@@ -3,7 +3,6 @@ from core.models import TimeStampedModel, UUIDModel
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
-
 class User(AbstractUser, TimeStampedModel):
     """Utilisateur personnalisé avec rôles"""
     class UserType(models.TextChoices):
@@ -82,10 +81,7 @@ class Enseignant(TimeStampedModel):
             ('VAC', 'Vacataire')
         ]
     )
-    specialite = models.CharField(max_length=200)
-    date_embauche = models.DateField()
-    bureau = models.CharField(max_length=50, blank=True, null=True)
-    telephone_bureau = models.CharField(max_length=15, blank=True, null=True)
+    
     
     class StatutEnseignant(models.TextChoices):
         ACTIF = 'actif', 'Actif'

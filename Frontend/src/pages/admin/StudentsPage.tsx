@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getFilieres } from '@/api/filiere';
 import { getEtudiants, getEtudiant, createEtudiant, updateEtudiant, deleteEtudiant } from '@/api/etudiant';
 import {
   Dialog,
@@ -30,7 +31,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getStudents, addStudent, updateStudent, deleteStudent, getFilieres } from '@/lib/storage';
+import { getStudents, addStudent, updateStudent, deleteStudent } from '@/lib/storage';
 import { Student, Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, Users, Search } from 'lucide-react';
 import { toast } from 'sonner';

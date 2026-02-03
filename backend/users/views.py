@@ -1,4 +1,5 @@
 from .models import User, Etudiant, Enseignant
+from department.models import Departement
 from .serializer import UserSerializer, EtudiantSerializer, EnseignantSerializer, UserLoginSerializer, UserLogoutSerializer
 from rest_framework import viewsets, status
 from rest_framework import generics
@@ -32,11 +33,10 @@ class UserLoginView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data        
-        return Response({
-            'user': UserSerializer(user).data,
-            'role': user.role,
-        })
+        user = serializer.validated_data
+        user_data = UserSerializer(user).data
+
+        return Response(user_data)
 
 class UserLogoutView(generics.CreateAPIView):
     serializer_class = UserLogoutSerializer

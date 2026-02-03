@@ -84,7 +84,7 @@ export function getCurrentUser(): { id: string; role: string } | null {
   return data ? JSON.parse(data) : null;
 }
 
-export function setCurrentUser(user: { id: string; role: string } | null): void {
+export function setCurrentUser(user: User | null): void {
   if (user) {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
   } else {

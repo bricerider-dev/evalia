@@ -39,7 +39,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const getInitials = (firstName: string, lastName: string) => {
-    
+
     return `${firstName[0]}${lastName[0]}`.toUpperCase();
   };
 
@@ -71,6 +71,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         { to: '/dashboard/subjects', icon: BookOpen, label: 'Matières' },
         { to: '/dashboard/evaluations', icon: ClipboardList, label: 'Évaluations' },
         { to: '/dashboard/reports', icon: FileText, label: 'Rapports' },
+        { to: '/dashboard/my-subjects', icon: BookOpen, label: 'Mes Matières' },
+        { to: '/dashboard/grades', icon: ClipboardList, label: 'Saisie des Notes' },
+        { to: '/dashboard/statistics', icon: FileText, label: 'Statistiques' },
       ];
     }
 

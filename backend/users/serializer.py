@@ -102,6 +102,16 @@ class EtudiantSerializer(serializers.ModelSerializer):
     def get_filiere(self, obj):
         return obj.filiere.nom if obj.filiere else None
 
+    def create(self, validated_data):
+        user_data = validated_data.pop('user', {})
+        password = user_data.pop('password', None)
+        
+        if not password:
+            raise serializers.ValidationError({'password': 'Password is required for the user.'})
+        
+        user = User.objects.create_user(password=password, **user_data)
+        etudiant = Etudiant.objects.create(user=user, **validated_data)
+        return etudiant
 
 class EnseignantSerializer(serializers.ModelSerializer):
     """Serializer pour Enseignant avec correspondance frontend"""
@@ -110,26 +120,22 @@ class EnseignantSerializer(serializers.ModelSerializer):
     lastName = serializers.CharField(source='user.last_name', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
-    teacherId = serializers.CharField(source='id', read_only=True)
-    dateHired = serializers.DateField(source='date_embauche')
-    speciality = serializers.CharField(source='specialite')
-    officePhone = serializers.CharField(source='telephone_bureau', allow_blank=True)
     status = serializers.CharField(source='statut')
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
         model = Enseignant
         fields = [
-            'id', 'teacherId', 'user', 'firstName', 'lastName', 'email', 'phone',
-            'grade', 'speciality', 'dateHired', 'bureau', 'officePhone', 'status',
+            'id', 'user', 'firstName', 'lastName', 'email', 'phone',
+            'grade', 'status',
             'createdAt'
         ]
         read_only_fields = ['id', 'createdAt', 'user']
 
 
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    matricule = serializers.CharField(source='username')
+    password = serializers.CharField()    
     def validate(self, data):
         user = authenticate(**data)
         if user and user.is_active:

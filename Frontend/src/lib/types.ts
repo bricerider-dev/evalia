@@ -20,7 +20,7 @@ export interface Filiere {
   code: string;
   description: string;
   createdAt: string;
-  department: string;
+  department?: string;
 }
 
 export interface Student extends User {
@@ -36,7 +36,6 @@ export interface Student extends User {
 export interface Teacher extends User {
   role: 'teacher';
   teacherId: string;
-  department: string;
   subjects: string[];
   grade: string;
   speciality: string;

@@ -6,7 +6,7 @@ import { login } from '@/api/login';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (matricule: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -31,9 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const signIn = async (username: string, password: string): Promise<boolean> => {
-    const authenticatedUser = await login(username, password);
-    localStorage.setItem("current_user", JSON.stringify(authenticatedUser));
+  const signIn = async (matricule: string, password: string): Promise<boolean> => {
+    const authenticatedUser = await login(matricule, password);
     if (authenticatedUser) {
       setUser(authenticatedUser);
       setCurrentUser(authenticatedUser);

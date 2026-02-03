@@ -44,7 +44,7 @@ const App = () => (
 
             {/* Admin routes */}
             <Route
-              path="/dashboard/filieres"
+              path="/dashboard/filieres"          
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <FilieresPage />
@@ -88,7 +88,7 @@ const App = () => (
             <Route
               path="/dashboard/grades"
               element={
-                <ProtectedRoute allowedRoles={['teacher']}>
+                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                   <GradesEntryPage />
                 </ProtectedRoute>
               }
@@ -96,7 +96,7 @@ const App = () => (
             <Route
               path="/dashboard/my-subjects"
               element={
-                <ProtectedRoute allowedRoles={['teacher']}>
+                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -104,7 +104,7 @@ const App = () => (
             <Route
               path="/dashboard/statistics"
               element={
-                <ProtectedRoute allowedRoles={['teacher']}>
+                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                   <DashboardPage />
                 </ProtectedRoute>
               }

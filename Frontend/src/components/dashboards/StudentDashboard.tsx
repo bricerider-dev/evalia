@@ -15,12 +15,12 @@ export function StudentDashboard() {
   const [filiereName, setFiliereName] = useState('');
 
   useEffect(() => {
-    if (user && 'filiereId' in user) {
+    if (user && 'filiere' in user) {
       const student = user as Student;
-      const filiere = getFilieres().find((f) => f.id === student.filiereId);
+      const filiere = getFilieres().find((f) => f.id === student.filiere);
       setFiliereName(filiere?.name || '');
 
-      const subjects = getSubjectsByFiliere(student.filiereId);
+      const subjects = getSubjectsByFiliere(student.filiere);
       const subjectResults = subjects.map((subject) =>
         getSubjectResultForStudent(student.id, subject.id, subject.name, subject.coefficient)
       );
@@ -57,7 +57,7 @@ export function StudentDashboard() {
             Bienvenue, {user?.firstName} {user?.lastName}
           </CardTitle>
           <CardDescription className="text-primary-foreground/80">
-            {filiereName} • Année {(user as Student)?.enrollmentYear}
+            {filiereName} • {new Date().getFullYear()}
           </CardDescription>
         </CardHeader>
       </Card>
