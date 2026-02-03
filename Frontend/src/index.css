@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* University Grade Management System - Institutional Design System */
+
+@layer base {
+  :root {
+    /* Navy institutional palette */
+    --background: 210 20% 98%;
+    --foreground: 215 50% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 50% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 50% 15%;
+
+    /* Deep Navy Primary */
+    --primary: 215 60% 25%;
+    --primary-foreground: 45 80% 95%;
+
+    /* Warm Gray Secondary */
+    --secondary: 210 15% 92%;
+    --secondary-foreground: 215 50% 20%;
+
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 20% 45%;
+
+    /* Gold Accent */
+    --accent: 45 85% 50%;
+    --accent-foreground: 215 60% 15%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Success Green */
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning Orange */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 215 25% 88%;
+    --input: 215 25% 88%;
+    --ring: 45 85% 50%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 215 60% 20%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 45 85% 55%;
+    --sidebar-primary-foreground: 215 60% 15%;
+    --sidebar-accent: 215 55% 30%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 50% 28%;
+    --sidebar-ring: 45 85% 55%;
+  }
+
+  .dark {
+    --background: 215 50% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 215 50% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 215 50% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 45 85% 55%;
+    --primary-foreground: 215 60% 15%;
+
+    --secondary: 215 40% 18%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 215 40% 18%;
+    --muted-foreground: 215 20% 60%;
+
+    --accent: 45 85% 50%;
+    --accent-foreground: 215 60% 15%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 215 40% 22%;
+    --input: 215 40% 22%;
+    --ring: 45 85% 55%;
+
+    --sidebar-background: 215 55% 10%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 45 85% 55%;
+    --sidebar-primary-foreground: 215 60% 15%;
+    --sidebar-accent: 215 50% 18%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 45% 20%;
+    --sidebar-ring: 45 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .gradient-institutional {
+    background: linear-gradient(135deg, hsl(215 60% 25%) 0%, hsl(215 55% 35%) 100%);
+  }
+  
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(45 85% 50%) 0%, hsl(38 90% 55%) 100%);
+  }
+  
+  .shadow-institutional {
+    box-shadow: 0 4px 20px -4px hsl(215 60% 25% / 0.15);
+  }
+}
