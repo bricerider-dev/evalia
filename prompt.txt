@@ -1,0 +1,11 @@
+faisons un diagramm  de class avec mermaid. 
+Contexte : dans un departement il peut avoir plusieurs filieres, 
+
+on a 3 types d'evaluation: 
+ 1. Le controle continue (CC) qui compte pour 30% de la note finale
+ 2. La session normale (SN), qui compte pour 70% de la note finale
+ 3. Le rattrape (RA), un etudiant ne compose le rattrapageque s'il n'a pas obtenue une note >=10
+
+on veut une plateforme dans laquelle les enseignants pourront remplir les notes des etudiants, les etudiants pourront lire leurs notes et les decisions
+le departement programme les evaluation, gere (CRUD)les etudiants, les enseignants et les filieres
+

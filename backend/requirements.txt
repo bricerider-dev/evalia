@@ -1,0 +1,25 @@
+# Core
+djangorestframework==3.14.0
+django-cors-headers==4.2.0
+#python-decouple==3.8  # pour les variables d'environnement
+
+# Database
+#psycopg2-binary==2.9.7   PostgreSQL
+# ou pour MySQL:
+# mysqlclient==2.2.0
+
+# Authentication & Security
+djangorestframework-simplejwt==5.2.2
+django-filter==23.3
+drf-yasg==1.21.7  # Documentation API
+
+
+
+
+
+# Export/Import
+#openpyxl==3.1.2  # Export Excel
+#reportlab==4.0.4  # Génération PDF
+
+
+
