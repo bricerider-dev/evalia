@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# ENSPD - Système de Gestion des Notes
 
 ## Project info
 
@@ -8,7 +8,7 @@
 
 There are several ways of editing your application.
 
-**Use Lovable**
+**ENSPD** (École Nationale Supérieure Polytechnique de Douala) academic management system.
 
 Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 

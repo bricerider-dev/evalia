@@ -55,32 +55,38 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Welcome Banner */}
-      <Card className="gradient-institutional text-primary-foreground border-0">
-        <CardHeader>
-          <CardTitle className="text-2xl">Bienvenue sur UniGrades</CardTitle>
-          <CardDescription className="text-primary-foreground/80">
-            Tableau de bord administratif - Vue d'ensemble du département
-          </CardDescription>
+      <Card className="gradient-institutional text-primary-foreground border-0 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
+        <CardHeader className="relative z-10 py-8 px-8">
+          <div className="flex flex-col gap-1">
+            <CardTitle className="text-2xl font-black tracking-tight">Bienvenue sur ENSPD</CardTitle>
+            <CardDescription className="text-base text-primary-foreground/90 font-medium">
+              Tableau de bord administratif — Propulsez la réussite académique de votre département.
+            </CardDescription>
+          </div>
         </CardHeader>
       </Card>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+        {statCards.map((stat, index) => (
+          <Card key={stat.title} className={`hover-lift border-0 shadow-institutional bg-white transition-all duration-300 stagger-${index + 1}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
+              <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">
                 {stat.title}
               </CardTitle>
-              <div className={`p-2 rounded-lg ${stat.color}`}>
+              <div className={`p-2.5 rounded-xl ${stat.color} shadow-inner`}>
                 <stat.icon className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+              <div className="text-3xl font-black text-primary">{stat.value}</div>
+              <p className="text-xs text-muted-foreground font-semibold mt-1 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-success" />
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -136,7 +142,7 @@ export function AdminDashboard() {
                 {stats.grades}
               </Badge>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -168,13 +174,15 @@ function QuickAction({
   return (
     <a
       href={href}
-      className="flex items-center justify-between p-3 rounded-lg border hover:bg-secondary/50 transition-colors"
+      className="flex items-center justify-between p-3.5 rounded-2xl border-2 border-transparent bg-secondary/30 hover:bg-white hover:border-primary/20 hover:shadow-xl transition-all duration-300 group"
     >
       <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="font-bold text-primary group-hover:text-accent-foreground transition-colors">{title}</p>
+        <p className="text-xs text-muted-foreground font-medium">{description}</p>
       </div>
-      <span className="text-primary">→</span>
+      <div className="p-2 rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+        <TrendingUp className="h-4 w-4 rotate-45" />
+      </div>
     </a>
   );
 }

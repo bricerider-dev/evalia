@@ -93,6 +93,12 @@ export default function TeachersPage() {
         id: `teacher-${Date.now()}`,
         role: 'teacher',
         subjects: [],
+        grade: 'Assistant',
+        speciality: 'Informatique',
+        bureau: 'N/A',
+        status: 'active',
+        is_active: true,
+        phone: '',
         ...formData,
         createdAt: new Date().toISOString(),
       };
@@ -120,18 +126,23 @@ export default function TeachersPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Gestion des Enseignants</h2>
-            <p className="text-muted-foreground">
-              Gérez le corps professoral du département
-            </p>
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-institutional border border-black/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+              <User className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Enseignants</h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Gérez le corps professoral d'excellence
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button onClick={() => handleOpenDialog()} className="gradient-institutional text-white shadow-lg hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold">
+                <Plus className="mr-2 h-5 w-5" />
                 Nouvel Enseignant
               </Button>
             </DialogTrigger>
@@ -217,74 +228,84 @@ export default function TeachersPage() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Liste des Enseignants
-            </CardTitle>
-            <CardDescription>
-              {teachers.length} enseignant(s) enregistré(s)
-            </CardDescription>
+        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-white">
+          <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                  <span className="p-1.5 bg-primary rounded-lg text-white">
+                    <User className="h-5 w-5" />
+                  </span>
+                  Liste des Enseignants
+                </CardTitle>
+                <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
+                  {teachers.length} expert(s) enregistré(s)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {teachers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucun enseignant enregistré.
+              <div className="text-center py-20">
+                <User className="h-20 w-20 mx-auto text-slate-200 mb-4" />
+                <p className="text-2xl font-bold text-slate-400">Aucun enseignant enregistré.</p>
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Matricule</TableHead>
-                    <TableHead>Nom Complet</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Département</TableHead>
-                    <TableHead>Matières</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Département</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Matières</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {teachers.map((teacher) => {
                     const subjectCount = getSubjectsByTeacher(teacher.id).length;
                     return (
-                      <TableRow key={teacher.id}>
-                        <TableCell className="font-mono font-medium">
+                      <TableRow key={teacher.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
+                        <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
                           {teacher.teacherId}
                         </TableCell>
-                        <TableCell className="font-medium">
-                          Prof. {teacher.firstName} {teacher.lastName}
+                        <TableCell className="py-3 px-6">
+                          <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
+                            Prof. {teacher.firstName} {teacher.lastName}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
                           {teacher.email}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
+                        <TableCell className="py-3 px-6">
+                          <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1 rounded-full font-bold text-[10px]">
                             {teacher.department || 'N/A'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <TableCell className="py-3 px-6 text-center">
+                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full text-slate-600 font-bold text-xs">
+                            <BookOpen className="h-3.5 w-3.5" />
                             {subjectCount}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell className="py-3 px-10 text-right">
+                          <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => handleOpenDialog(teacher)}
+                              className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-primary transition-all"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil className="h-5 w-5" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDelete(teacher.id)}
-                              className="text-destructive hover:text-destructive"
+                              className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-destructive transition-all"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-5 w-5" />
                             </Button>
                           </div>
                         </TableCell>

@@ -148,23 +148,23 @@ export default function GradesEntryPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-5 animate-fade-in-up">
         <div>
-          <h2 className="text-2xl font-bold">Saisie des Notes</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl font-bold">Saisie des Notes</h2>
+          <p className="text-sm text-muted-foreground">
             Entrez les notes pour vos évaluations
           </p>
         </div>
 
         {/* Selection */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Sélection</CardTitle>
+          <CardHeader className="py-3 px-6">
+            <CardTitle className="text-base">Sélection</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Matière</label>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Matière</label>
                 <Select value={selectedSubject} onValueChange={setSelectedSubject}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une matière" />
@@ -178,8 +178,8 @@ export default function GradesEntryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Évaluation</label>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Évaluation</label>
                 <Select
                   value={selectedEvaluation}
                   onValueChange={setSelectedEvaluation}
@@ -204,39 +204,39 @@ export default function GradesEntryPage() {
         {/* Grades Entry */}
         {selectedEvaluation && students.length > 0 && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
               <div>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
                   <ClipboardList className="h-5 w-5" />
                   {selectedSubj?.name} - {selectedEval && getTypeBadge(selectedEval.type)}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs mt-0.5">
                   {students.length} étudiant(s) • Note sur {selectedEval?.maxScore || 20}
                 </CardDescription>
               </div>
-              <Button onClick={handleSaveGrades} disabled={isSaving}>
+              <Button onClick={handleSaveGrades} disabled={isSaving} size="sm">
                 <Save className="mr-2 h-4 w-4" />
-                {isSaving ? 'Enregistrement...' : 'Enregistrer'}
+                {isSaving ? 'Envoi...' : 'Enregistrer'}
               </Button>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Matricule</TableHead>
-                    <TableHead>Nom Complet</TableHead>
-                    <TableHead className="w-[150px]">Note / 20</TableHead>
-                    <TableHead className="w-[100px]">Statut</TableHead>
+                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary">Matricule</TableHead>
+                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary">Nom Complet</TableHead>
+                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary w-[120px]">Note</TableHead>
+                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary w-[100px]">Statut</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {students.map((student) => (
                     <TableRow key={student.id}>
-                      <TableCell className="font-mono">{student.studentId}</TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="py-2 px-6 font-mono text-sm">{student.studentId}</TableCell>
+                      <TableCell className="py-2 px-6 font-bold text-sm">
                         {student.firstName} {student.lastName}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2 px-6">
                         <Input
                           type="number"
                           min="0"
@@ -245,14 +245,14 @@ export default function GradesEntryPage() {
                           value={grades[student.id] ?? ''}
                           onChange={(e) => handleGradeChange(student.id, e.target.value)}
                           placeholder="—"
-                          className="w-24"
+                          className="w-20 h-8 text-sm"
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2 px-6">
                         {hasGrade(student.id) ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
-                          <span className="text-muted-foreground text-sm">Non saisi</span>
+                          <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-tighter">Absent</span>
                         )}
                       </TableCell>
                     </TableRow>

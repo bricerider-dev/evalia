@@ -84,7 +84,7 @@ export default function FilieresPage() {
         id: `fil-${Date.now()}`,
         ...formData,
         createdAt: new Date().toISOString(),
-        department: "1"       
+        department: "1"
       };
       await createFiliere(newFiliere);
       toast.success('Filière créée avec succès');
@@ -108,11 +108,11 @@ export default function FilieresPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Gestion des Filières</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-bold">Gestion des Filières</h2>
+            <p className="text-sm text-muted-foreground">
               Créez et gérez les programmes d'études
             </p>
           </div>

@@ -133,17 +133,17 @@ export default function EvaluationsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-5 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Programmation des Évaluations</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-bold">Programmation des Évaluations</h2>
+            <p className="text-sm text-muted-foreground">
               Planifiez les examens et contrôles
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => resetForm()}>
+              <Button onClick={() => resetForm()} size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle Évaluation
               </Button>
@@ -224,8 +224,8 @@ export default function EvaluationsPage() {
         </div>
 
         {/* Info Card */}
-        <Card className="bg-secondary/30 border-dashed">
-          <CardContent className="pt-6">
+        <Card className="bg-secondary/30 border-dashed border-2">
+          <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-4">
               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                 <Calendar className="h-5 w-5" />
@@ -244,7 +244,7 @@ export default function EvaluationsPage() {
 
         {/* Filter */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 pb-4">
             <Select value={filterSubject} onValueChange={setFilterSubject}>
               <SelectTrigger className="w-[300px]">
                 <SelectValue placeholder="Filtrer par matière" />
@@ -262,12 +262,12 @@ export default function EvaluationsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="py-4 px-6">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <ClipboardList className="h-5 w-5" />
               Calendrier des Évaluations
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs font-bold text-muted-foreground mt-0.5">
               {filteredEvaluations.length} évaluation(s) programmée(s)
             </CardDescription>
           </CardHeader>

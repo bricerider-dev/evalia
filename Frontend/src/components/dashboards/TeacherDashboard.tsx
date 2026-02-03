@@ -22,7 +22,7 @@ export function TeacherDashboard() {
       const filieres = getFilieres();
       const allStudents = getStudents();
       const subjectFiliereIds = new Set(teacherSubjects.map((s) => s.filiereId));
-      const studentsInSubjects = allStudents.filter((s) => subjectFiliereIds.has(s.filiereId));
+      const studentsInSubjects = allStudents.filter((s) => subjectFiliereIds.has(s.filiere));
       setTotalStudents(studentsInSubjects.length);
 
       // Calculate grades entered by this teacher
@@ -41,16 +41,19 @@ export function TeacherDashboard() {
   }, [user]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Welcome Banner */}
-      <Card className="gradient-institutional text-primary-foreground border-0">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            Bienvenue, Prof. {user?.lastName}
-          </CardTitle>
-          <CardDescription className="text-primary-foreground/80">
-            Gérez vos cours et les notes de vos étudiants
-          </CardDescription>
+      <Card className="gradient-institutional text-primary-foreground border-0 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
+        <CardHeader className="relative z-10 py-8 px-8">
+          <div className="flex flex-col gap-1">
+            <CardTitle className="text-2xl font-black tracking-tight">
+              Bienvenue, Prof. {user?.lastName}
+            </CardTitle>
+            <CardDescription className="text-base text-primary-foreground/90 font-medium">
+              Gérez vos cours et les notes de vos étudiants avec précision et élégance.
+            </CardDescription>
+          </div>
         </CardHeader>
       </Card>
 
@@ -62,6 +65,7 @@ export function TeacherDashboard() {
           icon={BookOpen}
           description="Cours assignés"
           color="bg-blue-500/10 text-blue-600"
+          index={1}
         />
         <StatCard
           title="Étudiants"
@@ -69,6 +73,7 @@ export function TeacherDashboard() {
           icon={Users}
           description="Dans mes cours"
           color="bg-green-500/10 text-green-600"
+          index={2}
         />
         <StatCard
           title="Notes Saisies"
@@ -76,6 +81,7 @@ export function TeacherDashboard() {
           icon={CheckCircle}
           description="Ce semestre"
           color="bg-purple-500/10 text-purple-600"
+          index={3}
         />
         <StatCard
           title="En Attente"
@@ -83,6 +89,7 @@ export function TeacherDashboard() {
           icon={AlertCircle}
           description="Notes à saisir"
           color="bg-orange-500/10 text-orange-600"
+          index={4}
         />
       </div>
 
@@ -160,26 +167,28 @@ function StatCard({
   icon: Icon,
   description,
   color,
+  index,
 }: {
   title: string;
   value: number;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   color: string;
+  index: number;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className={`hover-lift border-0 shadow-institutional bg-white transition-all duration-300 stagger-${index}`}>
+      <CardHeader className="flex flex-row items-center justify-between pb-1">
+        <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">
           {title}
         </CardTitle>
-        <div className={`p-2 rounded-lg ${color}`}>
+        <div className={`p-2.5 rounded-xl ${color} shadow-inner`}>
           <Icon className="h-4 w-4" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground mt-1">{description}</p>
+        <div className="text-3xl font-black text-primary">{value}</div>
+        <p className="text-xs text-muted-foreground font-semibold mt-1">{description}</p>
       </CardContent>
     </Card>
   );
@@ -197,13 +206,15 @@ function QuickActionCard({
   return (
     <a
       href={href}
-      className="flex items-center justify-between p-4 rounded-lg border hover:bg-secondary/50 transition-colors"
+      className="flex items-center justify-between p-3.5 rounded-2xl border-2 border-transparent bg-secondary/30 hover:bg-white hover:border-primary/20 hover:shadow-xl transition-all duration-300 group"
     >
       <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="font-bold text-primary group-hover:text-accent-foreground transition-colors">{title}</p>
+        <p className="text-xs text-muted-foreground font-medium leading-relaxed">{description}</p>
       </div>
-      <span className="text-primary">→</span>
+      <div className="p-2 rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1">
+        <ClipboardList className="h-4 w-4" />
+      </div>
     </a>
   );
 }

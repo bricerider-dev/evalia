@@ -137,18 +137,23 @@ export default function SubjectsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Gestion des Matières</h2>
-            <p className="text-muted-foreground">
-              Créez et assignez les matières aux enseignants
-            </p>
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-institutional border border-black/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Matières</h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Structurez le programme académique et assignez les cours
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button onClick={() => handleOpenDialog()} className="gradient-institutional text-white shadow-lg hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold">
+                <Plus className="mr-2 h-5 w-5" />
                 Nouvelle Matière
               </Button>
             </DialogTrigger>
@@ -265,17 +270,21 @@ export default function SubjectsPage() {
         </div>
 
         {/* Filter */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex gap-4">
+        {/* Filter */}
+        <Card className="border-0 shadow-institutional bg-white/80 backdrop-blur-sm rounded-2xl">
+          <CardContent className="py-5">
+            <div className="flex flex-col md:flex-row gap-6">
               <Select value={filterFiliere} onValueChange={setFilterFiliere}>
-                <SelectTrigger className="w-[250px]">
-                  <SelectValue placeholder="Filtrer par filière" />
+                <SelectTrigger className="w-full md:w-[280px] py-5 text-base rounded-xl border-2 border-slate-100 bg-slate-50 shadow-inner">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground font-medium">Filière:</span>
+                    <SelectValue placeholder="Filtrer" />
+                  </div>
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les filières</SelectItem>
+                <SelectContent className="rounded-xl border-2 border-slate-100 shadow-2xl">
+                  <SelectItem value="all" className="py-2 text-base rounded-lg">Toutes les filières</SelectItem>
                   {filieres.map((filiere) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="py-2 text-base rounded-lg">
                       {filiere.name}
                     </SelectItem>
                   ))}
@@ -285,67 +294,85 @@ export default function SubjectsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Liste des Matières
-            </CardTitle>
-            <CardDescription>
-              {filteredSubjects.length} matière(s) trouvée(s)
-            </CardDescription>
+        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-white">
+          <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                  <span className="p-1.5 bg-primary rounded-lg text-white">
+                    <BookOpen className="h-5 w-5" />
+                  </span>
+                  Liste des Matières
+                </CardTitle>
+                <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
+                  {filteredSubjects.length} matière(s) définie(s)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {filteredSubjects.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucune matière trouvée.
+              <div className="text-center py-20">
+                <BookOpen className="h-20 w-20 mx-auto text-slate-200 mb-4" />
+                <p className="text-2xl font-bold text-slate-400">Aucune matière trouvée.</p>
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Matière</TableHead>
-                    <TableHead>Filière</TableHead>
-                    <TableHead>Enseignant</TableHead>
-                    <TableHead>Coef.</TableHead>
-                    <TableHead>Semestre</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Code</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Matière</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Filière</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Enseignant</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Coef.</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Semestre</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSubjects.map((subject) => (
-                    <TableRow key={subject.id}>
-                      <TableCell className="font-mono font-medium">
+                    <TableRow key={subject.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
+                      <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
                         {subject.code}
                       </TableCell>
-                      <TableCell className="font-medium">{subject.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
+                      <TableCell className="py-3 px-6">
+                        <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
+                          {subject.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-6">
+                        <Badge variant="outline" className="border-slate-200 text-slate-600 px-3 py-1 rounded-full font-bold text-[10px]">
                           {getFiliereName(subject.filiereId)}
                         </Badge>
                       </TableCell>
-                      <TableCell>{getTeacherName(subject.teacherId)}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{subject.coefficient}</Badge>
+                      <TableCell className="py-3 px-6 font-medium text-slate-600 text-sm">
+                        {getTeacherName(subject.teacherId)}
                       </TableCell>
-                      <TableCell>S{subject.semester}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                      <TableCell className="py-3 px-6 text-center">
+                        <Badge variant="secondary" className="bg-primary hover:bg-primary text-white px-2 py-0.5 rounded-full font-black text-[10px]">
+                          {subject.coefficient}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-3 px-6 text-center font-bold text-slate-500 text-sm">
+                        S{subject.semester}
+                      </TableCell>
+                      <TableCell className="py-3 px-10 text-right">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(subject)}
+                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-primary transition-all"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-5 w-5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(subject.id)}
-                            className="text-destructive hover:text-destructive"
+                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-destructive transition-all"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </TableCell>
