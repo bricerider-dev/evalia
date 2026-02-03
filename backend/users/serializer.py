@@ -79,28 +79,20 @@ class EtudiantSerializer(serializers.ModelSerializer):
     firstName = serializers.CharField(source='user.first_name', read_only=True)
     lastName = serializers.CharField(source='user.last_name', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
-    phone = serializers.CharField(source='user.phone', read_only=True)
-    studentId = serializers.CharField(source='id', read_only=True)
-    filiere = serializers.SerializerMethodField()
-    filiereId = serializers.CharField(source='filiere.id', read_only=True)
-    dateOfBirth = serializers.DateField(source='date_naissance')
-    placeOfBirth = serializers.CharField(source='lieu_naissance')
-    nationality = serializers.CharField(source='nationalite')
-    address = serializers.CharField(source='adresse')
+    phone = serializers.CharField(source='user.phone', read_only=True)    
+    filiere = serializers.CharField(source='filiere.id')    
     status = serializers.CharField(source='statut')
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
         model = Etudiant
         fields = [
-            'id', 'studentId', 'user', 'firstName', 'lastName', 'email', 'phone',
-            'filiere', 'filiereId', 'dateOfBirth', 'placeOfBirth', 'nationality',
-            'address', 'status', 'createdAt'
+            'id', 'user', 'firstName', 'lastName', 'email', 'phone',
+            'filiere', 'status', 'createdAt'
         ]
         read_only_fields = ['id', 'createdAt', 'user']
     
-    def get_filiere(self, obj):
-        return obj.filiere.nom if obj.filiere else None
+        
 
     def create(self, validated_data):
         user_data = validated_data.pop('user', {})
@@ -121,14 +113,14 @@ class EnseignantSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user.email', read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
     status = serializers.CharField(source='statut')
+    filiere = serializers.SerializerMethodField()
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
         model = Enseignant
         fields = [
             'id', 'user', 'firstName', 'lastName', 'email', 'phone',
-            'grade', 'status',
-            'createdAt'
+            'grade', 'status', 'filiere', 'createdAt'
         ]
         read_only_fields = ['id', 'createdAt', 'user']
 

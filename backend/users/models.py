@@ -41,10 +41,7 @@ class Etudiant(TimeStampedModel):
         related_name='etudiant_profile'
     )      
     filiere = models.ForeignKey('department.Filiere',on_delete=models.CASCADE,related_name='etudiants')
-    date_naissance = models.DateField()
-    lieu_naissance = models.CharField(max_length=100)
-    nationalite = models.CharField(max_length=50, default="Camerounaise")
-    adresse = models.TextField()
+    
     #photo = models.ImageField(upload_to='etudiants/photos/',blank=True,null=True)
     
     class StatutEtudiant(models.TextChoices):

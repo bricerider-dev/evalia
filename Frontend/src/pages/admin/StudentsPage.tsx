@@ -35,6 +35,7 @@ import { getStudents, addStudent, updateStudent, deleteStudent } from '@/lib/sto
 import { Student, Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, Users, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { error } from 'console';
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -50,6 +51,7 @@ export default function StudentsPage() {
     password: '',
     studentId: '',
     filiereId: '',
+    matricule: '',
     enrollmentYear: new Date().getFullYear(),
   });
 
@@ -72,6 +74,7 @@ export default function StudentsPage() {
       password: 'etud123',
       studentId: '',
       filiereId: '',
+      matricule: '',
       enrollmentYear: new Date().getFullYear(),
     });
     setEditingStudent(null);
@@ -87,6 +90,7 @@ export default function StudentsPage() {
         password: student.password,
         studentId: student.id,
         filiereId: student.filiere,
+        matricule: student.matricule,
         enrollmentYear: student.enrollmentYear || new Date().getFullYear(),
       });
     } else {
@@ -95,7 +99,7 @@ export default function StudentsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.studentId || !formData.filiereId) {
@@ -107,26 +111,28 @@ export default function StudentsPage() {
       updateStudent(editingStudent.id, formData);
       toast.success('Étudiant mis à jour avec succès');
     } else {
-      const newStudent: Student = {
-        id: `student-${Date.now()}`,
-        role: 'student',
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        studentId: formData.studentId,                
-        createdAt: new Date().toISOString(),
+      const newStudent: any = {
+        user:{          
+          role: 'student',
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password, 
+          username: formData.matricule,         
+          phone: '',
+          is_active: true   // or false, depending on your logic
+        },                     
         // Add required fields with default or empty values
-        filiere: formData.filiereId,
-        date_of_birth: '',
-        lieu_de_naissance: '',
-        address: '',
-        phone: '',
+        filiere: formData.filiereId,        
         status: 'active', // or another default value as appropriate
-        is_active: true   // or false, depending on your logic
       };
-      addStudent(newStudent);
-      toast.success('Étudiant inscrit avec succès');
+      try {
+        await createEtudiant(newStudent);
+        toast.success('Étudiant inscrit avec succès');
+      } catch (error) {
+        console.log(error);
+        toast.error('Erreur lors de l\'inscription de l\'étudiant :', error);
+      }
     }
 
     setIsDialogOpen(false);
