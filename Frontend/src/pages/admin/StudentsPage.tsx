@@ -76,17 +76,17 @@ export default function StudentsPage() {
     setEditingStudent(null);
   };
 
-  const handleOpenDialog = (student?: Student) => {
+  const handleOpenDialog = (student?: any) => {
     if (student) {
       setEditingStudent(student);
       setFormData({
-        firstName: student.firstName,
-        lastName: student.lastName,
+        firstName: student.first_name,
+        lastName: student.last_name,
         email: student.email,
         password: student.password,
-        studentId: student.studentId,
-        filiereId: student.filiereId,
-        enrollmentYear: student.enrollmentYear,
+        studentId: student.id,
+        filiereId: student.filiere,
+        enrollmentYear: student.enrollmentYear || new Date().getFullYear(),
       });
     } else {
       resetForm();
@@ -109,8 +109,20 @@ export default function StudentsPage() {
       const newStudent: Student = {
         id: `student-${Date.now()}`,
         role: 'student',
-        ...formData,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        studentId: formData.studentId,                
         createdAt: new Date().toISOString(),
+        // Add required fields with default or empty values
+        filiere: formData.filiereId,
+        date_of_birth: '',
+        lieu_de_naissance: '',
+        address: '',
+        phone: '',
+        status: 'active', // or another default value as appropriate
+        is_active: true   // or false, depending on your logic
       };
       addStudent(newStudent);
       toast.success('Étudiant inscrit avec succès');
@@ -135,7 +147,7 @@ export default function StudentsPage() {
       student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFiliere = filterFiliere === 'all' || student.filiereId === filterFiliere;
+    const matchesFiliere = filterFiliere === 'all' || student.filiere === filterFiliere;
     return matchesSearch && matchesFiliere;
   });
 
@@ -331,10 +343,10 @@ export default function StudentsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {getFiliereName(student.filiereId)}
+                          {getFiliereName(student.filiere)}
                         </Badge>
                       </TableCell>
-                      <TableCell>{student.enrollmentYear}</TableCell>
+                      <TableCell>{new Date(student.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button

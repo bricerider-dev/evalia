@@ -66,6 +66,11 @@ export function getUserByEmail(email: string): User | undefined {
   return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
 }
 
+export function getUserById(id: string): User | undefined {
+  const users = getAllUsers();
+  return users.find((u) => u.id === id);
+}
+
 export function authenticateUser(email: string, password: string): User | null {
   const user = getUserByEmail(email);
   if (user && user.password === password) {
@@ -74,12 +79,12 @@ export function authenticateUser(email: string, password: string): User | null {
   return null;
 }
 
-export function getCurrentUser(): User | null {
+export function getCurrentUser(): { id: string; role: string } | null {
   const data = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
   return data ? JSON.parse(data) : null;
 }
 
-export function setCurrentUser(user: User | null): void {
+export function setCurrentUser(user: { id: string; role: string } | null): void {
   if (user) {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
   } else {
@@ -121,7 +126,7 @@ export function addTeacher(teacher: Teacher): void {
   const teachers = getTeachers();
   teachers.push(teacher);
   saveToStorage(STORAGE_KEYS.TEACHERS, teachers);
-  
+
   // Also add to users
   const users = getAllUsers();
   users.push(teacher);
@@ -140,7 +145,7 @@ export function updateTeacher(id: string, updates: Partial<Teacher>): void {
 export function deleteTeacher(id: string): void {
   const teachers = getTeachers().filter((t) => t.id !== id);
   saveToStorage(STORAGE_KEYS.TEACHERS, teachers);
-  
+
   const users = getAllUsers().filter((u) => u.id !== id);
   saveToStorage(STORAGE_KEYS.USERS, users);
 }
@@ -151,14 +156,14 @@ export function getStudents(): Student[] {
 }
 
 export function getStudentsByFiliere(filiereId: string): Student[] {
-  return getStudents().filter((s) => s.filiereId === filiereId);
+  return getStudents().filter((s) => s.filiere === filiereId);
 }
 
 export function addStudent(student: Student): void {
   const students = getStudents();
   students.push(student);
   saveToStorage(STORAGE_KEYS.STUDENTS, students);
-  
+
   const users = getAllUsers();
   users.push(student);
   saveToStorage(STORAGE_KEYS.USERS, users);
@@ -176,7 +181,7 @@ export function updateStudent(id: string, updates: Partial<Student>): void {
 export function deleteStudent(id: string): void {
   const students = getStudents().filter((s) => s.id !== id);
   saveToStorage(STORAGE_KEYS.STUDENTS, students);
-  
+
   const users = getAllUsers().filter((u) => u.id !== id);
   saveToStorage(STORAGE_KEYS.USERS, users);
 }
@@ -280,7 +285,7 @@ export function upsertGrade(grade: Grade): void {
   const existingIndex = grades.findIndex(
     (g) => g.studentId === grade.studentId && g.evaluationId === grade.evaluationId
   );
-  
+
   if (existingIndex !== -1) {
     grades[existingIndex] = { ...grade, updatedAt: new Date().toISOString() };
   } else {

@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/grade/', include('grade.urls')),
 
     #path('api/', include('academic.urls')),
-    #path('api/', include('department.urls')),
+    path('api/dep/', include('department.urls')),
     #path('api/', include('core.urls')),
 
     #swagger

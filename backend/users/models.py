@@ -9,10 +9,10 @@ class User(AbstractUser, TimeStampedModel):
     class UserType(models.TextChoices):
         STUDENT = 'student', 'Étudiant'
         TEACHER = 'teacher', 'Enseignant'
-        DEPARTMENT_ADMIN = 'admin_dep', 'Administrateur Département'
+        DEPARTMENT_ADMIN = 'admin', 'Administrateur Département'
         SUPER_ADMIN = 'super_admin', 'Super Administrateur'
     
-    user_type = models.CharField(max_length=20,choices=UserType.choices,default=UserType.STUDENT)
+    role = models.CharField(max_length=20,choices=UserType.choices,default=UserType.STUDENT)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -29,7 +29,7 @@ class User(AbstractUser, TimeStampedModel):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.get_full_name()} ({self.get_user_type_display()})"
+        return f"{self.get_full_name()} ({self.role})"
     
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
@@ -40,11 +40,11 @@ class Etudiant(TimeStampedModel):
         User,
         on_delete=models.CASCADE,
         related_name='etudiant_profile'
-    )
-    matricule = models.CharField(max_length=20,unique=True,help_text="Numéro matricule unique de l'étudiant")
+    )      
+    filiere = models.ForeignKey('department.Filiere',on_delete=models.CASCADE,related_name='etudiants')
     date_naissance = models.DateField()
     lieu_naissance = models.CharField(max_length=100)
-    nationalite = models.CharField(max_length=50, default="Sénégalaise")
+    nationalite = models.CharField(max_length=50, default="Camerounaise")
     adresse = models.TextField()
     #photo = models.ImageField(upload_to='etudiants/photos/',blank=True,null=True)
     
@@ -59,10 +59,10 @@ class Etudiant(TimeStampedModel):
     class Meta:
         verbose_name = "Étudiant"
         verbose_name_plural = "Étudiants"
-        ordering = ['matricule']
+        ordering = ['user__username']
     
     def __str__(self):
-        return f"{self.matricule} - {self.user.get_full_name()}"
+        return f"{self.user.username} - {self.user.get_full_name()}"
 
 class Enseignant(TimeStampedModel):
     """Modèle Enseignant"""
@@ -71,7 +71,7 @@ class Enseignant(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name='enseignant_profile'
     )
-    matricule = models.CharField(max_length=20,unique=True,help_text="Numéro matricule de l'enseignant")
+    
     grade = models.CharField(max_length=50,choices=[
             ('PA', 'Professeur Agrégé'),
             ('PH', 'Professeur Hors Classe'),
@@ -101,5 +101,5 @@ class Enseignant(TimeStampedModel):
         ordering = ['user__last_name']
     
     def __str__(self):
-        return f"{self.matricule} - {self.user.get_full_name()}"
+        return f"{self.user.username} - {self.user.get_full_name()}"
 

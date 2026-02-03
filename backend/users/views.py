@@ -29,6 +29,14 @@ class EnseignantViewSet(viewsets.ModelViewSet):
 class UserLoginView(generics.CreateAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data        
+        return Response({
+            'user': UserSerializer(user).data,
+            'role': user.role,
+        })
 
 class UserLogoutView(generics.CreateAPIView):
     serializer_class = UserLogoutSerializer

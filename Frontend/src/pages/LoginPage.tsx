@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, LogIn, AlertCircle, Users, BookOpen, BarChart3 } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [matricule, setMatricule] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,11 +23,11 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(matricule, password);
       if (success) {
         navigate('/dashboard');
       } else {
-        setError('Email ou mot de passe incorrect');
+        setError('Matricule ou mot de passe incorrect');
       }
     } catch {
       setError('Une erreur est survenue');
@@ -37,13 +37,13 @@ export default function LoginPage() {
   };
 
   const demoCredentials = [
-    { role: 'Admin', email: 'admin@univ.edu', password: 'admin123' },
-    { role: 'Enseignant', email: 'prof.benali@univ.edu', password: 'prof123' },
-    { role: 'Étudiant', email: 'etudiant1@univ.edu', password: 'etud123' },
+    { role: 'Admin', matricule: 'admin@univ.edu', password: 'admin123' },
+    { role: 'Enseignant', matricule: 'prof.benali@univ.edu', password: 'prof123' },
+    { role: 'Étudiant', matricule: 'etudiant1@univ.edu', password: 'etud123' },
   ];
 
-  const fillCredentials = (email: string, password: string) => {
-    setEmail(email);
+  const fillCredentials = (matricule: string, password: string) => {
+    setMatricule(matricule);
     setPassword(password);
     setError('');
   };
@@ -106,15 +106,15 @@ export default function LoginPage() {
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Adresse email</Label>
+                    <Label htmlFor="matricule">Matricule</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="votre.email@univ.edu"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="matricule"
+                      type="text"
+                      placeholder="votre.matricule"
+                      value={matricule}
+                      onChange={(e) => setMatricule(e.target.value)}
                       required
-                      autoComplete="email"
+                      autoComplete="matricule"
                     />
                   </div>
 
@@ -158,13 +158,13 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     {demoCredentials.map((cred) => (
                       <button
-                        key={cred.email}
+                        key={cred.matricule}
                         type="button"
-                        onClick={() => fillCredentials(cred.email, cred.password)}
+                        onClick={() => fillCredentials(cred.matricule, cred.password)}
                         className="w-full text-left px-3 py-2 rounded-md text-sm bg-secondary/50 hover:bg-secondary transition-colors"
                       >
                         <span className="font-medium text-primary">{cred.role}:</span>{' '}
-                        <span className="text-muted-foreground">{cred.email}</span>
+                        <span className="text-muted-foreground">{cred.matricule}</span>
                       </button>
                     ))}
                   </div>

@@ -7,8 +7,10 @@ export interface User {
   password: string;
   role: UserRole;
   firstName: string;
+  phone : string;
   lastName: string;
   createdAt: string;
+  is_active: boolean;
 }
 
 // Academic Types
@@ -18,13 +20,17 @@ export interface Filiere {
   code: string;
   description: string;
   createdAt: string;
+  department: string;
 }
 
 export interface Student extends User {
   role: 'student';
   studentId: string;
-  filiereId: string;
-  enrollmentYear: number;
+  filiere: string;  
+  date_of_birth: string;
+  lieu_de_naissance: string;
+  address: string;
+  status: string;
 }
 
 export interface Teacher extends User {
@@ -32,6 +38,10 @@ export interface Teacher extends User {
   teacherId: string;
   department: string;
   subjects: string[];
+  grade: string;
+  speciality: string;
+  bureau: string;
+  status: string;
 }
 
 export interface Subject {
@@ -45,7 +55,7 @@ export interface Subject {
 }
 
 // Evaluation Types
-export type EvaluationType = 'CC' | 'SN' | 'RA';
+export type EvaluationType = 'CC'  | 'SN' | 'RA';
 export type SessionType = 'normal' | 'rattrapage';
 
 export interface Evaluation {

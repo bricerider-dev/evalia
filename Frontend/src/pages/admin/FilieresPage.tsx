@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { getFilieres, createFiliere } from '@/api/filiere';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getFilieres, addFiliere, updateFiliere, deleteFiliere, getStudentsByFiliere } from '@/lib/storage';
+import { updateFiliere, deleteFiliere, getStudentsByFiliere } from '@/lib/storage';
 import { Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, GraduationCap, Users } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,12 +34,18 @@ export default function FilieresPage() {
   const [editingFiliere, setEditingFiliere] = useState<Filiere | null>(null);
   const [formData, setFormData] = useState({ name: '', code: '', description: '' });
 
-  const loadFilieres = () => {
-    setFilieres(getFilieres());
+  const loadFilieres = async () => {
+    try {
+      const filieres = await getFilieres();
+      setFilieres(filieres);
+    } catch (error) {
+      console.error('Error loading filieres:', error);
+    }
   };
 
   useEffect(() => {
     loadFilieres();
+    console.log(filieres);
   }, []);
 
   const resetForm = () => {
@@ -53,6 +60,7 @@ export default function FilieresPage() {
         name: filiere.name,
         code: filiere.code,
         description: filiere.description,
+
       });
     } else {
       resetForm();
@@ -60,7 +68,7 @@ export default function FilieresPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.code) {
@@ -69,15 +77,16 @@ export default function FilieresPage() {
     }
 
     if (editingFiliere) {
-      updateFiliere(editingFiliere.id, formData);
+      await updateFiliere(editingFiliere.id, formData);
       toast.success('Filière mise à jour avec succès');
     } else {
       const newFiliere: Filiere = {
         id: `fil-${Date.now()}`,
         ...formData,
         createdAt: new Date().toISOString(),
+        department: "1"       
       };
-      addFiliere(newFiliere);
+      await createFiliere(newFiliere);
       toast.success('Filière créée avec succès');
     }
 

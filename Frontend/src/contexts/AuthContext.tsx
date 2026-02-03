@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/types';
-import { authenticateUser, getCurrentUser, setCurrentUser, initializeStorage } from '@/lib/storage';
+import { authenticateUser, getCurrentUser, setCurrentUser, initializeStorage, getUserById } from '@/lib/storage';
+import { login } from '@/api/login';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -18,17 +19,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Initialize storage with default data
     initializeStorage();
-    
+
     // Check for existing session
     const storedUser = getCurrentUser();
     if (storedUser) {
-      setUser(storedUser);
+      const fullUser = getUserById(storedUser.id);
+      if (fullUser) {
+        setUser(fullUser);
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const authenticatedUser = authenticateUser(email, password);
+  const signIn = async (username: string, password: string): Promise<boolean> => {
+    const authenticatedUser = await login(username, password);
+    localStorage.setItem("current_user", JSON.stringify(authenticatedUser));
     if (authenticatedUser) {
       setUser(authenticatedUser);
       setCurrentUser(authenticatedUser);
@@ -43,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login: signIn, logout }}>
       {children}
     </AuthContext.Provider>
   );

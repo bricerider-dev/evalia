@@ -43,24 +43,8 @@ class Filiere(TimeStampedModel):
         help_text="Code unique de la filière"
     )
     nom = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
-    duree_annees = models.IntegerField(
-        default=3,
-        help_text="Durée de la formation en années"
-    )
-    credit_total = models.IntegerField(
-        default=180,
-        help_text="Nombre total de crédits nécessaires"
-    )
-    chef_filiere = models.ForeignKey(
-        'users.Enseignant',
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        related_name='filieres_dirigees'
-    )
-    date_creation = models.DateField()
-    est_actif = models.BooleanField(default=True)
+    description = models.TextField(blank=True, null=True)    
+    
     
     class Meta:
         verbose_name = "Filière"
