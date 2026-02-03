@@ -1,0 +1,140 @@
+classDiagram
+    direction LR
+    
+    %% Entités principales
+    class Departement {
+        -String nom
+        -String code
+        +creerFiliere()
+        +programmerEvaluation()
+    }
+    
+    class Filiere {
+        -String code
+        -String intitule
+        -int anneeCreation
+        +getEtudiants()
+    }
+    
+    class Personne {
+        <<abstract>>
+        #String id
+        #String nom
+        #String prenom
+        #String email
+        #Date dateNaissance
+    }
+    
+    class Etudiant {
+        -String matricule
+        -Date dateInscription
+        -Filiere filiere
+        +consulterNotes()
+        +consulterDecisions()
+    }
+    
+    class Enseignant {
+        -String matricule
+        -String specialite
+        -List~Matiere~ matieres
+        +saisirNotes()
+        +modifierNotes()
+    }
+    
+    class Evaluation {
+        <<abstract>>
+        #String code
+        #String intitule
+        #Date date
+        #float coefficient
+        #Matiere matiere
+        +calculerNote()*
+    }
+    
+    class ControleContinu {
+        -int nombreActivites
+        -List~float~ notesActivites
+        +calculerNote() float
+    }
+    
+    class SessionNormale {
+        -float noteExamen
+        +calculerNote() float
+    }
+    
+    class Rattrapage {
+        -float noteRattrapage
+        -boolean estAdmis
+        +calculerNote() float
+    }
+    
+    class Note {
+        -Evaluation evaluation
+        -Etudiant etudiant
+        -float valeur
+        -String appreciation
+        -Date dateSaisie
+        +estValide() boolean
+    }
+    
+    class Matiere {
+        -String code
+        -String intitule
+        -int credits
+        -Enseignant enseignant
+        -Filiere filiere
+    }
+    
+    class Decision {
+        -Etudiant etudiant
+        -Matiere matiere
+        -float noteFinale
+        -String statut
+        -String mention
+        +estAdmis() boolean
+    }
+    
+    %% Plateforme
+    class Plateforme {
+        -List~Departement~ departements
+        -List~Utilisateur~ utilisateurs
+        +authentifier()
+        +genererReleve()
+        +publierDecisions()
+    }
+    
+    class Utilisateur {
+        <<interface>>
+        +String login
+        +String password
+        +seConnecter()
+        +seDeconnecter()
+    }
+    
+    %% Relations
+    Departement "1" --> "*" Filiere : gère
+    Departement "1" --> "*" Etudiant : inscrit
+    Departement "1" --> "*" Enseignant : emploie
+    
+    Filiere "1" --> "*" Etudiant : contient
+    Filiere "1" --> "*" Matiere : propose
+    
+    Etudiant --|> Personne
+    Enseignant --|> Personne
+    Etudiant ..> Utilisateur : implémente
+    Enseignant ..> Utilisateur : implémente
+    
+    ControleContinu --|> Evaluation
+    SessionNormale --|> Evaluation
+    Rattrapage --|> Evaluation
+    
+    Matiere "1" --> "*" Evaluation : a pour
+    
+    Note "1" --> "1" Evaluation : concerne
+    Note "1" --> "1" Etudiant : appartient à
+    Note "1" --> "1" Enseignant : saisie par
+    
+    Decision "1" --> "1" Etudiant : concerne
+    Decision "1" --> "1" Matiere : pour
+    
+    Enseignant "1" --> "*" Matiere : enseigne
