@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getEtudiants, getEtudiant, createEtudiant, updateEtudiant, deleteEtudiant } from '@/api/etudiant';
 import {
   Dialog,
   DialogContent,
@@ -51,9 +52,11 @@ export default function StudentsPage() {
     enrollmentYear: new Date().getFullYear(),
   });
 
-  const loadData = () => {
-    setStudents(getStudents());
-    setFilieres(getFilieres());
+  const loadData = async () => {
+    const students = await getEtudiants();
+    const filieres = await getFilieres();
+    setStudents(students);
+    setFilieres(filieres);
   };
 
   useEffect(() => {
