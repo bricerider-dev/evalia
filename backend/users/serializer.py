@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Etudiant, Enseignant
+from department.models import Filiere
 from django.contrib.auth import authenticate
 User = get_user_model()
 
@@ -50,7 +51,8 @@ class UserSerializer(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
-        password = validated_data.pop('password', None)
+        user_data = validated_data.pop('user')
+        password = user_data.pop('password', None)
         if not password:
             raise serializers.ValidationError({'password': 'Password is required.'})
         
@@ -75,43 +77,41 @@ class UserSerializer(serializers.ModelSerializer):
 
 class EtudiantSerializer(serializers.ModelSerializer):
     """Serializer pour Étudiant avec correspondance frontend"""
-    user = UserSerializer(read_only=True)
-    firstName = serializers.CharField(source='user.first_name', read_only=True)
-    lastName = serializers.CharField(source='user.last_name', read_only=True)
-    email = serializers.CharField(source='user.email', read_only=True)
-    phone = serializers.CharField(source='user.phone', read_only=True)    
-    filiere = serializers.CharField(source='filiere.id')    
+    user = UserSerializer()
+    filiere = serializers.PrimaryKeyRelatedField(queryset=Filiere.objects.all())    
     status = serializers.CharField(source='statut')
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
         model = Etudiant
         fields = [
-            'id', 'user', 'firstName', 'lastName', 'email', 'phone',
-            'filiere', 'status', 'createdAt'
+            'id', 'user', 'filiere', 'status', 'createdAt'
         ]
-        read_only_fields = ['id', 'createdAt', 'user']
+        read_only_fields = ['id', 'createdAt']
     
         
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user', {})
-        password = user_data.pop('password', None)
+        user_data = validated_data.pop('user')
         
-        if not password:
-            raise serializers.ValidationError({'password': 'Password is required for the user.'})
-        
-        user = User.objects.create_user(password=password, **user_data)
+        if isinstance(user_data, User):
+            user = user_data
+        else:
+            password = user_data.pop('password', None)
+            if not password:
+                raise serializers.ValidationError({'password': 'Password is required for the user.'})
+            user = User.objects.create_user(password=password, **user_data)
+            
         etudiant = Etudiant.objects.create(user=user, **validated_data)
         return etudiant
 
 class EnseignantSerializer(serializers.ModelSerializer):
     """Serializer pour Enseignant avec correspondance frontend"""
-    user = UserSerializer(read_only=True)
-    firstName = serializers.CharField(source='user.first_name', read_only=True)
-    lastName = serializers.CharField(source='user.last_name', read_only=True)
-    email = serializers.CharField(source='user.email', read_only=True)
-    phone = serializers.CharField(source='user.phone', read_only=True)
+    user = UserSerializer()
+    firstName = serializers.CharField(source='user.first_name')
+    lastName = serializers.CharField(source='user.last_name')
+    email = serializers.CharField(source='user.email')
+    phone = serializers.CharField(source='user.phone')
     status = serializers.CharField(source='statut')
     filiere = serializers.SerializerMethodField()
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
@@ -122,7 +122,7 @@ class EnseignantSerializer(serializers.ModelSerializer):
             'id', 'user', 'firstName', 'lastName', 'email', 'phone',
             'grade', 'status', 'filiere', 'createdAt'
         ]
-        read_only_fields = ['id', 'createdAt', 'user']
+        read_only_fields = ['id', 'createdAt']
 
 
 class UserLoginSerializer(serializers.Serializer):

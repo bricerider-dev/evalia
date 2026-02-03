@@ -31,17 +31,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getStudents, addStudent, updateStudent, deleteStudent } from '@/lib/storage';
 import { Student, Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, Users, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { error } from 'console';
+
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [filieres, setFilieres] = useState<Filiere[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFiliere, setFilterFiliere] = useState<string>('all');
   const [formData, setFormData] = useState({
@@ -56,10 +55,26 @@ export default function StudentsPage() {
   });
 
   const loadData = async () => {
-    const students = await getEtudiants();
-    const filieres = await getFilieres();
-    setStudents(students);
-    setFilieres(filieres);
+    try {
+      const studentsData = await getEtudiants();
+      const filieresData = await getFilieres();
+
+      const mappedStudents = studentsData.map((s: any) => ({
+        ...s,
+        firstName: s.user.first_name,
+        lastName: s.user.last_name,
+        email: s.user.email,
+        role: s.user.role,
+        studentId: s.user.username,
+        user: s.user
+      }));
+
+      setStudents(mappedStudents);
+      setFilieres(filieresData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Erreur lors du chargement des données');
+    }
   };
 
   useEffect(() => {
@@ -84,13 +99,13 @@ export default function StudentsPage() {
     if (student) {
       setEditingStudent(student);
       setFormData({
-        firstName: student.first_name,
-        lastName: student.last_name,
+        firstName: student.firstName,
+        lastName: student.lastName,
         email: student.email,
-        password: student.password,
+        password: '', // Password excluded during edit
         studentId: student.id,
         filiereId: student.filiere,
-        matricule: student.matricule,
+        matricule: student.studentId,
         enrollmentYear: student.enrollmentYear || new Date().getFullYear(),
       });
     } else {
@@ -102,64 +117,71 @@ export default function StudentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.studentId || !formData.filiereId) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.matricule || !formData.filiereId) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    if (editingStudent) {
-      updateStudent(editingStudent.id, formData);
-      toast.success('Étudiant mis à jour avec succès');
-    } else {
-      const newStudent: any = {
-        user:{          
-          role: 'student',
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password, 
-          username: formData.matricule,         
-          phone: '',
-          is_active: true   // or false, depending on your logic
-        },                     
-        // Add required fields with default or empty values
-        filiere: formData.filiereId,        
-        status: 'active', // or another default value as appropriate
-      };
-      try {
-        await createEtudiant(newStudent);
-        toast.success('Étudiant inscrit avec succès');
-      } catch (error) {
-        console.log(error);
-        toast.error('Erreur lors de l\'inscription de l\'étudiant :', error);
-      }
+    const payload: any = {
+      user: {
+        role: 'student',
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        username: formData.matricule,
+        phone: '',
+        is_active: true
+      },
+      filiere: formData.filiereId,
+      status: 'active',
+    };
+
+    if (formData.password) {
+      payload.user.password = formData.password;
     }
 
-    setIsDialogOpen(false);
-    resetForm();
-    loadData();
+    try {
+      if (editingStudent) {
+        await updateEtudiant(editingStudent.id, payload);
+        toast.success('Étudiant mis à jour avec succès');
+      } else {
+        await createEtudiant(payload);
+        toast.success('Étudiant inscrit avec succès');
+      }
+      setIsDialogOpen(false);
+      resetForm();
+      loadData();
+    } catch (error) {
+      console.error(error);
+      toast.error('Une erreur est survenue');
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')) {
-      deleteStudent(id);
-      toast.success('Étudiant supprimé');
-      loadData();
+      try {
+        await deleteEtudiant(id);
+        toast.success('Étudiant supprimé');
+        loadData();
+      } catch (error) {
+        console.error(error);
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
-      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+      student.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFiliere = filterFiliere === 'all' || student.filiere === filterFiliere;
     return matchesSearch && matchesFiliere;
   });
 
   const getFiliereName = (filiereId: string) => {
-    return filieres.find((f) => f.id === filiereId)?.name || 'N/A';
+    return filieres.find((f) => f.id === filiereId)?.code || 'N/A';
   };
 
   return (
@@ -211,11 +233,11 @@ export default function StudentsPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="studentId">Matricule *</Label>
+                    <Label htmlFor="matricule">Matricule *</Label>
                     <Input
-                      id="studentId"
-                      value={formData.studentId}
-                      onChange={(e) => setFormData({ ...formData, studentId: e.target.value.toUpperCase() })}
+                      id="matricule"
+                      value={formData.matricule}
+                      onChange={(e) => setFormData({ ...formData, matricule: e.target.value })}
                       placeholder="ex: S2024001"
                     />
                   </div>
@@ -340,13 +362,13 @@ export default function StudentsPage() {
                   {filteredStudents.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell className="font-mono font-medium">
-                        {student.studentId}
+                        {student.user.username}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {student.firstName} {student.lastName}
+                        {student.user.firstName} {student.user.lastName}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {student.email}
+                        {student.user.email}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">

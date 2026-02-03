@@ -8,7 +8,6 @@ import {
   defaultEvaluations,
   defaultGrades,
 } from './mockData';
-
 const STORAGE_KEYS = {
   USERS: 'ugms_users',
   FILIERES: 'ugms_filieres',
@@ -67,8 +66,8 @@ export function getUserByEmail(email: string): User | undefined {
 }
 
 export function getUserById(id: string): User | undefined {
-  const users = getAllUsers();
-  return users.find((u) => u.id === id);
+  const users = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+  return users ? JSON.parse(users) : null;
 }
 
 export function authenticateUser(email: string, password: string): User | null {
@@ -79,12 +78,13 @@ export function authenticateUser(email: string, password: string): User | null {
   return null;
 }
 
-export function getCurrentUser(): { id: string; role: string } | null {
+export function getCurrentUser(): any | null {
   const data = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+  console.log(data);
   return data ? JSON.parse(data) : null;
 }
 
-export function setCurrentUser(user: User | null): void {
+export function setCurrentUser(user: any | null): void {
   if (user) {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
   } else {
