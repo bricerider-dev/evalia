@@ -57,11 +57,12 @@ export default function StudentsPage() {
     try {
       const studentsData = await getEtudiants();
       const filieresData = await getFilieres();
+      console.log(studentsData);
 
       const mappedStudents = studentsData.map((s: any) => ({
         ...s,
-        firstName: s.user.first_name,
-        lastName: s.user.last_name,
+        firstName: s.user.firstName,
+        lastName: s.user.lastName,
         email: s.user.email,
         role: s.user.role,
         studentId: s.user.username,
@@ -98,9 +99,9 @@ export default function StudentsPage() {
     if (student) {
       setEditingStudent(student);
       setFormData({
-        firstName: student.firstName,
-        lastName: student.lastName,
-        email: student.email,
+        firstName: student.user.firstName,
+        lastName: student.user.lastName,
+        email: student.user.email,
         password: '', // Password excluded during edit
         studentId: student.id,
         filiereId: student.filiere,
@@ -124,8 +125,8 @@ export default function StudentsPage() {
     const payload: any = {
       user: {
         role: 'student',
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         username: formData.matricule,
         phone: '',
@@ -171,16 +172,16 @@ export default function StudentsPage() {
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
-      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+      student.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFiliere = filterFiliere === 'all' || student.filiere === filterFiliere;
     return matchesSearch && matchesFiliere;
   });
 
   const getFiliereName = (filiereId: string) => {
-    return filieres.find((f) => f.id === filiereId)?.service_code || filieres.find((f) => f.id === filiereId)?.code || 'N/A';
+    return filieres.find((f) => f.id === filiereId)?.code || 'N/A';
   };
 
   return (
