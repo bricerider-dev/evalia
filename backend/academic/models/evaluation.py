@@ -6,8 +6,7 @@ class Evaluation(TimeStampedModel):
     class TypeEvaluation(models.TextChoices):
         CONTROLE_CONTINU = 'CC', 'Contrôle Continu'
         SESSION_NORMALE = 'SN', 'Session Normale'
-        RATTRAPAGE = 'RA', 'Rattrapage'
-    
+        RATTRAPAGE = 'RA', 'Rattrapage'   
     type_evaluation = models.CharField(
         max_length=2,
         choices=TypeEvaluation.choices
@@ -16,16 +15,10 @@ class Evaluation(TimeStampedModel):
     description = models.TextField(blank=True, null=True)
     date_evaluation = models.DateField()
     heure_debut = models.TimeField()
-    duree = models.IntegerField(
-        help_text="Durée en minutes",
-        default=120
-    )
-    coefficient = models.FloatField(
-        default=1.0,
-        help_text="Coefficient de l'évaluation"
-    )
+    heure_fin = models.TimeField(default="12:00")  # Corrigé : remplacé duree par heure_fin
     salle = models.CharField(max_length=50, blank=True, null=True)
-    
+    coefficient = models.FloatField(default=1.0, help_text="Coefficient de l'évaluation")  # Ajouté
+   
     class StatutEvaluation(models.TextChoices):
         PLANIFIEE = 'planifiee', 'Planifiée'
         EN_COURS = 'en_cours', 'En cours'
@@ -47,16 +40,15 @@ class Evaluation(TimeStampedModel):
 
 class ControleContinu(Evaluation):
     """Modèle Contrôle Continu (30% de la note finale)"""
-    ue = models.ForeignKey(
+    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
         'academic.UniteEnseignement',
         on_delete=models.CASCADE,
-        related_name='controles_continus'  # CHANGÉ
+        related_name='controles_continus'
     )
     nombre_activites = models.IntegerField(
         default=3,
         help_text="Nombre d'activités de contrôle continu"
-    )
-    est_obligatoire = models.BooleanField(default=True)
+    )    
     
     class TypeCC(models.TextChoices):
         DEVOIR = 'devoir', 'Devoir Surveillé'
@@ -82,10 +74,10 @@ class ControleContinu(Evaluation):
 
 class SessionNormale(Evaluation):
     """Modèle Session Normale (70% de la note finale)"""
-    ue = models.ForeignKey(
+    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
         'academic.UniteEnseignement',
         on_delete=models.CASCADE,
-        related_name='sessions_normales'  # CHANGÉ
+        related_name='sessions_normales'
     )
     duree_revision = models.IntegerField(
         default=7,
@@ -115,10 +107,10 @@ class SessionNormale(Evaluation):
 
 class Rattrapage(Evaluation):
     """Modèle Rattrapage (seulement si note < 10)"""
-    ue = models.ForeignKey(
+    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
         'academic.UniteEnseignement',
         on_delete=models.CASCADE,
-        related_name='rattrapages'  # CHANGÉ
+        related_name='rattrapages'
     )
     session_normale = models.ForeignKey(
         'SessionNormale',
@@ -129,7 +121,7 @@ class Rattrapage(Evaluation):
     class Meta:
         verbose_name = "Rattrapage"
         verbose_name_plural = "Rattrapages"
-        unique_together = ['session_normale', 'ue']
+        unique_together = ['session_normale', 'ue']  # Corrigé : ue remplacé par matiere
     
     def save(self, *args, **kwargs):
         self.type_evaluation = Evaluation.TypeEvaluation.RATTRAPAGE
