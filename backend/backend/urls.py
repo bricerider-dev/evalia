@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('api/academic/', include('academic.urls')),
     path('api/dep/', include('department.urls')),
+    path('api/notifications/', include('notifications.urls')),
     #path('api/', include('core.urls')),
 
     #swagger

@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (matricule: string, password: string): Promise<boolean> => {
     try {
       const authenticatedUser = await login(matricule, password);
+      console.log('Authenticated User:', authenticatedUser);
       if (authenticatedUser) {
         setUser(authenticatedUser);
         localStorage.setItem('user', JSON.stringify(authenticatedUser));

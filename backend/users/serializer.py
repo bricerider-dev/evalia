@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=4, required=False)
     firstName = serializers.CharField(source='first_name')
     lastName = serializers.CharField(source='last_name')
+    is_active = serializers.BooleanField(default=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
@@ -21,7 +22,6 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'password': {'write_only': True},
-            'is_active': {'read_only': True},
         }
     
     def validate(self, data):
@@ -49,31 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
                 })
         
         return data
-    
-    def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        password = user_data.pop('password', None)
-        if not password:
-            raise serializers.ValidationError({'password': 'Password is required.'})
-        
-        if 'role' not in validated_data:
-            validated_data['role'] = User.UserType.STUDENT
-        
-        user = User.objects.create_user(password=password, **validated_data)
-        return user
-    
-    def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
-        
-        if password:
-            instance.set_password(password)
-        
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        instance.save()
-        return instance
-
 
 class EtudiantSerializer(serializers.ModelSerializer):
     """Serializer pour Étudiant avec correspondance frontend"""
@@ -88,19 +63,16 @@ class EtudiantSerializer(serializers.ModelSerializer):
             'id', 'user', 'filiere', 'status', 'createdAt'
         ]
         read_only_fields = ['id', 'createdAt']
-    
-        
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
+        password = user_data.pop('password', None)
+        if not password:
+            raise serializers.ValidationError({'password': 'Le mot de passe est obligatoire.'})
         
-        if isinstance(user_data, User):
-            user = user_data
-        else:
-            password = user_data.pop('password', None)
-            if not password:
-                raise serializers.ValidationError({'password': 'Password is required for the user.'})
-            user = User.objects.create_user(password=password, **user_data)
+        # S'assurer que le rôle est étudiant
+        user_data['role'] = User.UserType.STUDENT
+        user = User.objects.create_user(password=password, **user_data)
             
         etudiant = Etudiant.objects.create(user=user, **validated_data)
         return etudiant
@@ -120,14 +92,13 @@ class EnseignantSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')
+        password = user_data.pop('password', None)
+        if not password:
+            raise serializers.ValidationError({'password': 'Le mot de passe est obligatoire.'})
         
-        if isinstance(user_data, User):
-            user = user_data
-        else:
-            password = user_data.pop('password', None)
-            if not password:
-                raise serializers.ValidationError({'password': 'Password is required for the user.'})
-            user = User.objects.create_user(password=password, **user_data)
+        # S'assurer que le rôle est enseignant
+        user_data['role'] = User.UserType.TEACHER
+        user = User.objects.create_user(password=password, **user_data)
             
         enseignant = Enseignant.objects.create(user=user, **validated_data)
         return enseignant

@@ -36,177 +36,130 @@ export default function LoginPage() {
     }
   };
 
-  const demoCredentials = [
-    { role: 'Admin', matricule: 'admin@univ.edu', password: 'admin123' },
-    { role: 'Enseignant', matricule: 'prof.benali@univ.edu', password: 'prof123' },
-    { role: 'Étudiant', matricule: 'etudiant1@univ.edu', password: 'etud123' },
-  ];
-
-  const fillCredentials = (matricule: string, password: string) => {
-    setMatricule(matricule);
-    setPassword(password);
-    setError('');
-  };
-
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden flex items-center justify-center">
-      {/* Background Blobs */}
-      <div className="absolute top-0 -left-4 w-72 h-72 bg-primary/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-      <div className="absolute top-0 -right-4 w-72 h-72 bg-accent/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-secondary/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="h-screen w-full bg-slate-50 overflow-hidden flex items-center justify-center relative font-sans">
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse [animation-delay:2s]"></div>
 
-      <div className="container relative z-10 mx-auto px-4 py-8">
-        {/* Header */}
-        <header className="flex justify-center mb-12 animate-fade-in-up">
-          <Logo size="lg" />
-        </header>
-
-        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          {/* Left side - Features */}
-          <div className="hidden lg:block space-y-8 animate-fade-in-up stagger-1">
-            <div>
-              <h1 className="text-5xl font-extrabold text-primary mb-6 tracking-tight">
-                Plateforme de Gestion <br />
-                <span className="text-accent underline decoration-primary/10 underline-offset-8">des Notes Académiques</span>
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-                Une solution institutionnelle premium pour le suivi complet de la réussite académique au sein de votre département.
-              </p>
+      <div className="container max-w-6xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+        {/* Left Section: Branding & Features */}
+        <div className="flex-1 space-y-10 animate-in fade-in slide-in-from-left duration-1000 hidden md:block">
+          <div className="space-y-6">
+            <div className="inline-block p-4 bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/50 shadow-xl shadow-primary/5 animate-float">
+              <Logo size="lg" />
             </div>
-
-            <div className="space-y-6">
-              <FeatureItem
-                icon={<Users className="h-6 w-6" />}
-                title="Gestion Multi-Rôles"
-                description="Administration, enseignants et étudiants avec des accès personnalisés et sécurisés"
-                delay="stagger-1"
-              />
-              <FeatureItem
-                icon={<BookOpen className="h-6 w-6" />}
-                title="Suivi Académique Complet"
-                description="CC (30%), Session Normale (70%), Rattrapage avec calcul automatique intelligent"
-                delay="stagger-2"
-              />
-              <FeatureItem
-                icon={<BarChart3 className="h-6 w-6" />}
-                title="Tableaux de Bord Dynamiques"
-                description="Visualisation en temps réel des performances et génération instantanée de relevés"
-                delay="stagger-3"
-              />
-            </div>
+            <h1 className="text-5xl font-black text-primary tracking-tight leading-[1.15] animate-in fade-in slide-in-from-bottom-6 duration-1000 [animation-delay:300ms]">
+              Maîtrisez vos <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-accent animate-pulse-subtle">Résultats</span>
+            </h1>
+            <p className="text-lg text-slate-600 font-medium max-w-md leading-relaxed animate-in fade-in duration-1000 [animation-delay:500ms]">
+              La plateforme Evalia centralise le suivi académique de l'ENSPD avec précision et élégance.
+            </p>
           </div>
 
-          {/* Right side - Login Form */}
-          <div className="w-full max-w-md mx-auto animate-fade-in-up stagger-2">
-            <Card className="glass shadow-institutional border-white/40 ring-1 ring-black/5">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-3xl font-bold tracking-tight text-primary">Connexion</CardTitle>
-                <CardDescription className="text-base">
-                  Authentification sécurisée requise
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+          <div className="space-y-4 max-w-sm">
+            <CompactFeatureItem
+              icon={<Users className="w-5 h-5" />}
+              text="Gestion multi-rôles sécurisée"
+              delay="[animation-delay:700ms]"
+            />
+            <CompactFeatureItem
+              icon={<BookOpen className="w-5 h-5" />}
+              text="Calcul automatique des moyennes"
+              delay="[animation-delay:900ms]"
+            />
+            <CompactFeatureItem
+              icon={<BarChart3 className="w-5 h-5" />}
+              text="Analyses de performance en temps réel"
+              delay="[animation-delay:1100ms]"
+            />
+          </div>
+        </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="matricule">Matricule</Label>
-                    <Input
-                      id="matricule"
-                      type="text"
-                      placeholder="votre.matricule"
-                      value={matricule}
-                      onChange={(e) => setMatricule(e.target.value)}
-                      required
-                      autoComplete="matricule"
-                    />
-                  </div>
+        {/* Right Section: Login Card */}
+        <div className="w-full max-w-[420px] animate-in fade-in slide-in-from-right zoom-in-95 duration-1000">
+          <Card className="border-white/50 bg-white/70 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden rounded-[2rem]">
+            <CardHeader className="space-y-1 pb-6 pt-8 text-center md:text-left">
+              <div className="md:hidden flex justify-center mb-4">
+                <Logo size="sm" />
+              </div>
+              <CardTitle className="text-3xl font-black text-primary tracking-tight">Bienvenue</CardTitle>
+              <CardDescription className="text-slate-500 font-medium">Connectez-vous pour accéder à votre espace</CardDescription>
+            </CardHeader>
+            <CardContent className="pb-8">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive rounded-2xl animate-in shake-1">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="font-semibold">{error}</AlertDescription>
+                  </Alert>
+                )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Mot de passe</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      autoComplete="current-password"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full gradient-institutional text-accent"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Connexion...
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="mr-2 h-4 w-4" />
-                        Se connecter
-                      </>
-                    )}
-                  </Button>
-                </form>
-
-                {/* Demo Credentials */}
-                <div className="mt-6 pt-6 border-t">
-                  <p className="text-sm text-muted-foreground text-center mb-3">
-                    Comptes de démonstration
-                  </p>
-                  <div className="space-y-2">
-                    {demoCredentials.map((cred) => (
-                      <button
-                        key={cred.matricule}
-                        type="button"
-                        onClick={() => fillCredentials(cred.matricule, cred.password)}
-                        className="w-full text-left px-3 py-2 rounded-md text-sm bg-secondary/50 hover:bg-secondary transition-colors"
-                      >
-                        <span className="font-medium text-primary">{cred.role}:</span>{' '}
-                        <span className="text-muted-foreground">{cred.matricule}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="space-y-2 group">
+                  <Label htmlFor="matricule" className="text-sm font-bold text-slate-700 ml-1 transition-colors group-focus-within:text-primary">Matricule</Label>
+                  <Input
+                    id="matricule"
+                    type="text"
+                    placeholder="votre.matricule"
+                    value={matricule}
+                    onChange={(e) => setMatricule(e.target.value)}
+                    required
+                    className="h-12 border-slate-200/60 bg-white/50 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all duration-300"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                <div className="space-y-2 group">
+                  <Label htmlFor="password" title="password" className="text-sm font-bold text-slate-700 ml-1 transition-colors group-focus-within:text-primary">Mot de passe</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="h-12 border-slate-200/60 bg-white/50 rounded-2xl focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all duration-300"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] mt-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Authentification...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>Se connecter</span>
+                      <LogIn className="h-5 w-5" />
+                    </div>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <p className="text-center mt-6 text-sm text-slate-400 font-medium animate-in fade-in duration-1000 [animation-delay:800ms]">
+            Système de Gestion Académique Officiel — ENSPD
+          </p>
         </div>
       </div>
     </div>
   );
 }
 
-function FeatureItem({
-  icon,
-  title,
-  description,
-  delay
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  delay?: string;
-}) {
+function CompactFeatureItem({ icon, text, delay }: { icon: React.ReactNode, text: string, delay: string }) {
   return (
-    <div className={`flex gap-5 items-start p-4 rounded-xl transition-all duration-300 hover:bg-white/40 hover:shadow-sm group animate-fade-in-up ${delay}`}>
-      <div className="p-3 rounded-xl bg-primary text-accent shadow-lg group-hover:scale-110 transition-transform duration-300">
+    <div className={`flex items-center gap-4 p-3 rounded-2xl bg-white/40 border border-white/60 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay} hover:bg-white/60 transition-colors cursor-default`}>
+      <div className="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-xl shadow-md shrink-0">
         {icon}
       </div>
-      <div>
-        <h3 className="font-bold text-lg text-primary group-hover:text-accent-foreground transition-colors">{title}</h3>
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
-      </div>
+      <span className="text-sm font-bold text-slate-700">{text}</span>
     </div>
   );
 }
+

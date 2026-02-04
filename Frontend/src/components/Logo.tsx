@@ -33,7 +33,7 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
       {showText && (
         <div className="flex flex-col leading-tight">
           <span className={cn(textSizeClasses[size], "font-black text-primary tracking-tighter")}>
-            ENSPD
+            Evalia
           </span>
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             Polytechnique Douala

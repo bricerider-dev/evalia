@@ -59,14 +59,14 @@ class SemesterSerializer(serializers.ModelSerializer):
 
 class EvaluationSerializer(serializers.ModelSerializer):
     """Serializer pour les évaluations (CC, SN, RA)"""
-    subjectId = serializers.CharField(source='matiere.id')
+    subjectId = serializers.PrimaryKeyRelatedField(source='ue', queryset=UniteEnseignement.objects.all())
     title = serializers.CharField(source='intitule')
     evaluationDate = serializers.DateField(source='date_evaluation')
     startTime = serializers.TimeField(source='heure_debut')
     duration = serializers.IntegerField()  # en minutes
-    coefficient = serializers.FloatField()
-    room = serializers.CharField(source='salle', allow_blank=True)
-    evaluationStatus = serializers.CharField(source='statut')
+    coefficient = serializers.FloatField(required=False)
+    room = serializers.CharField(source='salle', allow_blank=True, required=False)
+    evaluationStatus = serializers.CharField(source='statut', required=False)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
@@ -80,9 +80,9 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
 class ControleContenuSerializer(EvaluationSerializer):
     """Serializer pour Contrôle Continu"""
-    numberOfActivities = serializers.IntegerField(source='nombre_activites')
-    isMandatory = serializers.BooleanField(source='est_obligatoire')
-    ccType = serializers.CharField(source='type_cc')
+    numberOfActivities = serializers.IntegerField(source='nombre_activites', required=False)
+    isMandatory = serializers.BooleanField(source='est_obligatoire', required=False)
+    ccType = serializers.CharField(source='type_cc', required=False)
     
     class Meta(EvaluationSerializer.Meta):
         model = ControleContinu
@@ -93,8 +93,8 @@ class ControleContenuSerializer(EvaluationSerializer):
 
 class NormalSessionSerializer(EvaluationSerializer):
     """Serializer pour Session Normale"""
-    revisionsDay = serializers.IntegerField(source='duree_revision')
-    examType = serializers.CharField(source='type_examen')
+    revisionsDay = serializers.IntegerField(source='duree_revision', required=False)
+    examType = serializers.CharField(source='type_examen', required=False)
     
     class Meta(EvaluationSerializer.Meta):
         model = SessionNormale
@@ -105,14 +105,10 @@ class NormalSessionSerializer(EvaluationSerializer):
 
 class MakeupSerializer(EvaluationSerializer):
     """Serializer pour Rattrapage"""
-    registrationDeadline = serializers.DateField(source='date_limite_inscription')
-    makeupFees = serializers.DecimalField(
-        source='frais_rattrapage', max_digits=10, decimal_places=2
-    )
-    makeupType = serializers.CharField(source='type_rattrapage')
+    normalSessionId = serializers.PrimaryKeyRelatedField(source='session_normale', queryset=SessionNormale.objects.all())
     
     class Meta(EvaluationSerializer.Meta):
         model = Rattrapage
         fields = EvaluationSerializer.Meta.fields + [
-            'registrationDeadline', 'makeupFees', 'makeupType'
+            'normalSessionId'
         ]
