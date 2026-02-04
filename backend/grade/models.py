@@ -152,11 +152,6 @@ class HistoriqueNote(TimeStampedModel):
 
 class DecisionFinale(TimeStampedModel):
     """Modèle Décision finale pour un étudiant dans une matière"""
-    inscription = models.OneToOneField(
-        'academic.Inscription',
-        on_delete=models.CASCADE,
-        related_name='decision_finale'
-    )
     note_cc = models.FloatField(
         null=True,
         blank=True,

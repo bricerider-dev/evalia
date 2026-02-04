@@ -187,17 +187,18 @@ export function deleteStudent(id: string): void {
 }
 
 // Subject operations
+// Subject operations
 export function getSubjects(): Subject[] {
   return getFromStorage<Subject>(STORAGE_KEYS.SUBJECTS);
 }
 
-export function getSubjectsByFiliere(filiereId: string): Subject[] {
-  return getSubjects().filter((s) => s.filiereId === filiereId);
-}
+// export function getSubjectsByFiliere(filiereId: string): Subject[] {
+//   return getSubjects().filter((s) => s.filiereId === filiereId);
+// }
 
-export function getSubjectsByTeacher(teacherId: string): Subject[] {
-  return getSubjects().filter((s) => s.teacherId === teacherId);
-}
+// export function getSubjectsByTeacher(teacherId: string): Subject[] {
+//   return getSubjects().filter((s) => s.teacherId === teacherId);
+// }
 
 export function addSubject(subject: Subject): void {
   const subjects = getSubjects();
@@ -205,17 +206,17 @@ export function addSubject(subject: Subject): void {
   saveToStorage(STORAGE_KEYS.SUBJECTS, subjects);
 }
 
-export function updateSubject(id: string, updates: Partial<Subject>): void {
+export function updateSubject(id: number | string, updates: Partial<Subject>): void {
   const subjects = getSubjects();
-  const index = subjects.findIndex((s) => s.id === id);
+  const index = subjects.findIndex((s) => s.id === Number(id));
   if (index !== -1) {
     subjects[index] = { ...subjects[index], ...updates };
     saveToStorage(STORAGE_KEYS.SUBJECTS, subjects);
   }
 }
 
-export function deleteSubject(id: string): void {
-  const subjects = getSubjects().filter((s) => s.id !== id);
+export function deleteSubject(id: number | string): void {
+  const subjects = getSubjects().filter((s) => s.id !== Number(id));
   saveToStorage(STORAGE_KEYS.SUBJECTS, subjects);
 }
 

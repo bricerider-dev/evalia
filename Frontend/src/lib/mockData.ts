@@ -9,32 +9,11 @@ export const defaultAdmin: User = {
   firstName: 'Mohamed',
   lastName: 'Administrateur',
   createdAt: '2024-01-01T00:00:00Z',
+  phone: '0600000000',
+  is_active: true,
 };
 
-// Sample Filieres
-export const defaultFilieres: Filiere[] = [
-  {
-    id: 'fil-1',
-    name: 'Informatique',
-    code: 'INFO',
-    description: 'Licence en Sciences Informatiques',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'fil-2',
-    name: 'Mathématiques',
-    code: 'MATH',
-    description: 'Licence en Mathématiques Appliquées',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'fil-3',
-    name: 'Physique',
-    code: 'PHYS',
-    description: 'Licence en Physique Fondamentale',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-];
+// ... (Filieres unchanged)
 
 // Sample Teachers
 export const defaultTeachers: Teacher[] = [
@@ -49,6 +28,12 @@ export const defaultTeachers: Teacher[] = [
     department: 'Informatique',
     subjects: ['sub-1', 'sub-2'],
     createdAt: '2024-01-15T00:00:00Z',
+    grade: 'Professor',
+    speciality: 'Informatique',
+    bureau: 'B101',
+    status: 'Active',
+    phone: '',
+    is_active: true,
   },
   {
     id: 'teacher-2',
@@ -61,6 +46,12 @@ export const defaultTeachers: Teacher[] = [
     department: 'Mathématiques',
     subjects: ['sub-3'],
     createdAt: '2024-01-15T00:00:00Z',
+    grade: 'Associate Professor',
+    speciality: 'Mathematics',
+    bureau: 'B102',
+    status: 'Active',
+    phone: '',
+    is_active: true,
   },
 ];
 
@@ -74,9 +65,15 @@ export const defaultStudents: Student[] = [
     firstName: 'Youssef',
     lastName: 'El Amrani',
     studentId: 'S2024001',
-    filiereId: 'fil-1',
+    filiere: 'fil-1',
     enrollmentYear: 2024,
     createdAt: '2024-09-01T00:00:00Z',
+    phone: '',
+    is_active: true,
+    date_of_birth: '',
+    lieu_de_naissance: '',
+    address: '',
+    status: 'Active',
   },
   {
     id: 'student-2',
@@ -86,9 +83,15 @@ export const defaultStudents: Student[] = [
     firstName: 'Sara',
     lastName: 'Bouazza',
     studentId: 'S2024002',
-    filiereId: 'fil-1',
+    filiere: 'fil-1',
     enrollmentYear: 2024,
     createdAt: '2024-09-01T00:00:00Z',
+    phone: '',
+    is_active: true,
+    date_of_birth: '',
+    lieu_de_naissance: '',
+    address: '',
+    status: 'Active',
   },
   {
     id: 'student-3',
@@ -98,40 +101,49 @@ export const defaultStudents: Student[] = [
     firstName: 'Karim',
     lastName: 'Hajji',
     studentId: 'S2024003',
-    filiereId: 'fil-1',
+    filiere: 'fil-1',
     enrollmentYear: 2024,
     createdAt: '2024-09-01T00:00:00Z',
+    phone: '',
+    is_active: true,
+    date_of_birth: '',
+    lieu_de_naissance: '',
+    address: '',
+    status: 'Active',
   },
 ];
 
 // Sample Subjects
 export const defaultSubjects: Subject[] = [
   {
-    id: 'sub-1',
+    id: 1,
     name: 'Programmation Java',
     code: 'INFO101',
-    filiereId: 'fil-1',
-    teacherId: 'teacher-1',
-    coefficient: 3,
+    description: 'Cours de programmation orientée objet en Java',
+    level: 1,
     semester: 1,
+    credit: 4,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'sub-2',
+    id: 2,
     name: 'Bases de Données',
     code: 'INFO102',
-    filiereId: 'fil-1',
-    teacherId: 'teacher-1',
-    coefficient: 3,
+    description: 'Introduction aux bases de données relationnelles',
+    level: 1,
     semester: 1,
+    credit: 3,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'sub-3',
+    id: 3,
     name: 'Analyse Mathématique',
     code: 'MATH101',
-    filiereId: 'fil-1',
-    teacherId: 'teacher-2',
-    coefficient: 4,
+    description: 'Analyse réelle et complexe',
+    level: 1,
     semester: 1,
+    credit: 4,
+    createdAt: '2024-01-01T00:00:00Z',
   },
 ];
 

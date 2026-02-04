@@ -107,22 +107,30 @@ class EtudiantSerializer(serializers.ModelSerializer):
 
 class EnseignantSerializer(serializers.ModelSerializer):
     """Serializer pour Enseignant avec correspondance frontend"""
-    user = UserSerializer()
-    firstName = serializers.CharField(source='user.first_name')
-    lastName = serializers.CharField(source='user.last_name')
-    email = serializers.CharField(source='user.email')
-    phone = serializers.CharField(source='user.phone')
-    status = serializers.CharField(source='statut')
-    filiere = serializers.SerializerMethodField()
+    user = UserSerializer()    
+    status = serializers.CharField(source='statut')    
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     
     class Meta:
         model = Enseignant
         fields = [
-            'id', 'user', 'firstName', 'lastName', 'email', 'phone',
-            'grade', 'status', 'filiere', 'createdAt'
+            'id', 'user', 'grade', 'status', 'createdAt'
         ]
         read_only_fields = ['id', 'createdAt']
+    
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        
+        if isinstance(user_data, User):
+            user = user_data
+        else:
+            password = user_data.pop('password', None)
+            if not password:
+                raise serializers.ValidationError({'password': 'Password is required for the user.'})
+            user = User.objects.create_user(password=password, **user_data)
+            
+        enseignant = Enseignant.objects.create(user=user, **validated_data)
+        return enseignant
 
 
 class UserLoginSerializer(serializers.Serializer):

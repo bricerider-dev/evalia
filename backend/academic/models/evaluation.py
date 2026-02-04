@@ -47,8 +47,8 @@ class Evaluation(TimeStampedModel):
 
 class ControleContinu(Evaluation):
     """Modèle Contrôle Continu (30% de la note finale)"""
-    matiere = models.ForeignKey(
-        'academic.Matiere',
+    ue = models.ForeignKey(
+        'academic.UniteEnseignement',
         on_delete=models.CASCADE,
         related_name='controles_continus'  # CHANGÉ
     )
@@ -82,8 +82,8 @@ class ControleContinu(Evaluation):
 
 class SessionNormale(Evaluation):
     """Modèle Session Normale (70% de la note finale)"""
-    matiere = models.ForeignKey(
-        'academic.Matiere',
+    ue = models.ForeignKey(
+        'academic.UniteEnseignement',
         on_delete=models.CASCADE,
         related_name='sessions_normales'  # CHANGÉ
     )
@@ -115,8 +115,8 @@ class SessionNormale(Evaluation):
 
 class Rattrapage(Evaluation):
     """Modèle Rattrapage (seulement si note < 10)"""
-    matiere = models.ForeignKey(
-        'academic.Matiere',
+    ue = models.ForeignKey(
+        'academic.UniteEnseignement',
         on_delete=models.CASCADE,
         related_name='rattrapages'  # CHANGÉ
     )
@@ -125,29 +125,11 @@ class Rattrapage(Evaluation):
         on_delete=models.CASCADE,
         related_name='rattrapages'
     )
-    date_limite_inscription = models.DateField()
-    frais_rattrapage = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0.00,
-        help_text="Frais de rattrapage en FCFA"
-    )
-    
-    class TypeRattrapage(models.TextChoices):
-        ECRIT = 'ecrit', 'Rattrapage Écrit'
-        ORAL = 'oral', 'Rattrapage Oral'
-        PRATIQUE = 'pratique', 'Rattrapage Pratique'
-    
-    type_rattrapage = models.CharField(
-        max_length=10,
-        choices=TypeRattrapage.choices,
-        default=TypeRattrapage.ECRIT
-    )
     
     class Meta:
         verbose_name = "Rattrapage"
         verbose_name_plural = "Rattrapages"
-        unique_together = ['session_normale', 'matiere']
+        unique_together = ['session_normale', 'ue']
     
     def save(self, *args, **kwargs):
         self.type_evaluation = Evaluation.TypeEvaluation.RATTRAPAGE

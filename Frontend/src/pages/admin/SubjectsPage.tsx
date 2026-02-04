@@ -37,7 +37,7 @@ import { Plus, Pencil, Trash2, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SubjectsPage() {
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filieres, setFilieres] = useState<Filiere[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);
@@ -47,24 +47,27 @@ export default function SubjectsPage() {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
+    description: '',
+    level: 1,
+    semester: 1,
+    credit: 1,
+    // Keep these if necessary for creation, but they won't be in the listed items
     filiereId: '',
     teacherId: '',
-    coefficient: 1,
-    semester: 1,
     unitId: '',
   });
 
   const loadData = async () => {
     try {
       const subjectsData = await getSubjects();
-      const filieresData = await getFilieres();
-      const teachersData = await getEnseignants();
-      const unitsData = await getUnits();
+      // const filieresData = await getFilieres();
+      // const teachersData = await getEnseignants();
+      // const unitsData = await getUnits();
 
       setSubjects(subjectsData);
-      setFilieres(filieresData);
-      setTeachers(teachersData);
-      setUnits(unitsData);
+      // setFilieres(filieresData);
+      // setTeachers(teachersData);
+      // setUnits(unitsData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement des données');
@@ -79,11 +82,13 @@ export default function SubjectsPage() {
     setFormData({
       name: '',
       code: '',
+      description: '',
+      level: 1,
+      semester: 1,
+      credit: 1,
       filiereId: '',
       teacherId: '',
-      coefficient: 1,
-      semester: 1,
-      unitId: units.length > 0 ? units[0].id : '',
+      unitId: '',
     });
     setEditingSubject(null);
   };
@@ -94,11 +99,13 @@ export default function SubjectsPage() {
       setFormData({
         name: subject.name,
         code: subject.code,
-        filiereId: '', // Filiere info might need separate mapping if not in serializer
-        teacherId: subject.responsibleTeacherId || '',
-        coefficient: subject.coefficient,
+        description: subject.description || '',
+        level: subject.level || 1,
         semester: subject.semester,
-        unitId: subject.uniteEnseignementId || '',
+        credit: subject.credit,
+        filiereId: '',
+        teacherId: '',
+        unitId: '',
       });
     } else {
       resetForm();
@@ -109,21 +116,18 @@ export default function SubjectsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.code || !formData.unitId) {
+    if (!formData.name || !formData.code) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
     const payload = {
-      nom: formData.name,
+      name: formData.name,
       code: formData.code,
-      unite_enseignement: formData.unitId,
-      responsable: formData.teacherId || null,
-      coefficient: formData.coefficient,
-      type_matiere: 'normal',
-      description: '',
-      volumeHoraire: 40,
-      credit: 4
+      description: formData.description,
+      level: formData.level,
+      semester: formData.semester,
+      credit: formData.credit,
     };
 
     try {
@@ -156,15 +160,6 @@ export default function SubjectsPage() {
     }
   };
 
-  const getFiliereName = (filiereId: string) => {
-    return filieres.find((f) => f.id === filiereId)?.name || 'N/A';
-  };
-
-  const getTeacherName = (teacherId: string) => {
-    const teacher = teachers.find((t) => t.id === teacherId);
-    return teacher ? `Prof. ${teacher.user?.last_name || teacher.lastName || ''}` : 'N/A';
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in-up">
@@ -176,7 +171,7 @@ export default function SubjectsPage() {
             <div>
               <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Matières</h2>
               <p className="text-sm text-muted-foreground font-medium">
-                Structurez le programme académique et assignez les cours
+                Structurez le programme académique
               </p>
             </div>
           </div>
@@ -219,51 +214,49 @@ export default function SubjectsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="unitId">Unité d'Enseignement *</Label>
-                    <Select
-                      value={formData.unitId}
-                      onValueChange={(value) => setFormData({ ...formData, unitId: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une UE" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {units.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.code} - {unit.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="description">Description</Label>
+                    <Input
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="teacherId">Enseignant Responsable</Label>
-                    <Select
-                      value={formData.teacherId}
-                      onValueChange={(value) => setFormData({ ...formData, teacherId: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un enseignant" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teachers.map((teacher) => (
-                          <SelectItem key={teacher.id} value={teacher.id}>
-                            Prof. {teacher.user?.first_name} {teacher.user?.last_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="coefficient">Coefficient</Label>
+                      <Label htmlFor="level">Niveau</Label>
                       <Input
-                        id="coefficient"
+                        id="level"
                         type="number"
                         min="1"
-                        max="10"
-                        value={formData.coefficient}
-                        onChange={(e) => setFormData({ ...formData, coefficient: parseInt(e.target.value) || 1 })}
+                        max="5"
+                        value={formData.level}
+                        onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) || 1 })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="semester">Semestre</Label>
+                      <Input
+                        id="semester"
+                        type="number"
+                        min="1"
+                        max="2"
+                        value={formData.semester}
+                        onChange={(e) => setFormData({ ...formData, semester: parseInt(e.target.value) || 1 })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="credit">Crédits</Label>
+                      <Input
+                        id="credit"
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={formData.credit}
+                        onChange={(e) => setFormData({ ...formData, credit: parseInt(e.target.value) || 1 })}
                       />
                     </div>
                   </div>
@@ -309,8 +302,8 @@ export default function SubjectsPage() {
                   <TableRow className="hover:bg-transparent border-0">
                     <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Code</TableHead>
                     <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Matière</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Enseignant</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Coef.</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Niveau</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Crédits</TableHead>
                     <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px] text-center">Semestre</TableHead>
                     <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
@@ -325,13 +318,18 @@ export default function SubjectsPage() {
                         <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
                           {subject.name}
                         </div>
+                        {subject.description && (
+                          <div className="text-xs text-muted-foreground mt-1 truncate max-w-[200px]">
+                            {subject.description}
+                          </div>
+                        )}
                       </TableCell>
-                      <TableCell className="py-3 px-6 font-medium text-slate-600 text-sm">
-                        {getTeacherName(subject.responsibleTeacherId)}
+                      <TableCell className="py-3 px-6 text-center font-bold text-slate-500 text-sm">
+                        L{subject.level}
                       </TableCell>
                       <TableCell className="py-3 px-6 text-center">
                         <Badge variant="secondary" className="bg-primary hover:bg-primary text-white px-2 py-0.5 rounded-full font-black text-[10px]">
-                          {subject.coefficient}
+                          {subject.credit}
                         </Badge>
                       </TableCell>
                       <TableCell className="py-3 px-6 text-center font-bold text-slate-500 text-sm">
@@ -350,7 +348,7 @@ export default function SubjectsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(subject.id)}
+                            onClick={() => handleDelete(String(subject.id))}
                             className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-destructive transition-all"
                           >
                             <Trash2 className="h-5 w-5" />

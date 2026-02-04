@@ -1,14 +1,12 @@
 from rest_framework import viewsets
-from academic.models.matiere import Matiere, UniteEnseignement
+from academic.models.matiere import  UniteEnseignement
 from academic.models.evaluation import ControleContinu, SessionNormale, Rattrapage
 from academic.serializer import (
-    SubjectSerializer, UniteSerialization, 
+     UniteSerialization, 
     ControleContenuSerializer, NormalSessionSerializer, MakeupSerializer
 )
 
-class SubjectViewSet(viewsets.ModelViewSet):
-    queryset = Matiere.objects.all()
-    serializer_class = SubjectSerializer
+
 
 class UniteEnseignementViewSet(viewsets.ModelViewSet):
     queryset = UniteEnseignement.objects.all()

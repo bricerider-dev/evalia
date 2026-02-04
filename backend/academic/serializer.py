@@ -1,27 +1,9 @@
 # FICHIER 4: backend/academic/serializers.py - NOUVEAU
 from rest_framework import serializers
-from academic.models.matiere import Matiere, UniteEnseignement
-from academic.models.planning import AnneeAcademique, Semestre, Inscription
+from academic.models.matiere import  UniteEnseignement
+from academic.models.planning import AnneeAcademique, Semestre
 from academic.models.evaluation import ControleContinu, SessionNormale, Rattrapage
 
-
-class SubjectSerializer(serializers.ModelSerializer):
-    """Serializer pour Matière/Subject"""
-    name = serializers.CharField(source='nom')
-    uniteEnseignementId = serializers.CharField(source='unite_enseignement.id')
-    responsibleTeacherId = serializers.CharField(source='responsable.id', allow_null=True)
-    typeSubject = serializers.CharField(source='type_matiere')
-    semester = serializers.IntegerField(source='unite_enseignement.semestre')
-    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    
-    class Meta:
-        model = Matiere
-        fields = [
-            'id', 'code', 'name', 'description', 'uniteEnseignementId',
-            'volumeHoraire', 'credit', 'coefficient', 'responsibleTeacherId',
-            'typeSubject', 'semester', 'createdAt'
-        ]
-        read_only_fields = ['id', 'createdAt']
 
 
 class UniteSerialization(serializers.ModelSerializer):
@@ -73,25 +55,6 @@ class SemesterSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'createdAt']
 
-
-class EnrollmentSerializer(serializers.ModelSerializer):
-    """Serializer pour Inscription"""
-    studentId = serializers.CharField(source='etudiant.id')
-    subjectId = serializers.CharField(source='matiere.id')
-    semesterId = serializers.CharField(source='semestre.id')
-    enrollmentDate = serializers.DateField(source='date_inscription', read_only=True)
-    enrollmentStatus = serializers.CharField(source='statut')
-    finalGrade = serializers.FloatField(source='note_finale', allow_null=True)
-    juryDecision = serializers.CharField(source='decision', allow_null=True)
-    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    
-    class Meta:
-        model = Inscription
-        fields = [
-            'id', 'studentId', 'subjectId', 'semesterId', 'enrollmentDate',
-            'enrollmentStatus', 'finalGrade', 'juryDecision', 'createdAt'
-        ]
-        read_only_fields = ['id', 'enrollmentDate', 'createdAt']
 
 
 class EvaluationSerializer(serializers.ModelSerializer):

@@ -10,12 +10,12 @@ export const createSubject = async (subject: any) => {
     return response.data;
 };
 
-export const updateSubject = async (id: string, subject: any) => {
+export const updateSubject = async (id: number | string, subject: any) => {
     const response = await api.put(`academic/subjects/${id}/`, subject);
     return response.data;
 };
 
-export const deleteSubject = async (id: string) => {
+export const deleteSubject = async (id: number | string) => {
     const response = await api.delete(`academic/subjects/${id}/`);
     return response.data;
 };

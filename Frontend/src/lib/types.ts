@@ -46,13 +46,14 @@ export interface Teacher extends User {
 }
 
 export interface Subject {
-  id: string;
-  name: string;
+  id: number;
   code: string;
-  filiereId: string;
-  teacherId: string;
-  coefficient: number;
+  name: string;
+  description: string;
+  level: number;
   semester: number;
+  credit: number;
+  createdAt: string;
 }
 
 // Evaluation Types
