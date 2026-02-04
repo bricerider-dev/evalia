@@ -1,8 +1,9 @@
 .env
 db.sqlite3
-__pycache__
+__pycache__/
+*__pycache__/
 env
-*.pyc
+*.pyc   
 *.pyo
 *.pyd
 *.sqlite3
@@ -26,4 +27,5 @@ htmlcov/
 .cache
 pip-wheel-metadata/
 prompt.txt
+
 migrations/
