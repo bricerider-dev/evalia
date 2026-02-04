@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Pages
@@ -16,6 +17,8 @@ import SubjectsPage from "./pages/admin/SubjectsPage";
 import EvaluationsPage from "./pages/admin/EvaluationsPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 import GradesEntryPage from "./pages/teacher/GradesEntryPage";
+import TeacherSubjectsPage from "./pages/teacher/TeacherSubjectsPage";
+import TeacherStatsPage from "./pages/teacher/TeacherStatsPage";
 import StudentGradesPage from "./pages/student/StudentGradesPage";
 import NotFound from "./pages/NotFound";
 
@@ -26,122 +29,124 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <BrowserRouter future={{ v7_startTransition: true }}>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter future={{ v7_startTransition: true }}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Protected routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Admin routes */}
-            <Route
-              path="/dashboard/filieres"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <FilieresPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/students"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <StudentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/teachers"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <TeachersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/subjects"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <SubjectsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/evaluations"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <EvaluationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/reports"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <ReportsPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Admin routes */}
+              <Route
+                path="/dashboard/filieres"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <FilieresPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/students"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <StudentsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/teachers"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <TeachersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/subjects"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <SubjectsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/evaluations"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EvaluationsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/reports"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Teacher routes */}
-            <Route
-              path="/dashboard/grades"
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <GradesEntryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/my-subjects"
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/statistics"
-              element={
-                <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Teacher routes */}
+              <Route
+                path="/dashboard/grades"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <GradesEntryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/my-subjects"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <TeacherSubjectsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/statistics"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+                    <TeacherStatsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Student routes */}
-            <Route
-              path="/dashboard/my-grades"
-              element={
-                <ProtectedRoute allowedRoles={['student']}>
-                  <StudentGradesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/transcript"
-              element={
-                <ProtectedRoute allowedRoles={['student']}>
-                  <StudentGradesPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Student routes */}
+              <Route
+                path="/dashboard/my-grades"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <StudentGradesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/transcript"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <StudentGradesPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+              {/* Catch all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

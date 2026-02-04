@@ -24,8 +24,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,6 +36,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -195,7 +199,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-blob"></div>
 
         {/* Top bar */}
-        <header className="h-20 glass border-b border-black/5 flex items-center justify-between px-8 sticky top-0 z-10 transition-all duration-500">
+        <header className="h-20 glass dark:glass-dark border-b border-black/5 flex items-center justify-between px-8 sticky top-0 z-10 transition-all duration-500">
           <div className="flex items-center gap-4">
             {isCollapsed && (
               <Button
@@ -213,6 +217,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full text-primary hover:bg-primary/5 transition-all hover:scale-110"
+              title={theme === 'light' ? 'Passer en mode sombre' : 'Passer en mode clair'}
+            >
+              {theme === 'light' ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Sun className="h-5 w-5" />
+              )}
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">

@@ -5,12 +5,10 @@ from academic.views import (
     ControleContinuViewSet, SessionNormaleViewSet, RattrapageViewSet
 )
 
-router = DefaultRouter()
-router.register(r'subjects', UniteEnseignementViewSet)
-router.register(r'cc', ControleContinuViewSet)
-router.register(r'sn', SessionNormaleViewSet)
-router.register(r'ra', RattrapageViewSet)
-
-urlpatterns = [
-    path('', include(router.urls)),
-]
+ac_router= DefaultRouter()
+ac_router.include_format_suffixes = False
+ac_router.register(r'subjects', UniteEnseignementViewSet)
+ac_router.register(r'cc', ControleContinuViewSet)
+ac_router.register(r'sn', SessionNormaleViewSet)
+ac_router.register(r'ra', RattrapageViewSet)
+urlpatterns = ac_router.urls
