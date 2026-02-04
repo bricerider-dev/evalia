@@ -14,6 +14,7 @@ import StudentsPage from "./pages/admin/StudentsPage";
 import TeachersPage from "./pages/admin/TeachersPage";
 import SubjectsPage from "./pages/admin/SubjectsPage";
 import EvaluationsPage from "./pages/admin/EvaluationsPage";
+import ReportsPage from "./pages/admin/ReportsPage";
 import GradesEntryPage from "./pages/teacher/GradesEntryPage";
 import StudentGradesPage from "./pages/student/StudentGradesPage";
 import NotFound from "./pages/NotFound";
@@ -26,7 +27,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true }}>
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -44,7 +45,7 @@ const App = () => (
 
             {/* Admin routes */}
             <Route
-              path="/dashboard/filieres"          
+              path="/dashboard/filieres"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <FilieresPage />
@@ -80,6 +81,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <EvaluationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/reports"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ReportsPage />
                 </ProtectedRoute>
               }
             />

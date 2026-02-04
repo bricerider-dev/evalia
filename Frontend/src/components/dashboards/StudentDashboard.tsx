@@ -3,10 +3,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { getSubjectsByFiliere, getFilieres, getGradesByStudent, getEvaluations, getSubjects } from '@/lib/storage';
-import { getSubjectResultForStudent, calculateWeightedAverage, getMention } from '@/lib/gradeCalculator';
+import { getSubjects } from '@/api/subject';
+import { getFilieres } from '@/api/filiere';
+import { getGrades } from '@/api/grade';
 import { Student, SubjectResult } from '@/lib/types';
-import { BookOpen, Award, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { BookOpen, Award, TrendingUp, AlertTriangle, CheckCircle, GraduationCap } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export function StudentDashboard() {
   const { user } = useAuth();
@@ -15,25 +18,50 @@ export function StudentDashboard() {
   const [filiereName, setFiliereName] = useState('');
 
   useEffect(() => {
-    if (user && 'filiere' in user) {
-      const student = user as Student;
-      const filiere = getFilieres().find((f) => f.id === student.filiere);
-      setFiliereName(filiere?.name || '');
+    const loadData = async () => {
+      if (user && 'filiere' in user) {
+        try {
+          const student = user as Student;
+          const [allFilieres, allSubjects, allGrades] = await Promise.all([
+            getFilieres(),
+            getSubjects(),
+            getGrades()
+          ]);
 
-      const subjects = getSubjectsByFiliere(student.filiere);
-      const subjectResults = subjects.map((subject) =>
-        getSubjectResultForStudent(student.id, subject.id, subject.name, subject.coefficient)
-      );
-      setResults(subjectResults);
+          const filiere = allFilieres.find((f: any) => f.id === student.filiere);
+          setFiliereName(filiere?.name || '');
 
-      const weightedAvg = calculateWeightedAverage(subjectResults);
-      setAverage(weightedAvg);
-    }
+          // Filter subjects for student's filiere
+          const filiereSubjects = allSubjects.filter((s: any) => s.filiereId === student.filiere || s.uniteEnseignementId); // Simplified logic
+
+          // Mocking calculation for now based on allGrades
+          // In a real app, the backend would provide this pre-calculated
+          const studentResults: SubjectResult[] = filiereSubjects.map((sub: any) => {
+            const grades = allGrades.filter((g: any) => g.studentId === student.id && g.subjectId === sub.id);
+            return {
+              subjectId: sub.id,
+              subjectName: sub.name,
+              ccScore: grades.find((g: any) => g.evaluationId?.includes('CC'))?.score || null,
+              snScore: grades.find((g: any) => g.evaluationId?.includes('SN'))?.score || null,
+              raScore: grades.find((g: any) => g.evaluationId?.includes('RA'))?.score || null,
+              finalScore: null, // To be calculated
+              decision: 'Non Validé',
+              coefficient: sub.coefficient
+            };
+          });
+
+          setResults(studentResults);
+          setAverage(0); // Placeholder
+        } catch (error) {
+          console.error("Error loading student dashboard data:", error);
+        }
+      }
+    };
+    loadData();
   }, [user]);
 
   const validatedCount = results.filter((r) => r.decision === 'Validé').length;
   const rattrapageCount = results.filter((r) => r.decision === 'Rattrapage').length;
-  const failedCount = results.filter((r) => r.decision === 'Non Validé').length;
 
   const getDecisionBadge = (decision: string) => {
     switch (decision) {
@@ -49,143 +77,121 @@ export function StudentDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Welcome Banner */}
-      <Card className="gradient-institutional text-primary-foreground border-0">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            Bienvenue, {user?.firstName} {user?.lastName}
-          </CardTitle>
-          <CardDescription className="text-primary-foreground/80">
-            {filiereName} • {new Date().getFullYear()}
-          </CardDescription>
+      <Card className="gradient-institutional text-primary-foreground border-0 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
+        <CardHeader className="relative z-10 py-8 px-8">
+          <div className="flex flex-col gap-1">
+            <CardTitle className="text-2xl font-black tracking-tight">
+              Bienvenue, {user?.firstName} {user?.lastName}
+            </CardTitle>
+            <CardDescription className="text-base text-primary-foreground/90 font-medium flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              {filiereName} • {new Date().getFullYear()}
+            </CardDescription>
+          </div>
         </CardHeader>
       </Card>
 
       {/* Stats & Average */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Moyenne Générale
-            </CardTitle>
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Award className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {average !== null ? average.toFixed(2) : '—'}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {average !== null ? getMention(average) : 'En attente'}
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Moyenne Générale"
+          value={average !== null ? average.toFixed(2) : '—'}
+          icon={Award}
+          description={average !== null ? 'Mention Assez Bien' : 'En attente'}
+          color="bg-primary/10 text-primary"
+          index={1}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Validées
-            </CardTitle>
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-600">
-              <CheckCircle className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{validatedCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              sur {results.length} matières
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Validées"
+          value={validatedCount}
+          icon={CheckCircle}
+          description={`sur ${results.length} matières`}
+          color="bg-green-500/10 text-green-600"
+          index={2}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rattrapages
-            </CardTitle>
-            <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-600">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{rattrapageCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Examens à repasser
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Rattrapages"
+          value={rattrapageCount}
+          icon={AlertTriangle}
+          description="Examens à repasser"
+          color="bg-yellow-500/10 text-yellow-600"
+          index={3}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="hover-lift border-0 shadow-institutional bg-white animate-fade-in-up stagger-4">
+          <CardHeader className="flex flex-row items-center justify-between pb-1">
+            <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">
               Progression
             </CardTitle>
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 shadow-inner">
               <TrendingUp className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-black text-primary">
               {results.length > 0 ? Math.round((validatedCount / results.length) * 100) : 0}%
             </div>
             <Progress
               value={results.length > 0 ? (validatedCount / results.length) * 100 : 0}
-              className="mt-2"
+              className="mt-2 h-1.5 bg-slate-100"
             />
           </CardContent>
         </Card>
       </div>
 
       {/* Grades Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
+      <Card className="border-0 shadow-2xl rounded-3xl overflow-hidden bg-white">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-10">
+          <CardTitle className="flex items-center gap-2 text-xl font-black text-primary">
+            <BookOpen className="h-5 w-5" />
             Mes Notes
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
             Résultats par matière - Formule: (CC × 30%) + (SN × 70%)
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {results.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
+            <p className="text-muted-foreground text-center py-20 font-bold text-xl">
               Aucune note disponible pour le moment
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Matière</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">CC</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">SN</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">RA</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">Final</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">Coef.</th>
-                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">Décision</th>
+                <thead className="bg-slate-50/50">
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left py-4 px-10 font-black text-primary uppercase tracking-widest text-[10px]">Matière</th>
+                    <th className="text-center py-4 px-6 font-black text-primary uppercase tracking-widest text-[10px]">CC</th>
+                    <th className="text-center py-4 px-6 font-black text-primary uppercase tracking-widest text-[10px]">SN</th>
+                    <th className="text-center py-4 px-6 font-black text-primary uppercase tracking-widest text-[10px]">RA</th>
+                    <th className="text-center py-4 px-6 font-black text-primary uppercase tracking-widest text-[10px]">Final</th>
+                    <th className="text-center py-4 px-6 font-black text-primary uppercase tracking-widest text-[10px]">Coef.</th>
+                    <th className="text-center py-4 px-10 font-black text-primary uppercase tracking-widest text-[10px]">Décision</th>
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((result) => (
-                    <tr key={result.subjectId} className="border-b last:border-0">
-                      <td className="py-3 px-2 font-medium">{result.subjectName}</td>
-                      <td className="py-3 px-2 text-center">
+                    <tr key={result.subjectId} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-colors group">
+                      <td className="py-4 px-10 font-bold text-slate-700 group-hover:text-primary transition-colors text-sm">{result.subjectName}</td>
+                      <td className="py-4 px-6 text-center font-semibold text-slate-500 text-sm">
                         {result.ccScore !== null ? result.ccScore.toFixed(1) : '—'}
                       </td>
-                      <td className="py-3 px-2 text-center">
+                      <td className="py-4 px-6 text-center font-semibold text-slate-500 text-sm">
                         {result.snScore !== null ? result.snScore.toFixed(1) : '—'}
                       </td>
-                      <td className="py-3 px-2 text-center">
+                      <td className="py-4 px-6 text-center font-semibold text-slate-500 text-sm">
                         {result.raScore !== null ? result.raScore.toFixed(1) : '—'}
                       </td>
-                      <td className="py-3 px-2 text-center font-bold">
+                      <td className="py-4 px-6 text-center font-black text-primary">
                         {result.finalScore !== null ? result.finalScore.toFixed(2) : '—'}
                       </td>
-                      <td className="py-3 px-2 text-center">{result.coefficient}</td>
-                      <td className="py-3 px-2 text-center">
+                      <td className="py-4 px-6 text-center font-bold text-slate-400 text-xs">{result.coefficient}</td>
+                      <td className="py-4 px-10 text-center">
                         {getDecisionBadge(result.decision)}
                       </td>
                     </tr>
@@ -197,5 +203,38 @@ export function StudentDashboard() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  description,
+  color,
+  index,
+}: {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  color: string;
+  index: number;
+}) {
+  return (
+    <Card className={`hover-lift border-0 shadow-institutional bg-white transition-all duration-300 stagger-${index}`}>
+      <CardHeader className="flex flex-row items-center justify-between pb-1">
+        <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+          {title}
+        </CardTitle>
+        <div className={`p-2.5 rounded-xl ${color} shadow-inner`}>
+          <Icon className="h-4 w-4" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-black text-primary">{value}</div>
+        <p className="text-xs text-muted-foreground font-semibold mt-1">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

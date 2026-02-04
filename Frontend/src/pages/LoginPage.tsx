@@ -49,51 +49,60 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
-      <div className="container mx-auto px-4 py-8">
+    <div className="relative min-h-screen bg-background overflow-hidden flex items-center justify-center">
+      {/* Background Blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-primary/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-accent/10 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-secondary/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+
+      <div className="container relative z-10 mx-auto px-4 py-8">
         {/* Header */}
-        <header className="flex justify-center mb-12 pt-8">
+        <header className="flex justify-center mb-12 animate-fade-in-up">
           <Logo size="lg" />
         </header>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
           {/* Left side - Features */}
-          <div className="hidden lg:block space-y-8">
+          <div className="hidden lg:block space-y-8 animate-fade-in-up stagger-1">
             <div>
-              <h1 className="text-4xl font-bold text-primary mb-4">
-                Plateforme de Gestion des Notes Académiques
+              <h1 className="text-5xl font-extrabold text-primary mb-6 tracking-tight">
+                Plateforme de Gestion <br />
+                <span className="text-accent underline decoration-primary/10 underline-offset-8">des Notes Académiques</span>
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Une solution complète pour la gestion des notes, évaluations et résultats académiques de votre département universitaire.
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                Une solution institutionnelle premium pour le suivi complet de la réussite académique au sein de votre département.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <FeatureItem
                 icon={<Users className="h-6 w-6" />}
                 title="Gestion Multi-Rôles"
-                description="Administration, enseignants et étudiants avec des accès personnalisés"
+                description="Administration, enseignants et étudiants avec des accès personnalisés et sécurisés"
+                delay="stagger-1"
               />
               <FeatureItem
                 icon={<BookOpen className="h-6 w-6" />}
                 title="Suivi Académique Complet"
-                description="CC, Session Normale, Rattrapage avec calcul automatique"
+                description="CC (30%), Session Normale (70%), Rattrapage avec calcul automatique intelligent"
+                delay="stagger-2"
               />
               <FeatureItem
                 icon={<BarChart3 className="h-6 w-6" />}
-                title="Statistiques & Rapports"
-                description="Visualisation des performances et génération de relevés"
+                title="Tableaux de Bord Dynamiques"
+                description="Visualisation en temps réel des performances et génération instantanée de relevés"
+                delay="stagger-3"
               />
             </div>
           </div>
 
           {/* Right side - Login Form */}
-          <div className="w-full max-w-md mx-auto">
-            <Card className="shadow-institutional border-0">
-              <CardHeader className="text-center pb-2">
-                <CardTitle className="text-2xl">Connexion</CardTitle>
-                <CardDescription>
-                  Accédez à votre espace personnel
+          <div className="w-full max-w-md mx-auto animate-fade-in-up stagger-2">
+            <Card className="glass shadow-institutional border-white/40 ring-1 ring-black/5">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-3xl font-bold tracking-tight text-primary">Connexion</CardTitle>
+                <CardDescription className="text-base">
+                  Authentification sécurisée requise
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -182,19 +191,21 @@ function FeatureItem({
   icon,
   title,
   description,
+  delay
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
+  delay?: string;
 }) {
   return (
-    <div className="flex gap-4 items-start">
-      <div className="p-2 rounded-lg bg-accent/20 text-accent shrink-0">
+    <div className={`flex gap-5 items-start p-4 rounded-xl transition-all duration-300 hover:bg-white/40 hover:shadow-sm group animate-fade-in-up ${delay}`}>
+      <div className="p-3 rounded-xl bg-primary text-accent shadow-lg group-hover:scale-110 transition-transform duration-300">
         {icon}
       </div>
       <div>
-        <h3 className="font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-bold text-lg text-primary group-hover:text-accent-foreground transition-colors">{title}</h3>
+        <p className="text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </div>
   );

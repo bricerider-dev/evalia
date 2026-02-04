@@ -22,15 +22,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getTeachers, addTeacher, updateTeacher, deleteTeacher, getSubjectsByTeacher } from '@/lib/storage';
+import { getEnseignants, createEnseignant, updateEnseignant, deleteEnseignant } from '@/api/enseignant';
 import { Teacher } from '@/lib/types';
 import { Plus, Pencil, Trash2, User, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function TeachersPage() {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [editingTeacher, setEditingTeacher] = useState<any>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -40,8 +40,22 @@ export default function TeachersPage() {
     department: '',
   });
 
-  const loadTeachers = () => {
-    setTeachers(getTeachers());
+  const loadTeachers = async () => {
+    try {
+      const data = await getEnseignants();
+      // Map backend data to match frontend expectations if necessary
+      const mappedTeachers = data.map((t: any) => ({
+        ...t,
+        firstName: t.user?.first_name || t.firstName,
+        lastName: t.user?.last_name || t.lastName,
+        email: t.user?.email || t.email,
+        teacherId: t.user?.username || t.teacherId,
+      }));
+      setTeachers(mappedTeachers);
+    } catch (error) {
+      console.error('Error loading teachers:', error);
+      toast.error('Erreur lors du chargement des enseignants');
+    }
   };
 
   useEffect(() => {
@@ -60,16 +74,16 @@ export default function TeachersPage() {
     setEditingTeacher(null);
   };
 
-  const handleOpenDialog = (teacher?: Teacher) => {
+  const handleOpenDialog = (teacher?: any) => {
     if (teacher) {
       setEditingTeacher(teacher);
       setFormData({
         firstName: teacher.firstName,
         lastName: teacher.lastName,
         email: teacher.email,
-        password: teacher.password,
+        password: '', // Don't show password on edit
         teacherId: teacher.teacherId,
-        department: teacher.department,
+        department: teacher.department || '',
       });
     } else {
       resetForm();
@@ -77,7 +91,7 @@ export default function TeachersPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.teacherId) {
@@ -85,53 +99,72 @@ export default function TeachersPage() {
       return;
     }
 
-    if (editingTeacher) {
-      updateTeacher(editingTeacher.id, formData);
-      toast.success('Enseignant mis à jour avec succès');
-    } else {
-      const newTeacher: Teacher = {
-        id: `teacher-${Date.now()}`,
+    const payload: any = {
+      user: {
         role: 'teacher',
-        subjects: [],
-        ...formData,
-        createdAt: new Date().toISOString(),
-      };
-      addTeacher(newTeacher);
-      toast.success('Enseignant ajouté avec succès');
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        username: formData.teacherId,
+        is_active: true
+      },
+      grade: 'Assistant', // Default grade
+      status: 'actif'
+    };
+
+    if (formData.password) {
+      payload.user.password = formData.password;
     }
 
-    setIsDialogOpen(false);
-    resetForm();
-    loadTeachers();
+    try {
+      if (editingTeacher) {
+        await updateEnseignant(editingTeacher.id, payload);
+        toast.success('Enseignant mis à jour avec succès');
+      } else {
+        await createEnseignant(payload);
+        toast.success('Enseignant ajouté avec succès');
+      }
+      setIsDialogOpen(false);
+      resetForm();
+      loadTeachers();
+    } catch (error) {
+      console.error('Error saving teacher:', error);
+      toast.error('Une erreur est survenue lors de l\'enregistrement');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const subjects = getSubjectsByTeacher(id);
-    if (subjects.length > 0) {
-      toast.error('Impossible de supprimer: cet enseignant a des matières assignées');
-      return;
-    }
+  const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet enseignant ?')) {
-      deleteTeacher(id);
-      toast.success('Enseignant supprimé');
-      loadTeachers();
+      try {
+        await deleteEnseignant(id);
+        toast.success('Enseignant supprimé');
+        loadTeachers();
+      } catch (error) {
+        console.error('Error deleting teacher:', error);
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Gestion des Enseignants</h2>
-            <p className="text-muted-foreground">
-              Gérez le corps professoral du département
-            </p>
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-institutional border border-black/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+              <User className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Enseignants</h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Gérez le corps professoral d'excellence
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button onClick={() => handleOpenDialog()} className="gradient-institutional text-white shadow-lg hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold">
+                <Plus className="mr-2 h-5 w-5" />
                 Nouvel Enseignant
               </Button>
             </DialogTrigger>
@@ -217,80 +250,80 @@ export default function TeachersPage() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Liste des Enseignants
-            </CardTitle>
-            <CardDescription>
-              {teachers.length} enseignant(s) enregistré(s)
-            </CardDescription>
+        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-white">
+          <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                  <span className="p-1.5 bg-primary rounded-lg text-white">
+                    <User className="h-5 w-5" />
+                  </span>
+                  Liste des Enseignants
+                </CardTitle>
+                <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
+                  {teachers.length} expert(s) enregistré(s)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {teachers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucun enseignant enregistré.
+              <div className="text-center py-20">
+                <User className="h-20 w-20 mx-auto text-slate-200 mb-4" />
+                <p className="text-2xl font-bold text-slate-400">Aucun enseignant enregistré.</p>
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Matricule</TableHead>
-                    <TableHead>Nom Complet</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Département</TableHead>
-                    <TableHead>Matières</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Département</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {teachers.map((teacher) => {
-                    const subjectCount = getSubjectsByTeacher(teacher.id).length;
-                    return (
-                      <TableRow key={teacher.id}>
-                        <TableCell className="font-mono font-medium">
-                          {teacher.teacherId}
-                        </TableCell>
-                        <TableCell className="font-medium">
+                  {teachers.map((teacher) => (
+                    <TableRow key={teacher.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
+                      <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
+                        {teacher.teacherId}
+                      </TableCell>
+                      <TableCell className="py-3 px-6">
+                        <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
                           Prof. {teacher.firstName} {teacher.lastName}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {teacher.email}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {teacher.department || 'N/A'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="h-4 w-4 text-muted-foreground" />
-                            {subjectCount}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleOpenDialog(teacher)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(teacher.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
+                        {teacher.email}
+                      </TableCell>
+                      <TableCell className="py-3 px-6">
+                        <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1 rounded-full font-bold text-[10px]">
+                          {teacher.department || 'N/A'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-3 px-10 text-right">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDialog(teacher)}
+                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-primary transition-all"
+                          >
+                            <Pencil className="h-5 w-5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(teacher.id)}
+                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-destructive transition-all"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             )}

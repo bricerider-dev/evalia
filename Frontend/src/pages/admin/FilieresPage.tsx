@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { getFilieres, createFiliere } from '@/api/filiere';
+import { getFilieres, createFiliere, updateFiliere, deleteFiliere } from '@/api/filiere';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { updateFiliere, deleteFiliere, getStudentsByFiliere } from '@/lib/storage';
 import { Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, GraduationCap, Users } from 'lucide-react';
 import { toast } from 'sonner';
@@ -36,8 +35,8 @@ export default function FilieresPage() {
 
   const loadFilieres = async () => {
     try {
-      const filieres = await getFilieres();
-      setFilieres(filieres);
+      const data = await getFilieres();
+      setFilieres(data);
     } catch (error) {
       console.error('Error loading filieres:', error);
     }
@@ -45,7 +44,6 @@ export default function FilieresPage() {
 
   useEffect(() => {
     loadFilieres();
-    console.log(filieres);
   }, []);
 
   const resetForm = () => {
@@ -60,7 +58,6 @@ export default function FilieresPage() {
         name: filiere.name,
         code: filiere.code,
         description: filiere.description,
-
       });
     } else {
       resetForm();
@@ -76,43 +73,48 @@ export default function FilieresPage() {
       return;
     }
 
-    if (editingFiliere) {
-      await updateFiliere(editingFiliere.id, formData);
-      toast.success('Filière mise à jour avec succès');
-    } else {
-      const newFiliere: Filiere = {
-        id: `fil-${Date.now()}`,
-        ...formData,
-        createdAt: new Date().toISOString(),
-        department: "1"       
-      };
-      await createFiliere(newFiliere);
-      toast.success('Filière créée avec succès');
-    }
+    try {
+      if (editingFiliere) {
+        await updateFiliere(editingFiliere.id, formData);
+        toast.success('Filière mise à jour avec succès');
+      } else {
+        const newFiliere = {
+          ...formData,
+          department: 1 // TODO: Dynamic department
+        };
+        await createFiliere(newFiliere);
+        toast.success('Filière créée avec succès');
+      }
 
-    setIsDialogOpen(false);
-    resetForm();
-    loadFilieres();
+      setIsDialogOpen(false);
+      resetForm();
+      loadFilieres();
+    } catch (error) {
+      console.error('Error saving filiere:', error);
+      toast.error('Erreur lors de l\'enregistrement');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const students = getStudentsByFiliere(id);
-    if (students.length > 0) {
-      toast.error('Impossible de supprimer: des étudiants sont inscrits dans cette filière');
-      return;
+  const handleDelete = async (id: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette filière ?')) {
+      try {
+        await deleteFiliere(id);
+        toast.success('Filière supprimée');
+        loadFilieres();
+      } catch (error) {
+        console.error('Error deleting filiere:', error);
+        toast.error('Erreur lors de la suppression (vérifiez si des étudiants y sont inscrits)');
+      }
     }
-    deleteFiliere(id);
-    toast.success('Filière supprimée');
-    loadFilieres();
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-5 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Gestion des Filières</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-bold">Gestion des Filières</h2>
+            <p className="text-sm text-muted-foreground">
               Créez et gérez les programmes d'études
             </p>
           </div>
@@ -199,50 +201,40 @@ export default function FilieresPage() {
                     <TableHead>Code</TableHead>
                     <TableHead>Nom</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Étudiants</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filieres.map((filiere) => {
-                    const studentCount = getStudentsByFiliere(filiere.id).length;
-                    return (
-                      <TableRow key={filiere.id}>
-                        <TableCell className="font-mono font-medium">
-                          {filiere.code}
-                        </TableCell>
-                        <TableCell className="font-medium">{filiere.name}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-xs truncate">
-                          {filiere.description || '—'}
-                        </TableCell>
-                        <TableCell>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            {studentCount}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleOpenDialog(filiere)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(filiere.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {filieres.map((filiere) => (
+                    <TableRow key={filiere.id}>
+                      <TableCell className="font-mono font-medium">
+                        {filiere.code}
+                      </TableCell>
+                      <TableCell className="font-medium">{filiere.name}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-xs truncate">
+                        {filiere.description || '—'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDialog(filiere)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(filiere.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             )}

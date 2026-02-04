@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/types';
-import { authenticateUser, getCurrentUser, setCurrentUser, initializeStorage, getUserById } from '@/lib/storage';
 import { login } from '@/api/login';
 
 interface AuthContextType {
@@ -17,33 +16,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize storage with default data
-    initializeStorage();
-
-    // Check for existing session
-    const storedUser = getCurrentUser();
+    // Check for existing session in localStorage
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      const fullUser = getUserById(storedUser.id);
-      if (fullUser) {
-        setUser(fullUser);
-      }
+      setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
   }, []);
 
   const signIn = async (matricule: string, password: string): Promise<boolean> => {
-    const authenticatedUser = await login(matricule, password);
-    if (authenticatedUser) {
-      setUser(authenticatedUser);
-      setCurrentUser(authenticatedUser);
-      return true;
+    try {
+      const authenticatedUser = await login(matricule, password);
+      if (authenticatedUser) {
+        setUser(authenticatedUser);
+        localStorage.setItem('user', JSON.stringify(authenticatedUser));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
-    setCurrentUser(null);
+    localStorage.removeItem('user');
   };
 
   return (
