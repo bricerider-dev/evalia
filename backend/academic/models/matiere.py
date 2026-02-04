@@ -13,7 +13,11 @@ class UniteEnseignement(TimeStampedModel):
         choices=[(1, 'Niveau 1'), (2, 'Niveau 2'), (3, 'Niveau 3')]
     )
     credit = models.IntegerField(default=6)
-    # Retirer la référence à Filiere ici et la mettre dans le modèle Filiere
+    filiere = models.ForeignKey(
+        'department.Filiere',
+        on_delete=models.CASCADE,
+        related_name='unites_enseignement'
+    )
     
     class Meta:
         verbose_name = "Unité d'Enseignement"
