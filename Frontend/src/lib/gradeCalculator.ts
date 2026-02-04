@@ -1,5 +1,4 @@
 import { Grade, Evaluation, SubjectResult, JuryDecision } from './types';
-import { getEvaluations, getGrades } from './storage';
 
 // Constants for grade calculation
 const CC_WEIGHT = 0.3;
@@ -69,11 +68,17 @@ export function getSubjectResultForStudent(
   studentId: string,
   subjectId: string,
   subjectName: string,
-  coefficient: number
+  coefficient: number,
+  allEvaluations: any[],
+  allGrades: any[]
 ): SubjectResult {
-  const evaluations = getEvaluations().filter((e) => e.subjectId === subjectId);
-  const grades = getGrades().filter(
-    (g) => g.studentId === studentId && g.subjectId === subjectId
+  const evaluations = allEvaluations.filter((e) => e.subjectId === subjectId);
+  const grades = allGrades.filter(
+    (g) => g.studentId === studentId && (
+      g.controle_continu === evaluations.find(e => e.type === 'CC')?.id ||
+      g.session_normale === evaluations.find(e => e.type === 'SN')?.id ||
+      g.rattrapage === evaluations.find(e => e.type === 'RA')?.id
+    )
   );
 
   // Find grades by evaluation type
@@ -81,9 +86,9 @@ export function getSubjectResultForStudent(
   const snEval = evaluations.find((e) => e.type === 'SN');
   const raEval = evaluations.find((e) => e.type === 'RA');
 
-  const ccGrade = ccEval ? grades.find((g) => g.evaluationId === ccEval.id) : null;
-  const snGrade = snEval ? grades.find((g) => g.evaluationId === snEval.id) : null;
-  const raGrade = raEval ? grades.find((g) => g.evaluationId === raEval.id) : null;
+  const ccGrade = ccEval ? grades.find((g) => g.controle_continu === ccEval.id) : null;
+  const snGrade = snEval ? grades.find((g) => g.session_normale === snEval.id) : null;
+  const raGrade = raEval ? grades.find((g) => g.rattrapage === raEval.id) : null;
 
   const ccScore = ccGrade?.score ?? null;
   const snScore = snGrade?.score ?? null;
@@ -110,7 +115,7 @@ export function getSubjectResultForStudent(
  */
 export function calculateWeightedAverage(results: SubjectResult[]): number | null {
   const validResults = results.filter((r) => r.finalScore !== null);
-  
+
   if (validResults.length === 0) {
     return null;
   }

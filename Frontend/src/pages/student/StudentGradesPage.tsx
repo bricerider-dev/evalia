@@ -3,11 +3,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getSubjectsByFiliere, getFilieres } from '@/lib/storage';
+import { getSubjects } from '@/api/subject';
+import { getFilieres } from '@/api/filiere';
+import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getGrades } from '@/api/grade';
 import { getSubjectResultForStudent, calculateWeightedAverage, getMention } from '@/lib/gradeCalculator';
 import { Student, SubjectResult } from '@/lib/types';
 import { FileText, Download, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function StudentGradesPage() {
   const { user } = useAuth();
@@ -16,20 +20,52 @@ export default function StudentGradesPage() {
   const [filiereName, setFiliereName] = useState('');
 
   useEffect(() => {
-    if (user && 'filiere' in user) {
-      const student = user as unknown as Student;
-      const filiere = getFilieres().find((f) => f.id === student.filiere);
-      setFiliereName(filiere?.name || '');
+    const loadData = async () => {
+      if (user && 'filiere' in user) {
+        try {
+          const student = user as any;
+          const [allFilieres, allSubjects, cc, sn, ra, allGrades] = await Promise.all([
+            getFilieres(),
+            getSubjects(),
+            getEvaluationsCC(),
+            getEvaluationsSN(),
+            getEvaluationsRA(),
+            getGrades()
+          ]);
 
-      const subjects = getSubjectsByFiliere(student.filiere);
-      const subjectResults = subjects.map((subject) =>
-        getSubjectResultForStudent(student.id, subject.id, subject.name, subject.coefficient)
-      );
-      setResults(subjectResults);
+          const filiere = allFilieres.find((f: any) => f.id === student.filiere);
+          setFiliereName(filiere?.name || '');
 
-      const weightedAvg = calculateWeightedAverage(subjectResults);
-      setAverage(weightedAvg);
-    }
+          const allEvals = [
+            ...cc.map((e: any) => ({ ...e, type: 'CC' })),
+            ...sn.map((e: any) => ({ ...e, type: 'SN' })),
+            ...ra.map((e: any) => ({ ...e, type: 'RA' }))
+          ];
+
+          // Filter subjects for student's filiere (simplified logic)
+          const studentSubjects = allSubjects.filter((s: any) => s.filiereId === student.filiere || true);
+
+          const subjectResults = studentSubjects.map((subject: any) =>
+            getSubjectResultForStudent(
+              student.id,
+              subject.id,
+              subject.name,
+              subject.coefficient,
+              allEvals,
+              allGrades
+            )
+          );
+          setResults(subjectResults);
+
+          const weightedAvg = calculateWeightedAverage(subjectResults);
+          setAverage(weightedAvg);
+        } catch (error) {
+          console.error("Error loading student grades:", error);
+          toast.error("Erreur lors du chargement des notes");
+        }
+      }
+    };
+    loadData();
   }, [user]);
 
   const getDecisionBadge = (decision: string) => {
@@ -124,7 +160,7 @@ export default function StudentGradesPage() {
                       </th>
                       <th className="text-center py-2.5 px-4 font-black uppercase text-[10px] tracking-wider text-primary">
                         <div>RA</div>
-                        <div className="text-[9px] font-normal text-muted-foreground">(ratt.)</div>
+                        <div className="text-[9px] font-normal text-muted-foreground text-foreground">(ratt.)</div>
                       </th>
                       <th className="text-center py-2.5 px-4 font-black uppercase text-[10px] tracking-wider text-primary">Final</th>
                       <th className="text-center py-2.5 px-4 font-black uppercase text-[10px] tracking-wider text-primary">Coef.</th>

@@ -35,7 +35,6 @@ import { Student, Filiere } from '@/lib/types';
 import { Plus, Pencil, Trash2, Users, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-
 export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [filieres, setFilieres] = useState<Filiere[]>([]);
@@ -122,38 +121,11 @@ export default function StudentsPage() {
       return;
     }
 
-<<<<<<< HEAD
-      updateStudent(editingStudent.id, formData);
-      toast.success('Étudiant mis à jour avec succès');
-    } else {
-      const newStudent: any = {
-        user: {
-          role: 'student',
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          username: formData.matricule,
-          phone: '',
-          is_active: true   // or false, depending on your logic
-        },
-        // Add required fields with default or empty values
-        filiere: formData.filiereId,
-        status: 'active', // or another default value as appropriate
-      };
-      try {
-        await createEtudiant(newStudent);
-        toast.success('Étudiant inscrit avec succès');
-      } catch (error) {
-        console.log(error);
-        toast.error('Erreur lors de l\'inscription de l\'étudiant :', error);
-      }
-=======
     const payload: any = {
       user: {
         role: 'student',
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
         username: formData.matricule,
         phone: '',
@@ -165,7 +137,6 @@ export default function StudentsPage() {
 
     if (formData.password) {
       payload.user.password = formData.password;
->>>>>>> 3f3626c0fc03cd718c2e20f2a9ff434e1cdd17b2
     }
 
     try {
@@ -185,37 +156,6 @@ export default function StudentsPage() {
     }
   };
 
-        if (editingStudent) {
-          updateStudent(editingStudent.id, formData);
-          toast.success('Étudiant mis à jour avec succès');
-        } else {
-          const newStudent: any = {
-            user: {
-              role: 'student',
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              email: formData.email,
-              password: formData.password,
-              username: formData.matricule,
-              phone: '',
-              is_active: true   // or false, depending on your logic
-            },
-            // Add required fields with default or empty values
-            filiere: formData.filiereId,
-            status: 'active', // or another default value as appropriate
-          };
-          try {
-            await createEtudiant(newStudent);
-            toast.success('Étudiant inscrit avec succès');
-          } catch (error) {
-            console.log(error);
-            toast.error('Erreur lors de l\'inscription de l\'étudiant :', error);
-          }
-        }
-        setIsDialogOpen(false);
-        resetForm();
-        loadData();
-      };
   const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')) {
       try {
@@ -231,16 +171,16 @@ export default function StudentsPage() {
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
-      student.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFiliere = filterFiliere === 'all' || student.filiere === filterFiliere;
     return matchesSearch && matchesFiliere;
   });
 
   const getFiliereName = (filiereId: string) => {
-    return filieres.find((f) => f.id === filiereId)?.code || 'N/A';
+    return filieres.find((f) => f.id === filiereId)?.service_code || filieres.find((f) => f.id === filiereId)?.code || 'N/A';
   };
 
   return (
@@ -431,28 +371,6 @@ export default function StudentsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredStudents.map((student) => (
-                    <TableRow key={student.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
-                      <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
-                        {student.studentId}
-                      </TableCell>
-                      <TableCell className="py-3 px-6">
-                        <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
-                          {student.firstName} {student.lastName}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
-                        {student.email}
-=======
-                    <TableRow key={student.id}>
-                      <TableCell className="font-mono font-medium">
-                        {student.user.username}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {student.user.firstName} {student.user.lastName}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {student.user.email}
->>>>>>> 3f3626c0fc03cd718c2e20f2a9ff434e1cdd17b2
                     <TableRow key={student.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
                       <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
                         {student.studentId}

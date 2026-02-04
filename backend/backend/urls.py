@@ -29,7 +29,7 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/grade/', include('grade.urls')),
 
-    #path('api/', include('academic.urls')),
+    path('api/academic/', include('academic.urls')),
     path('api/dep/', include('department.urls')),
     #path('api/', include('core.urls')),
 

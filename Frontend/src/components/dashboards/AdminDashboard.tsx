@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getFilieres, getStudents, getTeachers, getSubjects, getGrades } from '@/lib/storage';
+import { getFilieres } from '@/api/filiere';
+import { getEtudiants } from '@/api/etudiant';
+import { getEnseignants } from '@/api/enseignant';
+import { getSubjects } from '@/api/subject';
+import { getGrades } from '@/api/grade';
 import { Users, GraduationCap, BookOpen, ClipboardList, TrendingUp, AlertTriangle } from 'lucide-react';
 
 export function AdminDashboard() {
@@ -14,13 +18,27 @@ export function AdminDashboard() {
   });
 
   useEffect(() => {
-    setStats({
-      filieres: getFilieres().length,
-      students: getStudents().length,
-      teachers: getTeachers().length,
-      subjects: getSubjects().length,
-      grades: getGrades().length,
-    });
+    const loadStats = async () => {
+      try {
+        const [f, e, t, s, g] = await Promise.all([
+          getFilieres(),
+          getEtudiants(),
+          getEnseignants(),
+          getSubjects(),
+          getGrades()
+        ]);
+        setStats({
+          filieres: f.length,
+          students: e.length,
+          teachers: t.length,
+          subjects: s.length,
+          grades: g.length,
+        });
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+      }
+    };
+    loadStats();
   }, []);
 
   const statCards = [
