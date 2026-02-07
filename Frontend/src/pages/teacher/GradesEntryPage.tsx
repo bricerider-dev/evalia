@@ -91,8 +91,12 @@ export default function GradesEntryPage() {
             getGrades()
           ]);
 
-          const subject = subjects.find(s => s.id === selectedSubject);
-          const filiereStudents = allStudents.filter((s: any) => s.filiere === subject.filiereId || true); // Need to check how filiere is linked
+          const subject = subjects.find(s => String(s.id) === String(selectedSubject));
+          const filiereStudents = allStudents.filter((s: any) => {
+            // If subject has a filiere property, use it. Otherwise, use what's available or default to true for now.
+            const subjectFiliere = subject?.filiere;
+            return subjectFiliere ? s.filiere === subjectFiliere : true;
+          });
           setStudents(filiereStudents);
 
           const currentEvalEvals = allGrades.filter((g: any) => {
@@ -107,7 +111,7 @@ export default function GradesEntryPage() {
 
           const gradesMap: Record<string, number | null> = {};
           filiereStudents.forEach((student: any) => {
-            const existingGrade = currentEvalEvals.find((g: any) => g.studentId === student.id);
+            const existingGrade = currentEvalEvals.find((g: any) => String(g.studentId) === String(student.id));
             gradesMap[student.id] = existingGrade?.score ?? null;
           });
           setGrades(gradesMap);
@@ -251,7 +255,7 @@ export default function GradesEntryPage() {
               <div>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <ClipboardList className="h-5 w-5" />
-                  {selectedSubj?.name} - {selectedEval && getTypeBadge(selectedEval.type)}
+                   {selectedEval && getTypeBadge(selectedEval.type)}
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
                   {students.length} étudiant(s) • Note sur 20
@@ -275,9 +279,9 @@ export default function GradesEntryPage() {
                 <TableBody>
                   {students.map((student) => (
                     <TableRow key={student.id}>
-                      <TableCell className="py-2 px-6 font-mono text-sm">{student.studentId}</TableCell>
+                      <TableCell className="py-2 px-6 font-mono text-sm">{student.user.username}</TableCell>
                       <TableCell className="py-2 px-6 font-bold text-sm">
-                        {student.user?.first_name} {student.user?.last_name}
+                        {student.user.firstName} {student.user.lastName}
                       </TableCell>
                       <TableCell className="py-2 px-6">
                         <Input

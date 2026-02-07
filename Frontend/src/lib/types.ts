@@ -2,20 +2,21 @@
 export type UserRole = 'admin' | 'teacher' | 'student';
 
 export interface User {
-  id: string;
+  id: number | string;
+  username: string;
   email: string;
-  password: string;
   role: UserRole;
   firstName: string;
-  phone: string;
   lastName: string;
-  createdAt: string;
+  phone: string;
   is_active: boolean;
+  createdAt: string;
+  password?: string;
 }
 
 // Academic Types
 export interface Filiere {
-  id: string;
+  id: number | string;
   name: string;
   code: string;
   description: string;
@@ -23,15 +24,18 @@ export interface Filiere {
   department?: string;
 }
 
-export interface Student extends User {
-  role: 'student';
-  studentId: string;
-  filiere: string;
-  date_of_birth: string;
-  lieu_de_naissance: string;
-  address: string;
+export interface Student {
+  id: number;
+  user: User;
+  filiere: number;
   status: string;
-  enrollmentYear: number;
+  createdAt: string;
+  // Optional extra fields if they still exist in some responses
+  studentId?: string;
+  date_of_birth?: string;
+  lieu_de_naissance?: string;
+  address?: string;
+  enrollmentYear?: number;
 }
 
 export interface Teacher extends User {

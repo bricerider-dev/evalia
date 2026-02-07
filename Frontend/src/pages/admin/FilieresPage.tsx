@@ -75,7 +75,7 @@ export default function FilieresPage() {
 
     try {
       if (editingFiliere) {
-        await updateFiliere(editingFiliere.id, formData);
+        await updateFiliere(String(editingFiliere.id), formData);
         toast.success('Filière mise à jour avec succès');
       } else {
         const newFiliere = {
@@ -98,7 +98,7 @@ export default function FilieresPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette filière ?')) {
       try {
-        await deleteFiliere(id);
+        await deleteFiliere(String(id));
         toast.success('Filière supprimée');
         loadFilieres();
       } catch (error) {
@@ -226,7 +226,7 @@ export default function FilieresPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(filiere.id)}
+                            onClick={() => handleDelete(String(filiere.id))}
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />

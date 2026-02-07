@@ -266,7 +266,7 @@ export default function StudentsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {filieres.map((filiere) => (
-                          <SelectItem key={filiere.id} value={filiere.id}>
+                          <SelectItem key={filiere.id} value={String(filiere.id)}>
                             {filiere.name} ({filiere.code})
                           </SelectItem>
                         ))}
@@ -326,7 +326,7 @@ export default function StudentsPage() {
                 <SelectContent className="rounded-xl border-2 border-slate-100 shadow-2xl">
                   <SelectItem value="all" className="py-2 text-base rounded-lg">Toutes les filières</SelectItem>
                   {filieres.map((filiere) => (
-                    <SelectItem key={filiere.id} value={filiere.id} className="py-2 text-base rounded-lg">
+                    <SelectItem key={filiere.id} value={String(filiere.id)} className="py-2 text-base rounded-lg">
                       {filiere.name}
                     </SelectItem>
                   ))}

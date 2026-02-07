@@ -155,8 +155,8 @@ export function getStudents(): Student[] {
   return getFromStorage<Student>(STORAGE_KEYS.STUDENTS);
 }
 
-export function getStudentsByFiliere(filiereId: string): Student[] {
-  return getStudents().filter((s) => s.filiere === filiereId);
+export function getStudentsByFiliere(filiereId: string | number): Student[] {
+  return getStudents().filter((s) => String(s.filiere) === String(filiereId));
 }
 
 export function addStudent(student: Student): void {
@@ -165,24 +165,24 @@ export function addStudent(student: Student): void {
   saveToStorage(STORAGE_KEYS.STUDENTS, students);
 
   const users = getAllUsers();
-  users.push(student);
+  users.push(student.user);
   saveToStorage(STORAGE_KEYS.USERS, users);
 }
 
-export function updateStudent(id: string, updates: Partial<Student>): void {
+export function updateStudent(id: string | number, updates: Partial<Student>): void {
   const students = getStudents();
-  const index = students.findIndex((s) => s.id === id);
+  const index = students.findIndex((s) => String(s.id) === String(id));
   if (index !== -1) {
     students[index] = { ...students[index], ...updates };
     saveToStorage(STORAGE_KEYS.STUDENTS, students);
   }
 }
 
-export function deleteStudent(id: string): void {
-  const students = getStudents().filter((s) => s.id !== id);
+export function deleteStudent(id: string | number): void {
+  const students = getStudents().filter((s) => String(s.id) === String(id));
   saveToStorage(STORAGE_KEYS.STUDENTS, students);
 
-  const users = getAllUsers().filter((u) => u.id !== id);
+  const users = getAllUsers().filter((u) => String(u.id) !== String(id));
   saveToStorage(STORAGE_KEYS.USERS, users);
 }
 
