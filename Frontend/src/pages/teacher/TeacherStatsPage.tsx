@@ -75,11 +75,28 @@ export default function TeacherStatsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-6 animate-fade-in-up">
-                <div>
-                    <h2 className="text-2xl font-black text-primary tracking-tight">Statistiques de Performance</h2>
-                    <p className="text-sm text-muted-foreground font-medium">
-                        Analyse des résultats pour vos matières
-                    </p>
+                {/* Header Banner */}
+                <div className="relative overflow-hidden rounded-3xl gradient-deep-blue shadow-2xl group mb-8">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] -ml-24 -mb-24 animate-pulse delay-1000"></div>
+
+                    <div className="relative z-10 p-8 flex items-center justify-between">
+                        <div className="space-y-2">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm animate-fade-in">
+                                <TrendingUp className="h-4 w-4 text-white" />
+                                <span className="text-xs font-bold text-white uppercase tracking-wider">Analyses & Rapports</span>
+                            </div>
+                            <h2 className="text-3xl font-black text-white tracking-tight animate-fade-up">Statistiques de Performance</h2>
+                            <p className="text-white/80 font-medium max-w-lg animate-fade-up delay-100">
+                                Visualisez la progression de vos étudiants et la réussite par matière.
+                            </p>
+                        </div>
+                        <div className="hidden md:block animate-float">
+                            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+                                <PieChart className="h-8 w-8 text-white" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {isLoading ? (
@@ -94,15 +111,17 @@ export default function TeacherStatsPage() {
                     </Card>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2">
-                        {stats.map((s) => (
-                            <Card key={s.id} className="border-0 shadow-institutional overflow-hidden group">
-                                <CardHeader className="bg-slate-50/50 border-b border-black/5">
+                        {stats.map((s, index) => (
+                            <Card key={s.id} className={`border-0 shadow-institutional overflow-hidden group hover:shadow-2xl transition-all duration-300 animate-fade-in-up stagger-${index % 5 + 1}`}>
+                                <CardHeader className="bg-slate-50/50 border-b border-black/5 group-hover:bg-primary/5 transition-colors">
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <CardTitle className="text-lg font-bold text-primary">{s.name}</CardTitle>
                                             <CardDescription className="text-xs font-mono">{s.code}</CardDescription>
                                         </div>
-                                        <BarChart2 className="h-5 w-5 text-primary/20" />
+                                        <div className="p-2 rounded-lg bg-white shadow-sm">
+                                            <BarChart2 className="h-5 w-5 text-primary" />
+                                        </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-6">
@@ -110,14 +129,16 @@ export default function TeacherStatsPage() {
                                         <div className="space-y-1">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Moyenne de Classe</p>
                                             <div className="flex items-baseline gap-2">
-                                                <span className="text-3xl font-black text-primary">{s.average}</span>
+                                                <span className="text-4xl font-black text-primary">{s.average}</span>
                                                 <span className="text-sm font-bold text-muted-foreground">/ 20</span>
                                             </div>
                                         </div>
                                         <div className="space-y-1 text-right">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Taux de Réussite</p>
                                             <div className="flex items-baseline justify-end gap-2">
-                                                <span className="text-3xl font-black text-primary">{s.passRate}%</span>
+                                                <span className={`text-4xl font-black ${s.passRate >= 70 ? 'text-green-600' : s.passRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                                    {s.passRate}%
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -129,7 +150,7 @@ export default function TeacherStatsPage() {
                                         </div>
                                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-primary transition-all duration-1000 ease-out"
+                                                className={`h-full transition-all duration-1000 ease-out ${s.passRate >= 70 ? 'bg-green-500' : s.passRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
                                                 style={{ width: `${s.passRate}%` }}
                                             />
                                         </div>
@@ -140,9 +161,9 @@ export default function TeacherStatsPage() {
                                             <Users className="h-4 w-4" />
                                             {s.studentCount} Étudiants évalués
                                         </div>
-                                        <div className="flex items-center gap-1 text-[10px] font-black text-green-600 uppercase tracking-tighter bg-green-50 px-2 py-1 rounded-md">
+                                        <div className="flex items-center gap-1 text-[10px] font-black text-primary uppercase tracking-tighter bg-primary/10 px-2 py-1 rounded-md">
                                             <TrendingUp className="h-3 w-3" />
-                                            Stable
+                                            Voir Détails
                                         </div>
                                     </div>
                                 </CardContent>

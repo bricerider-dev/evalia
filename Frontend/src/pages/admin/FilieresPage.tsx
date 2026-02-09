@@ -111,17 +111,25 @@ export default function FilieresPage() {
   return (
     <DashboardLayout>
       <div className="space-y-5 animate-fade-in-up">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">Gestion des Filières</h2>
-            <p className="text-sm text-muted-foreground">
-              Créez et gérez les programmes d'études
-            </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-card/40 backdrop-blur-3xl p-6 rounded-3xl shadow-institutional border border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+              <GraduationCap className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Filières</h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Créez et gérez les programmes d'études d'excellence
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="relative overflow-hidden gradient-institutional text-white shadow-lg hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold group before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700"
+              >
+                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 group-hover:scale-110 transition-all duration-300" />
                 Nouvelle Filière
               </Button>
             </DialogTrigger>
@@ -179,57 +187,68 @@ export default function FilieresPage() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Liste des Filières
-            </CardTitle>
-            <CardDescription>
-              {filieres.length} filière(s) enregistrée(s)
-            </CardDescription>
+        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border border-white/5">
+          <CardHeader className="bg-muted/30 border-b border-white/5 py-6 px-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                  <span className="p-1.5 bg-primary rounded-lg text-white">
+                    <GraduationCap className="h-5 w-5" />
+                  </span>
+                  Liste des Filières
+                </CardTitle>
+                <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
+                  {filieres.length} filière(s) enregistrée(s)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {filieres.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Aucune filière créée. Cliquez sur "Nouvelle Filière" pour commencer.
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Code</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Description</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filieres.map((filiere) => (
-                    <TableRow key={filiere.id}>
-                      <TableCell className="font-mono font-medium">
+                    <TableRow key={filiere.id} className="hover:bg-primary/5 transition-colors border-b border-white/5 group">
+                      <TableCell className="py-4 px-10 font-mono font-black text-primary text-sm">
                         {filiere.code}
                       </TableCell>
-                      <TableCell className="font-medium">{filiere.name}</TableCell>
-                      <TableCell className="text-muted-foreground max-w-xs truncate">
+                      <TableCell className="py-4 px-6">
+                        <div className="font-bold text-base group-hover:text-primary transition-colors">
+                          {filiere.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4 px-6 text-muted-foreground/80 font-medium text-sm max-w-xs truncate">
                         {filiere.description || '—'}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                      <TableCell className="py-4 px-10 text-right">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(filiere)}
+                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-primary transition-all"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-5 w-5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(String(filiere.id))}
-                            className="text-destructive hover:text-destructive"
+                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-destructive transition-all"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </TableCell>

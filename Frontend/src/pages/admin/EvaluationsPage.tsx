@@ -172,17 +172,25 @@ export default function EvaluationsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-5 animate-fade-in-up">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">Programmation des Évaluations</h2>
-            <p className="text-sm text-muted-foreground">
-              Planifiez les examens et contrôles
-            </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-card/40 backdrop-blur-3xl p-6 rounded-3xl shadow-institutional border border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-primary tracking-tight">Programmation des Évaluations</h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Planifiez les examens et contrôles d'excellence
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => resetForm()} size="sm">
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                onClick={() => resetForm()}
+                className="relative overflow-hidden gradient-institutional text-white shadow-lg hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold group before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700"
+              >
+                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 group-hover:scale-110 transition-all duration-300" />
                 Nouvelle Évaluation
               </Button>
             </DialogTrigger>
@@ -299,14 +307,20 @@ export default function EvaluationsPage() {
         </Card>
 
         <Card>
-          <CardHeader className="py-4 px-6">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ClipboardList className="h-5 w-5" />
-              Calendrier des Évaluations
-            </CardTitle>
-            <CardDescription className="text-xs font-bold text-muted-foreground mt-0.5">
-              {filteredEvaluations.length} évaluation(s) programmée(s)
-            </CardDescription>
+          <CardHeader className="bg-muted/30 border-b border-white/5 py-6 px-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                  <span className="p-1.5 bg-primary rounded-lg text-white">
+                    <ClipboardList className="h-5 w-5" />
+                  </span>
+                  Calendrier des Évaluations
+                </CardTitle>
+                <CardDescription className="text-sm font-bold text-muted-foreground mt-1">
+                  {filteredEvaluations.length} évaluation(s) programmée(s)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {filteredEvaluations.length === 0 ? (
@@ -315,13 +329,13 @@ export default function EvaluationsPage() {
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Matière</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date & Heure</TableHead>
-                    <TableHead>Salle</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matière</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Type</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Date & Heure</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Salle</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -337,15 +351,17 @@ export default function EvaluationsPage() {
                           {format(new Date(evaluation.evaluationDate), 'dd MMM yyyy', { locale: fr })} à {evaluation.startTime}
                         </TableCell>
                         <TableCell>{evaluation.room || '—'}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(evaluation.type, evaluation.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <TableCell className="py-4 px-10 text-right">
+                          <div className="flex justify-end gap-3">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(evaluation.type, evaluation.id)}
+                              className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-destructive transition-all"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

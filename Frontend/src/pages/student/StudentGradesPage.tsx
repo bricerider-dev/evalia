@@ -101,32 +101,38 @@ export default function StudentGradesPage() {
         </div>
 
         {/* Summary Card */}
-        <Card className="gradient-institutional text-primary-foreground border-0 shadow-lg">
-          <CardContent className="py-4 px-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-full bg-accent/20">
-                  <Award className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <p className="text-primary-foreground/80 text-xs">Moyenne Générale</p>
-                  <p className="text-2xl font-black">
-                    {average !== null ? average.toFixed(2) : '—'} / 20
-                  </p>
-                  <p className="text-primary-foreground/70 text-xs mt-0.5">
-                    {average !== null ? getMention(average) : 'En attente de notes'}
-                  </p>
-                </div>
+        <div className="relative overflow-hidden rounded-3xl gradient-premium shadow-2xl group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] -ml-24 -mb-24 animate-pulse delay-1000"></div>
+
+          <div className="relative z-10 p-6 md:p-8 flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg animate-float">
+                <Award className="h-8 w-8 text-white drop-shadow-md" />
               </div>
-              <div className="text-right">
-                <p className="text-primary-foreground/80 text-xs">Matières validées</p>
-                <p className="text-2xl font-black">
-                  {results.filter((r) => r.decision === 'Validé').length} / {results.length}
-                </p>
+              <div className="space-y-1">
+                <p className="text-white/80 text-sm font-medium uppercase tracking-wider">Moyenne Générale</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                    {average !== null ? average.toFixed(2) : '—'}
+                  </span>
+                  <span className="text-white/60 font-medium text-lg">/ 20</span>
+                </div>
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10 text-xs font-bold text-white">
+                  {average !== null ? getMention(average) : 'En attente de notes'}
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="hidden md:block text-right space-y-2">
+              <p className="text-white/80 text-sm font-medium uppercase tracking-wider">Matières validées</p>
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-4xl font-black text-white">{results.filter((r) => r.decision === 'Validé').length}</span>
+                <span className="text-white/60 text-xl font-medium">/ {results.length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Grades Table */}
         <Card>
@@ -141,8 +147,14 @@ export default function StudentGradesPage() {
           </CardHeader>
           <CardContent>
             {results.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucune note disponible pour le moment.
+              <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-up">
+                <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">Aucune note disponible</h3>
+                <p className="text-muted-foreground text-sm max-w-xs mt-1">
+                  Les résultats de vos examens n'ont pas encore été publiés.
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -168,9 +180,9 @@ export default function StudentGradesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {results.map((result) => (
-                      <tr key={result.subjectId} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="py-2.5 px-4 font-bold text-sm">{result.subjectName}</td>
+                    {results.map((result, index) => (
+                      <tr key={result.subjectId} className={`border-b last:border-0 hover:bg-muted/30 transition-colors animate-fade-in-right stagger-${index % 5 + 1}`}>
+                        <td className="py-3 px-4 font-bold text-sm">{result.subjectName}</td>
                         <td className="py-2.5 px-4 text-center text-sm">
                           <span className={getScoreColor(result.ccScore)}>
                             {result.ccScore !== null ? result.ccScore.toFixed(1) : '—'}
