@@ -6,7 +6,7 @@ import { getEtudiants } from '@/api/etudiant';
 import { getEnseignants } from '@/api/enseignant';
 import { getSubjects } from '@/api/subject';
 import { getGrades } from '@/api/grade';
-import { Users, GraduationCap, BookOpen, ClipboardList, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Users, GraduationCap, BookOpen, ClipboardList, TrendingUp, AlertTriangle, ArrowUpRight } from 'lucide-react';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -47,134 +47,129 @@ export function AdminDashboard() {
       value: stats.filieres,
       icon: GraduationCap,
       description: 'Programmes actifs',
-      color: 'bg-blue-500/10 text-blue-600',
+      color: 'text-primary bg-primary/10',
     },
     {
       title: 'Étudiants',
       value: stats.students,
       icon: Users,
       description: 'Inscrits cette année',
-      color: 'bg-green-500/10 text-green-600',
+      color: 'text-emerald-500 bg-emerald-500/10',
     },
     {
       title: 'Enseignants',
       value: stats.teachers,
       icon: Users,
       description: 'Corps professoral',
-      color: 'bg-purple-500/10 text-purple-600',
+      color: 'text-purple-500 bg-purple-500/10',
     },
     {
       title: 'Matières',
       value: stats.subjects,
       icon: BookOpen,
       description: 'Cours dispensés',
-      color: 'bg-orange-500/10 text-orange-600',
+      color: 'text-cyan-500 bg-cyan-500/10',
     },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      {/* Welcome Banner */}
-      <Card className="gradient-institutional text-primary-foreground border-0 shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-125"></div>
-        <CardHeader className="relative z-10 py-8 px-8">
-          <div className="flex flex-col gap-1">
-            <CardTitle className="text-2xl font-black tracking-tight">Bienvenue sur ENSPD</CardTitle>
-            <CardDescription className="text-base text-primary-foreground/90 font-medium">
-              Tableau de bord administratif — Propulsez la réussite académique de votre département.
-            </CardDescription>
+    <div className="space-y-8 animate-fade-in stagger-1">
+      {/* Tech Welcome Banner */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-card/60 backdrop-blur-2xl border border-white/10 p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32 animate-glow"></div>
+        <div className="relative z-10 flex flex-col gap-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 mb-2 w-fit">
+            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Administrative Console</span>
           </div>
-        </CardHeader>
-      </Card>
+          <h2 className="text-3xl font-black tracking-tight">Bienvenue, Admin</h2>
+          <p className="max-w-xl text-muted-foreground font-medium">
+            Tableau de bord de gestion centralisé. Visualisez et pilotez les performances académiques de l'ENSPD en temps réel.
+          </p>
+        </div>
+      </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
-          <Card key={stat.title} className={`hover-lift border-0 shadow-institutional bg-white transition-all duration-300 stagger-${index + 1}`}>
-            <CardHeader className="flex flex-row items-center justify-between pb-1">
-              <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+          <div key={stat.title} className={`tech-card p-6 animate-fade-up stagger-${index + 1}`}>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
                 {stat.title}
-              </CardTitle>
-              <div className={`p-2.5 rounded-xl ${stat.color} shadow-inner`}>
-                <stat.icon className="h-4 w-4" />
+              </span>
+              <div className={`p-2.5 rounded-xl ${stat.color}`}>
+                <stat.icon className="h-5 w-5" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-black text-primary">{stat.value}</div>
-              <p className="text-xs text-muted-foreground font-semibold mt-1 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-success" />
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="text-4xl font-black">{stat.value}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-2 flex items-center gap-1 opacity-70">
+              <TrendingUp className="h-3 w-3 text-emerald-500" />
+              {stat.description}
+            </p>
+          </div>
         ))}
       </div>
 
-      {/* Quick Actions & Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      {/* Bottom Layout */}
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-primary" />
               Actions Rapides
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+            </h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <QuickAction
-              title="Ajouter une filière"
-              description="Créer un nouveau programme d'études"
+              title="Filieres"
+              description="Nouveaux programmes"
               href="/dashboard/filieres"
             />
             <QuickAction
-              title="Inscrire un étudiant"
-              description="Ajouter un nouvel étudiant au système"
+              title="Etudiants"
+              description="Nouveaux inscrits"
               href="/dashboard/students"
             />
             <QuickAction
-              title="Programmer une évaluation"
-              description="Planifier un examen ou contrôle"
+              title="Evaluations"
+              description="Planification session"
               href="/dashboard/evaluations"
             />
             <QuickAction
-              title="Générer un rapport"
-              description="Créer des statistiques académiques"
+              title="Rapports"
+              description="Statistiques globales"
               href="/dashboard/reports"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Aperçu Académique
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-              <div>
-                <p className="font-medium">Notes saisies</p>
-                <p className="text-sm text-muted-foreground">Ce semestre</p>
-              </div>
-              <Badge variant="secondary" className="text-lg px-3">
-                {stats.grades}
-              </Badge>
+        {/* System Health / Status */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Statut du Système
+          </h3>
+          <div className="tech-card p-6 bg-emerald-500/5 border-emerald-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-bold text-sm">Notes Saisies</p>
+              <Badge className="bg-emerald-500 text-white border-0">On Track</Badge>
             </div>
+            <div className="text-4xl font-black mb-1">{stats.grades}</div>
+            <p className="text-xs text-muted-foreground">Volume de données traitées ce semestre</p>
+          </div>
 
-            <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                <div>
-                  <p className="font-medium text-yellow-800 dark:text-yellow-200">Rattrapages en attente</p>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-400">Étudiants en session RA</p>
-                </div>
-              </div>
-              <Badge variant="outline" className="border-yellow-500 text-yellow-700">
-                À venir
-              </Badge>
+          <div className="tech-card p-6 bg-yellow-500/5 border-yellow-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-bold text-sm">Sessions RA</p>
+              <Badge className="bg-yellow-500 text-black border-0">Pending</Badge>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center gap-2 text-yellow-500">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-bold">Vérification Requise</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Étudiants en attente de rattrapages</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -192,14 +187,14 @@ function QuickAction({
   return (
     <a
       href={href}
-      className="flex items-center justify-between p-3.5 rounded-2xl border-2 border-transparent bg-secondary/30 hover:bg-white hover:border-primary/20 hover:shadow-xl transition-all duration-300 group"
+      className="tech-card p-5 group flex items-center justify-between hover:bg-primary/5 border-white/5"
     >
       <div>
-        <p className="font-bold text-primary group-hover:text-accent-foreground transition-colors">{title}</p>
+        <p className="font-bold text-lg group-hover:text-primary transition-colors">{title}</p>
         <p className="text-xs text-muted-foreground font-medium">{description}</p>
       </div>
-      <div className="p-2 rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-        <TrendingUp className="h-4 w-4 rotate-45" />
+      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+        <ArrowUpRight className="h-5 w-5" />
       </div>
     </a>
   );

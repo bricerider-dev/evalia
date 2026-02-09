@@ -89,9 +89,9 @@ export default function ReportsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-6 animate-fade-in-up">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-institutional border border-black/5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-card/40 backdrop-blur-3xl p-6 rounded-3xl shadow-institutional border border-white/5">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                             <FileText className="h-6 w-6" />
                         </div>
                         <div>
@@ -101,8 +101,8 @@ export default function ReportsPage() {
                             </p>
                         </div>
                     </div>
-                    <Button className="gradient-institutional text-white shadow-lg hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold">
-                        <Download className="mr-2 h-5 w-5" />
+                    <Button className="relative overflow-hidden gradient-institutional text-white shadow-lg hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold group before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700">
+                        <Download className="mr-2 h-5 w-5 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
                         Exporter Tout
                     </Button>
                 </div>
@@ -129,10 +129,10 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
-                    <Card className="border-0 shadow-institutional">
+                    <Card className="border-0 shadow-institutional bg-card/60 backdrop-blur-sm border border-white/5 rounded-2xl">
                         <CardHeader>
-                            <CardTitle className="text-lg font-bold">Performance par Filière</CardTitle>
-                            <CardDescription>Moyennes académiques par département</CardDescription>
+                            <CardTitle className="text-lg font-black text-primary">Performance par Filière</CardTitle>
+                            <CardDescription className="text-xs font-bold text-muted-foreground">Moyennes académiques par département</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -143,11 +143,11 @@ export default function ReportsPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-0 shadow-institutional">
+                    <Card className="border-0 shadow-institutional bg-card/60 backdrop-blur-sm border border-white/5 rounded-2xl">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle className="text-lg font-bold">Rapports Instantanés</CardTitle>
-                                <CardDescription>Prêts à être téléchargés</CardDescription>
+                                <CardTitle className="text-lg font-black text-primary">Rapports Instantanés</CardTitle>
+                                <CardDescription className="text-xs font-bold text-muted-foreground">Prêts à être téléchargés</CardDescription>
                             </div>
                             <BookOpen className="h-6 w-6 text-primary/20" />
                         </CardHeader>
@@ -165,13 +165,13 @@ export default function ReportsPage() {
 
 function StatsCard({ title, value, icon, trend }: { title: string, value: string, icon: React.ReactNode, trend: string }) {
     return (
-        <Card className="border-0 shadow-institutional overflow-hidden group hover:shadow-2xl transition-all duration-500">
+        <Card className="border-0 shadow-institutional overflow-hidden group hover:shadow-2xl transition-all duration-500 bg-card/60 backdrop-blur-sm border border-white/5">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-slate-50 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500">
                         {icon}
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{trend}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{trend}</span>
                 </div>
                 <div className="space-y-1">
                     <p className="text-sm font-bold text-muted-foreground">{title}</p>
@@ -186,10 +186,10 @@ function FiliereProgress({ label, progress, average }: { label: string, progress
     return (
         <div className="space-y-2">
             <div className="flex justify-between text-sm">
-                <span className="font-bold text-slate-700">{label}</span>
+                <span className="font-bold text-foreground/80">{label}</span>
                 <span className="font-black text-primary">{average} / 20</span>
             </div>
-            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
                 <div
                     className="h-full bg-primary transition-all duration-1000"
                     style={{ width: `${progress}%` }}
@@ -201,14 +201,14 @@ function FiliereProgress({ label, progress, average }: { label: string, progress
 
 function ReportLink({ title, type }: { title: string, type: string }) {
     return (
-        <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
+        <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 border border-transparent hover:border-white/5 transition-all group">
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
+                <div className="p-2 bg-card rounded-lg shadow-sm border border-white/10 group-hover:scale-110 transition-transform">
                     <FileText className="h-4 w-4 text-primary" />
                 </div>
-                <p className="text-sm font-bold text-slate-700">{title}</p>
+                <p className="text-sm font-bold text-foreground/80">{title}</p>
             </div>
-            <Badge variant="outline" className="text-[10px] font-black uppercase tracking-wider">{type}</Badge>
+            <Badge variant="outline" className="text-[10px] font-black uppercase tracking-wider border-white/20">{type}</Badge>
         </div>
     );
 }

@@ -163,22 +163,25 @@ export default function SubjectsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in-up">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-institutional border border-black/5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-card/40 backdrop-blur-3xl p-6 rounded-3xl shadow-institutional border border-white/5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
               <BookOpen className="h-6 w-6" />
             </div>
             <div>
               <h2 className="text-xl font-black text-primary tracking-tight">Gestion des Matières</h2>
               <p className="text-sm text-muted-foreground font-medium">
-                Structurez le programme académique
+                Structurez le programme académique d'excellence
               </p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()} className="gradient-institutional text-white shadow-lg hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold">
-                <Plus className="mr-2 h-5 w-5" />
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="relative overflow-hidden gradient-institutional text-white shadow-lg hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 hover:scale-105 transition-all duration-300 py-3 px-6 rounded-xl text-base font-bold group before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700"
+              >
+                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 group-hover:scale-110 transition-all duration-300" />
                 Nouvelle Matière
               </Button>
             </DialogTrigger>
@@ -274,8 +277,8 @@ export default function SubjectsPage() {
           </Dialog>
         </div>
 
-        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-white">
-          <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-10">
+        <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border border-white/5">
+          <CardHeader className="bg-muted/30 border-b border-white/5 py-6 px-10">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
@@ -298,7 +301,7 @@ export default function SubjectsPage() {
               </div>
             ) : (
               <Table>
-                <TableHeader className="bg-slate-50/50">
+                <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent border-0">
                     <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Code</TableHead>
                     <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Matière</TableHead>
@@ -310,12 +313,12 @@ export default function SubjectsPage() {
                 </TableHeader>
                 <TableBody>
                   {subjects.map((subject) => (
-                    <TableRow key={subject.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-50 group">
-                      <TableCell className="py-3 px-10 font-mono font-black text-primary text-sm">
+                    <TableRow key={subject.id} className="hover:bg-primary/5 transition-colors border-b border-white/5 group">
+                      <TableCell className="py-4 px-10 font-mono font-black text-primary text-sm">
                         {subject.code}
                       </TableCell>
-                      <TableCell className="py-3 px-6">
-                        <div className="font-bold text-base text-slate-700 group-hover:text-primary transition-colors">
+                      <TableCell className="py-4 px-6">
+                        <div className="font-bold text-base group-hover:text-primary transition-colors text-foreground">
                           {subject.name}
                         </div>
                         {subject.description && (
@@ -335,13 +338,13 @@ export default function SubjectsPage() {
                       <TableCell className="py-3 px-6 text-center font-bold text-slate-500 text-sm">
                         S{subject.semester}
                       </TableCell>
-                      <TableCell className="py-3 px-10 text-right">
-                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <TableCell className="py-4 px-10 text-right">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(subject)}
-                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-primary transition-all"
+                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-primary transition-all"
                           >
                             <Pencil className="h-5 w-5" />
                           </Button>
@@ -349,7 +352,7 @@ export default function SubjectsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(String(subject.id))}
-                            className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-lg text-destructive transition-all"
+                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-destructive transition-all"
                           >
                             <Trash2 className="h-5 w-5" />
                           </Button>
