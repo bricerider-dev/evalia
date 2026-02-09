@@ -75,16 +75,29 @@ export function AdminDashboard() {
   return (
     <div className="space-y-8 animate-fade-in stagger-1">
       {/* Tech Welcome Banner */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-card/60 backdrop-blur-2xl border border-white/10 p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32 animate-glow"></div>
-        <div className="relative z-10 flex flex-col gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 mb-2 w-fit">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Administrative Console</span>
+      <div className="relative overflow-hidden rounded-3xl gradient-deep-blue shadow-2xl group">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-[80px] -mr-40 -mt-40 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-[60px] -ml-32 -mb-32 animate-pulse delay-1000"></div>
+
+        <div className="relative z-10 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-4 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm animate-fade-in">
+              <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Administrative Console</span>
+            </div>
+
+            <div className="space-y-2 animate-fade-up">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">Bienvenue, Admin</h2>
+              <p className="text-lg text-white/80 font-medium max-w-xl leading-relaxed">
+                Tableau de bord de gestion centralisé. Visualisez et pilotez les performances académiques de l'ENSPD en temps réel.
+              </p>
+            </div>
           </div>
-          <h2 className="text-3xl font-black tracking-tight">Bienvenue, Admin</h2>
-          <p className="max-w-xl text-muted-foreground font-medium">
-            Tableau de bord de gestion centralisé. Visualisez et pilotez les performances académiques de l'ENSPD en temps réel.
-          </p>
+
+          <div className="hidden md:block animate-float">
+            <div className="relative w-32 h-32 flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl rotate-3 hover:rotate-6 transition-all duration-500">
+              <TrendingUp className="h-16 w-16 text-white drop-shadow-lg" />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -198,23 +198,43 @@ export default function GradesEntryPage() {
   return (
     <DashboardLayout>
       <div className="space-y-5 animate-fade-in-up">
-        <div>
-          <h2 className="text-xl font-bold">Saisie des Notes</h2>
-          <p className="text-sm text-muted-foreground">
-            Entrez les notes pour vos évaluations
-          </p>
+        {/* Header Banner */}
+        <div className="relative overflow-hidden rounded-3xl gradient-deep-blue shadow-2xl group mb-8">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] -ml-24 -mb-24 animate-pulse delay-1000"></div>
+
+          <div className="relative z-10 p-8 flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm animate-fade-in">
+                <ClipboardList className="h-4 w-4 text-white" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Gestion des Notes</span>
+              </div>
+              <h2 className="text-3xl font-black text-white tracking-tight animate-fade-up">Saisie des Notes</h2>
+              <p className="text-white/80 font-medium max-w-lg animate-fade-up delay-100">
+                Sélectionnez une matière et une évaluation pour saisir ou modifier les notes des étudiants.
+              </p>
+            </div>
+            <div className="hidden md:block animate-float">
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+                <Save className="h-8 w-8 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader className="py-3 px-6">
-            <CardTitle className="text-base">Sélection</CardTitle>
+        <Card className="border-0 shadow-lg animate-fade-in-up delay-200">
+          <CardHeader className="py-4 px-6 bg-muted/30">
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="w-1 h-4 rounded-full bg-primary"></div>
+              Critères de Sélection
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1">
+          <CardContent className="pt-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Matière</label>
                 <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue placeholder="Sélectionner une matière" />
                   </SelectTrigger>
                   <SelectContent>
@@ -226,14 +246,14 @@ export default function GradesEntryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Évaluation</label>
                 <Select
                   value={selectedEvaluation}
                   onValueChange={setSelectedEvaluation}
                   disabled={!selectedSubject}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11">
                     <SelectValue placeholder="Sélectionner une évaluation" />
                   </SelectTrigger>
                   <SelectContent>
@@ -255,7 +275,7 @@ export default function GradesEntryPage() {
               <div>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <ClipboardList className="h-5 w-5" />
-                   {selectedEval && getTypeBadge(selectedEval.type)}
+                  {selectedEval && getTypeBadge(selectedEval.type)}
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
                   {students.length} étudiant(s) • Note sur 20
@@ -277,13 +297,13 @@ export default function GradesEntryPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="py-2 px-6 font-mono text-sm">{student.user.username}</TableCell>
-                      <TableCell className="py-2 px-6 font-bold text-sm">
+                  {students.map((student, index) => (
+                    <TableRow key={student.id} className={`animate-fade-in-right stagger-${index % 10 + 1}`}>
+                      <TableCell className="py-3 px-6 font-mono text-sm font-medium text-primary">{student.user.username}</TableCell>
+                      <TableCell className="py-3 px-6 font-bold text-sm">
                         {student.user.firstName} {student.user.lastName}
                       </TableCell>
-                      <TableCell className="py-2 px-6">
+                      <TableCell className="py-3 px-6">
                         <Input
                           type="number"
                           min="0"
@@ -292,14 +312,22 @@ export default function GradesEntryPage() {
                           value={grades[student.id] ?? ''}
                           onChange={(e) => handleGradeChange(student.id, e.target.value)}
                           placeholder="—"
-                          className="w-20 h-8 text-sm"
+                          className={`w-20 h-9 text-sm font-bold text-center ${grades[student.id] !== null && (grades[student.id] as number) >= 10
+                              ? 'text-green-600 bg-green-50 border-green-200 focus-visible:ring-green-500'
+                              : grades[student.id] !== null
+                                ? 'text-red-600 bg-red-50 border-red-200 focus-visible:ring-red-500'
+                                : ''
+                            }`}
                         />
                       </TableCell>
-                      <TableCell className="py-2 px-6">
+                      <TableCell className="py-3 px-6">
                         {grades[student.id] !== null ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <div className="flex items-center gap-1.5 text-green-600 animate-fade-in">
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="text-[10px] font-bold uppercase">Saisi</span>
+                          </div>
                         ) : (
-                          <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-tighter">Absent</span>
+                          <span className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-wider">En attente</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -319,11 +347,15 @@ export default function GradesEntryPage() {
         )}
 
         {!selectedEvaluation && (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Sélectionnez une matière et une évaluation pour commencer la saisie.
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-up delay-300">
+            <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mb-6 animate-pulse">
+              <ClipboardList className="h-10 w-10 text-muted-foreground/40" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Prêt à saisir les notes ?</h3>
+            <p className="text-muted-foreground max-w-sm">
+              Utilisez les filtres ci-dessus pour sélectionner une matière et une évaluation.
+            </p>
+          </div>
         )}
       </div>
     </DashboardLayout>

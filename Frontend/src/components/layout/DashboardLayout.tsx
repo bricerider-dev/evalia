@@ -251,20 +251,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               variant="outline"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-full border-white/10 hover:bg-white/5 transition-all hover:scale-110"
+              className="rounded-full border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
             >
               {theme === 'light' ? (
-                <Moon className="h-5 w-5 text-primary" />
+                <Moon className="h-5 w-5 text-primary group-hover:text-white transition-colors" />
               ) : (
-                <Sun className="h-5 w-5 text-yellow-500" />
+                <Sun className="h-5 w-5 text-yellow-500 group-hover:text-yellow-400 transition-colors" />
               )}
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5">
-                  <Avatar className="h-8 w-8 border border-white/10">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5 transition-all duration-300 hover:scale-105 active:scale-95 group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Avatar className="h-9 w-9 border-2 border-white/10 group-hover:border-primary/50 transition-all duration-300 shadow-lg group-hover:shadow-primary/20">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-xs font-black italic tracking-tighter group-hover:scale-110 transition-transform duration-300">
                       {user ? getInitials(user.firstName, user.lastName) : '??'}
                     </AvatarFallback>
                   </Avatar>

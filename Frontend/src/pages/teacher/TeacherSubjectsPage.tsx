@@ -50,12 +50,27 @@ export default function TeacherSubjectsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-6 animate-fade-in-up">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 className="text-2xl font-black text-primary tracking-tight">Mes Matières</h2>
-                        <p className="text-sm text-muted-foreground font-medium">
-                            Liste des enseignements dont vous êtes responsable
-                        </p>
+                {/* Header Banner */}
+                <div className="relative overflow-hidden rounded-3xl gradient-deep-blue shadow-2xl group mb-8">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] -ml-24 -mb-24 animate-pulse delay-1000"></div>
+
+                    <div className="relative z-10 p-8 flex items-center justify-between">
+                        <div className="space-y-2">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm animate-fade-in">
+                                <BookOpen className="h-4 w-4 text-white" />
+                                <span className="text-xs font-bold text-white uppercase tracking-wider">Programme Académique</span>
+                            </div>
+                            <h2 className="text-3xl font-black text-white tracking-tight animate-fade-up">Mes Matières</h2>
+                            <p className="text-white/80 font-medium max-w-lg animate-fade-up delay-100">
+                                Liste des enseignements dont vous êtes responsable pour cette année académique.
+                            </p>
+                        </div>
+                        <div className="hidden md:block animate-float">
+                            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+                                <GraduationCap className="h-8 w-8 text-white" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -78,8 +93,8 @@ export default function TeacherSubjectsPage() {
                     </Card>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {subjects.map((subject) => (
-                            <Card key={subject.id} className="border-0 shadow-institutional hover:shadow-2xl transition-all duration-500 group overflow-hidden">
+                        {subjects.map((subject, index) => (
+                            <Card key={subject.id} className={`border-0 shadow-institutional hover:shadow-2xl transition-all duration-500 group overflow-hidden animate-fade-in-up stagger-${index % 5 + 1}`}>
                                 <div className="h-2 bg-primary group-hover:h-3 transition-all duration-500" />
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
