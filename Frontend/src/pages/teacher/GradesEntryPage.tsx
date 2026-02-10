@@ -21,10 +21,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { getSubjects } from '@/api/subject';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getEvaluations } from '@/api/evaluation';
 import { getEtudiants } from '@/api/etudiant';
 import { getGrades, createGrade, updateGrade } from '@/api/grade';
-import { ClipboardList, Save, CheckCircle, GraduationCap, ChevronRight } from 'lucide-react';
+import { ClipboardList, Save, CheckCircle, GraduationCap, ChevronRight, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -59,18 +59,11 @@ export default function GradesEntryPage() {
     const loadEvaluations = async () => {
       if (selectedSubject) {
         try {
-          const [cc, sn, ra] = await Promise.all([
-            getEvaluationsCC(),
-            getEvaluationsSN(),
-            getEvaluationsRA()
+          const [evals] = await Promise.all([
+            getEvaluations()
           ]);
 
-          const subjectEvals = [
-            ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-            ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-            ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-          ].filter(e => e.subjectId === selectedSubject);
-
+          const subjectEvals = evals.filter(e => e.subjectId === selectedSubject);
           setEvaluations(subjectEvals);
           setSelectedEvaluation('');
           setStudents([]);

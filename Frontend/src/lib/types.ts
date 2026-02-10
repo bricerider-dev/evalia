@@ -63,12 +63,17 @@ export type EvaluationType = 'CC' | 'SN' | 'RA';
 export type SessionType = 'normal' | 'rattrapage';
 
 export interface Evaluation {
-  id: string;
-  subjectId: string;
-  type: EvaluationType;
-  session: SessionType;
-  date: string;
-  maxScore: number;
+  id?: number;
+  subjectId: number;
+  title: string;
+  description: string;
+  evaluationDate: Date;
+  startTime: string;
+  endTime: string;
+  room: string;
+  evaluationStatus: string;
+  evaluationType: EvaluationType;
+  createdAt?: string;
 }
 
 export interface Grade {

@@ -75,8 +75,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
     room = serializers.CharField(source='salle', allow_blank=True, required=False)
     evaluationStatus = serializers.CharField(source='statut_time', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    
-    
+    evaluationType = serializers.CharField(source='type_evaluation')
 
     def to_representation(self, instance):
         from django.utils import timezone
@@ -97,7 +96,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'subjectId', 'title', 'description', 'evaluationDate',
             'startTime', 'endTime', 'room', 'evaluationStatus',
-            'createdAt'
+            'createdAt', 'evaluationType'
         ]
         read_only_fields = ['id', 'createdAt', 'evaluationStatus']
 

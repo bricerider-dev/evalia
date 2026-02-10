@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { getSubjects } from '@/api/subject';
 import { getFilieres } from '@/api/filiere';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getEvaluations } from '@/api/evaluation';
 import { getGrades } from '@/api/grade';
 import { getSubjectResultForStudent, calculateWeightedAverage, getMention } from '@/lib/gradeCalculator';
 import { Student, SubjectResult } from '@/lib/types';
@@ -25,23 +25,17 @@ export default function StudentGradesPage() {
       if (user && 'filiere' in user) {
         try {
           const student = user as any;
-          const [allFilieres, allSubjects, cc, sn, ra, allGrades] = await Promise.all([
+          const [allFilieres, allSubjects, allEvals, allGrades] = await Promise.all([
             getFilieres(),
             getSubjects(),
-            getEvaluationsCC(),
-            getEvaluationsSN(),
-            getEvaluationsRA(),
+            getEvaluations(),
             getGrades()
           ]);
 
           const filiere = allFilieres.find((f: any) => f.id === student.filiere);
           setFiliereName(filiere?.name || '');
 
-          const allEvals = [
-            ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-            ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-            ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-          ];
+          
 
           // Filter subjects for student's filiere (simplified logic)
           const studentSubjects = allSubjects.filter((s: any) => s.filiereId === student.filiere || true);

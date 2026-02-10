@@ -9,7 +9,7 @@ import { getEtudiants } from '@/api/etudiant';
 import { getGrades } from '@/api/grade';
 import { getSubjects } from '@/api/subject';
 import { calculateWeightedAverage, getSubjectResultForStudent } from '@/lib/gradeCalculator';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getEvaluations } from '@/api/evaluation';
 import { motion } from 'framer-motion';
 
 export default function ReportsPage() {
@@ -23,21 +23,15 @@ export default function ReportsPage() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [filieres, etudiants, grades, subjects, cc, sn, ra] = await Promise.all([
+                const [filieres, etudiants, grades, subjects, allEvals] = await Promise.all([
                     getFilieres(),
                     getEtudiants(),
                     getGrades(),
                     getSubjects(),
-                    getEvaluationsCC(),
-                    getEvaluationsSN(),
-                    getEvaluationsRA()
+                    getEvaluations(),
+                    
                 ]);
-
-                const allEvals = [
-                    ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-                    ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-                    ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-                ];
+                
 
                 // Calculate Filiere Stats
                 const fStats = filieres.map((f: any) => {

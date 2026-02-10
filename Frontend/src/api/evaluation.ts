@@ -1,37 +1,17 @@
 import api from "./api";
+import { Evaluation } from "../lib/types";
 
-export const getEvaluationsCC = async () => {
-    const response = await api.get("academic/cc/");
+export const getEvaluations = async () => {
+    const response = await api.get("academic/evaluations/");
     return response.data;
 };
 
-export const createEvaluationCC = async (evalCC: any) => {
-    const response = await api.post("academic/cc/", evalCC);
+export const createEvaluation = async (evaluation: Evaluation) => {
+    const response = await api.post("academic/evaluations/", evaluation);
     return response.data;
 };
 
-export const getEvaluationsSN = async () => {
-    const response = await api.get("academic/sn/");
-    return response.data;
-};
-
-export const createEvaluationSN = async (evalSN: any) => {
-    const response = await api.post("academic/sn/", evalSN);
-    return response.data;
-};
-
-export const getEvaluationsRA = async () => {
-    const response = await api.get("academic/ra/");
-    return response.data;
-};
-
-export const createEvaluationRA = async (evalRA: any) => {
-    const response = await api.post("academic/ra/", evalRA);
-    return response.data;
-};
-
-export const deleteEvaluation = async (type: 'CC' | 'SN' | 'RA', id: string) => {
-    const endpoint = type.toLowerCase();
-    const response = await api.delete(`academic/${endpoint}/${id}/`);
+export const updateEvaluation = async (id: number, evaluation: Evaluation) => {
+    const response = await api.put(`academic/evaluations/${id}/`, evaluation);
     return response.data;
 };

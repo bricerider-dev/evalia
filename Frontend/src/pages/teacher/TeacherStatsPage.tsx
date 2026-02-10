@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart2, TrendingUp, Users, PieChart } from 'lucide-react';
 import { getSubjects } from '@/api/subject';
 import { getGrades } from '@/api/grade';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getEvaluations } from '@/api/evaluation';
 import { getSubjectResultForStudent } from '@/lib/gradeCalculator';
 import { getEtudiants } from '@/api/etudiant';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 export default function TeacherStatsPage() {
     const { user } = useAuth();
@@ -19,21 +20,13 @@ export default function TeacherStatsPage() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [allSubjects, allGrades, cc, sn, ra, etudiants] = await Promise.all([
+                const [allSubjects, allGrades, allEvals, etudiants] = await Promise.all([
                     getSubjects(),
                     getGrades(),
-                    getEvaluationsCC(),
-                    getEvaluationsSN(),
-                    getEvaluationsRA(),
+                    getEvaluations(),
                     getEtudiants()
                 ]);
-
-                const allEvals = [
-                    ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-                    ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-                    ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-                ];
-
+            
                 const teacherSubjects = allSubjects.filter((s: any) => s.responsibleTeacherId === user?.id);
 
                 const subjectStats = teacherSubjects.map(subject => {
