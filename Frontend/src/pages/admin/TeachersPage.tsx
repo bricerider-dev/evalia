@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -24,21 +25,31 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getEnseignants, createEnseignant, updateEnseignant, deleteEnseignant } from '@/api/enseignant';
 import { Teacher } from '@/lib/types';
-import { Plus, Pencil, Trash2, User, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, BookOpen, Search } from 'lucide-react';
 import { toast } from 'sonner';
+<<<<<<< HEAD
 import { motion, AnimatePresence } from 'framer-motion';
+=======
+import { fi, id } from 'date-fns/locale';
+>>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<any>(null);
   const [formData, setFormData] = useState({
+    matricule: '',
+    role: 'teacher',
+    phone: '',
     firstName: '',
     lastName: '',
     email: '',
     password: '',
+    id: '',
     teacherId: '',
-    department: '',
+    grade: '',
+    is_active: true,
+    status: 'actif',
   });
 
   const loadTeachers = async () => {
@@ -47,10 +58,14 @@ export default function TeachersPage() {
       // Map backend data to match frontend expectations if necessary
       const mappedTeachers = data.map((t: any) => ({
         ...t,
-        firstName: t.user?.first_name || t.firstName,
-        lastName: t.user?.last_name || t.lastName,
-        email: t.user?.email || t.email,
-        teacherId: t.user?.username || t.teacherId,
+        firstName: t.user.firstName,
+        lastName: t.user.lastName,
+        email: t.user.email,
+        matricule: t.user.username,
+        phone: t.user.phone,
+        is_active: t.user.is_active,
+        teacherId: t.id,
+        status: t.status,
       }));
       setTeachers(mappedTeachers);
     } catch (error) {
@@ -70,7 +85,13 @@ export default function TeachersPage() {
       email: '',
       password: 'prof123',
       teacherId: '',
-      department: '',
+      phone: '+237 6',
+      grade: 'PA',
+      is_active: true,
+      id: '',      
+      status: 'actif',
+      role: 'teacher',
+      matricule: ''      
     });
     setEditingTeacher(null);
   };
@@ -83,8 +104,14 @@ export default function TeachersPage() {
         lastName: teacher.lastName,
         email: teacher.email,
         password: '', // Don't show password on edit
-        teacherId: teacher.teacherId,
-        department: teacher.department || '',
+        teacherId: teacher.id,
+        phone: teacher.phone || '',
+        grade: teacher.grade || 'PA',
+        is_active: teacher.is_active,
+        status: teacher.status,
+        role: teacher.role,
+        matricule: teacher.matricule || '',
+        id: teacher.id,
       });
     } else {
       resetForm();
@@ -95,7 +122,7 @@ export default function TeachersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.teacherId) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.matricule) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -103,13 +130,14 @@ export default function TeachersPage() {
     const payload: any = {
       user: {
         role: 'teacher',
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
-        username: formData.teacherId,
-        is_active: true
+        username: formData.matricule,
+        is_active: true,
+        phone: formData.phone || '',
       },
-      grade: 'Assistant', // Default grade
+      grade: formData.grade || 'PA', // Default grade
       status: 'actif'
     };
 
@@ -119,9 +147,11 @@ export default function TeachersPage() {
 
     try {
       if (editingTeacher) {
+        console.log('Updating teacher with payload:', payload);
         await updateEnseignant(editingTeacher.id, payload);
         toast.success('Enseignant mis à jour avec succès');
       } else {
+        
         await createEnseignant(payload);
         toast.success('Enseignant ajouté avec succès');
       }
@@ -233,6 +263,7 @@ export default function TeachersPage() {
                       />
                     </div>
                   </div>
+<<<<<<< HEAD
                   <div className="space-y-2">
                     <Label htmlFor="teacherId" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Matricule *</Label>
                     <Input
@@ -262,6 +293,57 @@ export default function TeachersPage() {
                       placeholder="ex: Informatique"
                       className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                     />
+=======
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="matricule">Matricule *</Label>
+                      <Input
+                        id="matricule"
+                        value={formData.matricule}
+                        onChange={(e) => setFormData({ ...formData, matricule: e.target.value.toUpperCase() })}
+                        placeholder="ex: T001"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="grade">Grade</Label>
+                      <Select
+                        onValueChange={(value) => setFormData({ ...formData, grade: value as any })}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionnez le grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PA">PA (Professeur Assistant)</SelectItem>
+                          <SelectItem value="PH">PH (Professeur)</SelectItem>
+                          <SelectItem value="DR">DR (Docteur)</SelectItem>
+                          <SelectItem value="PR">PR (Professeur)</SelectItem>
+                          <SelectItem value="MC">MC (Maître de Conférences)</SelectItem>
+                          <SelectItem value="AS">AS (Assistant)</SelectItem>
+                          <SelectItem value="VAC">VAC (Vacataire)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+
+>>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
                   </div>
                   {!editingTeacher && (
                     <div className="space-y-2">
@@ -286,7 +368,40 @@ export default function TeachersPage() {
               </form>
             </DialogContent>
           </Dialog>
+<<<<<<< HEAD
         </motion.div>
+=======
+        </div>
+        {/**  filtres by name */}
+        <Card>
+          <CardContent className='py-5'>            
+              <div className="relative flex items-center gap-4">
+                <Search className="absolute left-4 top-5 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  placeholder="Rechercher par nom ou matricule..."
+                  className="pl-12 py-5 text-base rounded-xl border-2 border-white/10 dark:border-white/5 focus:border-primary/20 bg-muted/30 shadow-inner"
+                  onChange={(e) => {
+                    const query = e.target.value.toLowerCase();
+                    setTeachers((prev) =>
+                      prev.filter(
+                        (t) =>
+                          t.firstName.toLowerCase().includes(query) ||
+                          t.lastName.toLowerCase().includes(query) ||
+                          t.matricule.toLowerCase().includes(query)
+                      )
+                    );
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => loadTeachers()}
+                >
+                  Réinitialiser
+                </Button>
+              </div>            
+          </CardContent>
+        </Card>
+>>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
 
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-2xl rounded-[2rem] overflow-hidden bg-white/60 dark:bg-card/60 backdrop-blur-xl border-white/20 ring-1 ring-black/5">
@@ -304,6 +419,7 @@ export default function TeachersPage() {
                   </CardDescription>
                 </div>
               </div>
+<<<<<<< HEAD
             </CardHeader>
             <CardContent className="p-0">
               {teachers.length === 0 ? (
@@ -335,6 +451,53 @@ export default function TeachersPage() {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ delay: index * 0.05 }}
                             className="group hover:bg-primary/5 transition-colors border-b border-white/5 last:border-0"
+=======
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {teachers.length === 0 ? (
+              <div className="text-center py-20">
+                <User className="h-20 w-20 mx-auto text-slate-200 mb-4" />
+                <p className="text-2xl font-bold text-slate-400">Aucun enseignant enregistré.</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-0">
+                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Telephone</TableHead>
+                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teachers.map((teacher) => (
+                    <TableRow key={teacher.id} className="hover:bg-primary/5 transition-colors border-b border-white/5 group">
+                      <TableCell className="py-4 px-10 font-mono font-black text-primary text-sm">
+                        {teacher.matricule}
+                      </TableCell>
+                      <TableCell className="py-4 px-6">
+                        <div className="font-bold text-base group-hover:text-primary transition-colors text-foreground">
+                          {teacher.grade}. {teacher.firstName} {teacher.lastName}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
+                        {teacher.email}
+                      </TableCell>
+                      <TableCell className="py-3 px-6">
+                        <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1 rounded-full font-bold text-[10px]">
+                          {teacher.phone || 'N/A'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-4 px-10 text-right">
+                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDialog(teacher)}
+                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-primary transition-all"
+>>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
                           >
                             <TableCell className="py-5 px-8">
                               <span className="px-3 py-1 rounded-lg bg-white dark:bg-muted font-mono font-black text-primary text-sm shadow-sm ring-1 ring-black/5">

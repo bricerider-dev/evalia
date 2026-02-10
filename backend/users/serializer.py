@@ -22,12 +22,18 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'password': {'write_only': True},
+            'username': {'validators': []},
+            'email': {'validators': []},
         }
     
     def validate(self, data):
         # Validation de l'email
         email = data.get('email')
         instance = self.instance
+        
+        # Si le serializer est imbriqué, on récupère l'instance de l'utilisateur via le parent
+        if not instance and self.parent and hasattr(self.parent, 'instance') and self.parent.instance:
+            instance = getattr(self.parent.instance, 'user', None)
         if email:
             existing = User.objects.filter(email=email)
             if instance:
@@ -110,15 +116,14 @@ class EtudiantSerializer(serializers.ModelSerializer):
 class EnseignantSerializer(serializers.ModelSerializer):
     """Serializer pour Enseignant avec correspondance frontend"""
     user = UserSerializer()    
-    status = serializers.CharField(source='statut')    
-    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    status = serializers.CharField(source='statut')        
     
     class Meta:
         model = Enseignant
         fields = [
-            'id', 'user', 'grade', 'status', 'createdAt'
+            'id', 'user', 'grade', 'status'
         ]
-        read_only_fields = ['id', 'createdAt']
+        read_only_fields = ['id']
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -132,6 +137,27 @@ class EnseignantSerializer(serializers.ModelSerializer):
             
         enseignant = Enseignant.objects.create(user=user, **validated_data)
         return enseignant
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+        password = user_data.pop('password', None)
+        
+        # Update user instance
+        user = instance.user
+        for attr, value in user_data.items():
+            setattr(user, attr, value)
+        
+        if password:
+            user.set_password(password)
+        
+        user.save()
+            
+        # Update enseignant instance
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        return instance
 
 
 class UserLoginSerializer(serializers.Serializer):
