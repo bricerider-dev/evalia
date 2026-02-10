@@ -1,27 +1,26 @@
-# FICHIER 4: backend/academic/serializers.py - NOUVEAU
 from rest_framework import serializers
 from academic.models.matiere import UniteEnseignement
 from academic.models.planning import AnneeAcademique, Semestre
-from academic.models.evaluation import ControleContinu, SessionNormale, Rattrapage
+from academic.models.evaluation import Evaluation
+
 
 
 class UniteSerialization(serializers.ModelSerializer):
     """Serializer pour Unité d'Enseignement"""
     name = serializers.CharField(source='nom')
     level = serializers.IntegerField(source='niveau')
-    semester = serializers.IntegerField(source='semestre')
+    semester = serializers.IntegerField(source='semestre')    
     filiere = serializers.PrimaryKeyRelatedField(
         queryset=UniteEnseignement._meta.get_field('filiere').remote_field.model.objects.all(),
         required=False,
         allow_null=True
     )
-    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)    
     class Meta:
         model = UniteEnseignement
         fields = [
             'id', 'code', 'name', 'description', 'level', 'semester',
-            'credit', 'filiere', 'createdAt'
+            'credit', 'filiere', 'createdAt', 'enseignant'
         ]
         read_only_fields = ['id', 'createdAt']
 
@@ -74,51 +73,32 @@ class EvaluationSerializer(serializers.ModelSerializer):
     startTime = serializers.TimeField(source='heure_debut')
     endTime = serializers.TimeField(source='heure_fin', default="12:00")
     room = serializers.CharField(source='salle', allow_blank=True, required=False)
-    evaluationStatus = serializers.CharField(source='statut', read_only=True)
+    evaluationStatus = serializers.CharField(source='statut_time', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    
+    
+
+    def to_representation(self, instance):
+        from django.utils import timezone
+        from datetime import datetime
+        
+        data = super().to_representation(instance)
+        
+        if instance.date_evaluation and instance.heure_fin:
+            eval_end = timezone.make_aware(datetime.combine(instance.date_evaluation, instance.heure_fin))
+            if timezone.now() > eval_end:
+                data['evaluationStatus'] = 'TERMINE'
+                
+        return data
+    
 
     class Meta:
+        model = Evaluation
         fields = [
             'id', 'subjectId', 'title', 'description', 'evaluationDate',
-            'startTime', 'endTime', 'room', 'coefficient', 'evaluationStatus',
+            'startTime', 'endTime', 'room', 'evaluationStatus',
             'createdAt'
         ]
         read_only_fields = ['id', 'createdAt', 'evaluationStatus']
 
 
-class ControleContenuSerializer(EvaluationSerializer):
-    """Serializer pour Contrôle Continu"""
-    numberOfActivities = serializers.IntegerField(source='nombre_activites', required=False)
-    ccType = serializers.CharField(source='type_cc')
-    
-    class Meta(EvaluationSerializer.Meta):
-        model = ControleContinu
-        fields = EvaluationSerializer.Meta.fields + [
-            'numberOfActivities', 'ccType'
-        ]
-
-
-class NormalSessionSerializer(EvaluationSerializer):
-    """Serializer pour Session Normale"""
-    revisionsDay = serializers.IntegerField(source='duree_revision', required=False)
-    examType = serializers.CharField(source='type_examen')
-    
-    class Meta(EvaluationSerializer.Meta):
-        model = SessionNormale
-        fields = EvaluationSerializer.Meta.fields + [
-            'revisionsDay', 'examType'
-        ]
-
-
-class MakeupSerializer(EvaluationSerializer):
-    """Serializer pour Rattrapage"""
-    normalSessionId = serializers.PrimaryKeyRelatedField(
-        source='session_normale', 
-        queryset=SessionNormale.objects.all()
-    )
-    
-    class Meta(EvaluationSerializer.Meta):
-        model = Rattrapage
-        fields = EvaluationSerializer.Meta.fields + [
-            'normalSessionId'
-        ]
