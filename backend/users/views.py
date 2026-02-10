@@ -73,6 +73,13 @@ class EnseignantViewSet(viewsets.ModelViewSet):
     serializer_class = EnseignantSerializer
     permission_classes = [AllowAny]
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 class UserLoginView(generics.CreateAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]

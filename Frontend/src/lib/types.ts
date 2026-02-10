@@ -1,6 +1,6 @@
 // User Types
 export type UserRole = 'admin' | 'teacher' | 'student';
-
+export type TeacherGrade = 'PA' | 'PH' | 'DR' | 'PR' | 'MC' | 'AS' | 'VAC';
 export interface User {
   id: number | string;
   username: string;
@@ -38,15 +38,11 @@ export interface Student {
   enrollmentYear?: number;
 }
 
-export interface Teacher extends User {
-  role: 'teacher';
-  teacherId: string;
-  subjects: string[];
-  grade: string;
-  speciality: string;
-  bureau: string;
+export interface Teacher  {
+  user: User;
+  id: number;
+  grade: TeacherGrade;
   status: string;
-  department: string;
 }
 
 export interface Subject {

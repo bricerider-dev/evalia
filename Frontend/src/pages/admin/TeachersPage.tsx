@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -24,20 +25,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getEnseignants, createEnseignant, updateEnseignant, deleteEnseignant } from '@/api/enseignant';
 import { Teacher } from '@/lib/types';
-import { Plus, Pencil, Trash2, User, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, BookOpen, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { fi, id } from 'date-fns/locale';
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<any>(null);
   const [formData, setFormData] = useState({
+    matricule: '',
+    role: 'teacher',
+    phone: '',
     firstName: '',
     lastName: '',
     email: '',
     password: '',
+    id: '',
     teacherId: '',
-    department: '',
+    grade: '',
+    is_active: true,
+    status: 'actif',
   });
 
   const loadTeachers = async () => {
@@ -46,10 +54,14 @@ export default function TeachersPage() {
       // Map backend data to match frontend expectations if necessary
       const mappedTeachers = data.map((t: any) => ({
         ...t,
-        firstName: t.user?.first_name || t.firstName,
-        lastName: t.user?.last_name || t.lastName,
-        email: t.user?.email || t.email,
-        teacherId: t.user?.username || t.teacherId,
+        firstName: t.user.firstName,
+        lastName: t.user.lastName,
+        email: t.user.email,
+        matricule: t.user.username,
+        phone: t.user.phone,
+        is_active: t.user.is_active,
+        teacherId: t.id,
+        status: t.status,
       }));
       setTeachers(mappedTeachers);
     } catch (error) {
@@ -69,7 +81,13 @@ export default function TeachersPage() {
       email: '',
       password: 'prof123',
       teacherId: '',
-      department: '',
+      phone: '+237 6',
+      grade: 'PA',
+      is_active: true,
+      id: '',      
+      status: 'actif',
+      role: 'teacher',
+      matricule: ''      
     });
     setEditingTeacher(null);
   };
@@ -82,8 +100,14 @@ export default function TeachersPage() {
         lastName: teacher.lastName,
         email: teacher.email,
         password: '', // Don't show password on edit
-        teacherId: teacher.teacherId,
-        department: teacher.department || '',
+        teacherId: teacher.id,
+        phone: teacher.phone || '',
+        grade: teacher.grade || 'PA',
+        is_active: teacher.is_active,
+        status: teacher.status,
+        role: teacher.role,
+        matricule: teacher.matricule || '',
+        id: teacher.id,
       });
     } else {
       resetForm();
@@ -94,7 +118,7 @@ export default function TeachersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.teacherId) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.matricule) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -102,13 +126,14 @@ export default function TeachersPage() {
     const payload: any = {
       user: {
         role: 'teacher',
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
-        username: formData.teacherId,
-        is_active: true
+        username: formData.matricule,
+        is_active: true,
+        phone: formData.phone || '',
       },
-      grade: 'Assistant', // Default grade
+      grade: formData.grade || 'PA', // Default grade
       status: 'actif'
     };
 
@@ -118,9 +143,11 @@ export default function TeachersPage() {
 
     try {
       if (editingTeacher) {
+        console.log('Updating teacher with payload:', payload);
         await updateEnseignant(editingTeacher.id, payload);
         toast.success('Enseignant mis à jour avec succès');
       } else {
+        
         await createEnseignant(payload);
         toast.success('Enseignant ajouté avec succès');
       }
@@ -202,32 +229,55 @@ export default function TeachersPage() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="teacherId">Matricule *</Label>
-                    <Input
-                      id="teacherId"
-                      value={formData.teacherId}
-                      onChange={(e) => setFormData({ ...formData, teacherId: e.target.value.toUpperCase() })}
-                      placeholder="ex: T001"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="matricule">Matricule *</Label>
+                      <Input
+                        id="matricule"
+                        value={formData.matricule}
+                        onChange={(e) => setFormData({ ...formData, matricule: e.target.value.toUpperCase() })}
+                        placeholder="ex: T001"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="department">Département</Label>
-                    <Input
-                      id="department"
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      placeholder="ex: Informatique"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="grade">Grade</Label>
+                      <Select
+                        onValueChange={(value) => setFormData({ ...formData, grade: value as any })}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionnez le grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PA">PA (Professeur Assistant)</SelectItem>
+                          <SelectItem value="PH">PH (Professeur)</SelectItem>
+                          <SelectItem value="DR">DR (Docteur)</SelectItem>
+                          <SelectItem value="PR">PR (Professeur)</SelectItem>
+                          <SelectItem value="MC">MC (Maître de Conférences)</SelectItem>
+                          <SelectItem value="AS">AS (Assistant)</SelectItem>
+                          <SelectItem value="VAC">VAC (Vacataire)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+
                   </div>
                   {!editingTeacher && (
                     <div className="space-y-2">
@@ -252,6 +302,35 @@ export default function TeachersPage() {
             </DialogContent>
           </Dialog>
         </div>
+        {/**  filtres by name */}
+        <Card>
+          <CardContent className='py-5'>            
+              <div className="relative flex items-center gap-4">
+                <Search className="absolute left-4 top-5 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  placeholder="Rechercher par nom ou matricule..."
+                  className="pl-12 py-5 text-base rounded-xl border-2 border-white/10 dark:border-white/5 focus:border-primary/20 bg-muted/30 shadow-inner"
+                  onChange={(e) => {
+                    const query = e.target.value.toLowerCase();
+                    setTeachers((prev) =>
+                      prev.filter(
+                        (t) =>
+                          t.firstName.toLowerCase().includes(query) ||
+                          t.lastName.toLowerCase().includes(query) ||
+                          t.matricule.toLowerCase().includes(query)
+                      )
+                    );
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => loadTeachers()}
+                >
+                  Réinitialiser
+                </Button>
+              </div>            
+          </CardContent>
+        </Card>
 
         <Card className="border-0 shadow-2xl rounded-2xl overflow-hidden bg-card/60 backdrop-blur-xl border border-white/5">
           <CardHeader className="bg-muted/30 border-b border-white/5 py-6 px-10">
@@ -282,7 +361,7 @@ export default function TeachersPage() {
                     <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
                     <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
                     <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Département</TableHead>
+                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Telephone</TableHead>
                     <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -290,11 +369,11 @@ export default function TeachersPage() {
                   {teachers.map((teacher) => (
                     <TableRow key={teacher.id} className="hover:bg-primary/5 transition-colors border-b border-white/5 group">
                       <TableCell className="py-4 px-10 font-mono font-black text-primary text-sm">
-                        {teacher.teacherId}
+                        {teacher.matricule}
                       </TableCell>
                       <TableCell className="py-4 px-6">
                         <div className="font-bold text-base group-hover:text-primary transition-colors text-foreground">
-                          Prof. {teacher.firstName} {teacher.lastName}
+                          {teacher.grade}. {teacher.firstName} {teacher.lastName}
                         </div>
                       </TableCell>
                       <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
@@ -302,7 +381,7 @@ export default function TeachersPage() {
                       </TableCell>
                       <TableCell className="py-3 px-6">
                         <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1 rounded-full font-bold text-[10px]">
-                          {teacher.department || 'N/A'}
+                          {teacher.phone || 'N/A'}
                         </Badge>
                       </TableCell>
                       <TableCell className="py-4 px-10 text-right">
