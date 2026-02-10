@@ -41,7 +41,20 @@ class Etudiant(TimeStampedModel):
         related_name='etudiant_profile'
     )      
     filiere = models.ForeignKey('department.Filiere',on_delete=models.CASCADE,related_name='etudiants')
+    class Niveau(models.TextChoices):
+        L1 = 'L1', 'Licence 1'
+        L2 = 'L2', 'Licence 2'
+        L3 = 'L3', 'Licence 3'
+        M1 = 'M1', 'Master 1'
+        M2 = 'M2', 'Master 2'
     
+    class Cycle(models.TextChoices):
+        INGENIEUR = 'ING', 'Ingénieur'
+        MASTER = 'M', 'Master'
+        DOCTORAT = 'D', 'Doctorat'
+        SCINGENIEUR = 'SCGI', 'Science de l\'ingénieur'
+    cycle = models.CharField(max_length=5,choices=Cycle.choices,default=Cycle.INGENIEUR)
+    niveau = models.CharField(max_length=5,choices=Niveau.choices,default=Niveau.L1)
     #photo = models.ImageField(upload_to='etudiants/photos/',blank=True,null=True)
     
     class StatutEtudiant(models.TextChoices):

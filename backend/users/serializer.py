@@ -56,11 +56,12 @@ class EtudiantSerializer(serializers.ModelSerializer):
     filiere = serializers.PrimaryKeyRelatedField(queryset=Filiere.objects.all())    
     status = serializers.CharField(source='statut')
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    
+    level = serializers.CharField(source='niveau')
+
     class Meta:
         model = Etudiant
         fields = [
-            'id', 'user', 'filiere', 'status', 'createdAt'
+            'id', 'user', 'filiere', 'status', 'createdAt', 'level','cycle'
         ]
         read_only_fields = ['id', 'createdAt']
 

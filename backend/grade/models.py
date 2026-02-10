@@ -2,153 +2,69 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import TimeStampedModel
 
-class Note(TimeStampedModel):
-    """Modèle Note d'un étudiant pour une évaluation"""
-    
-    class TypeNote(models.TextChoices):
-        CC = 'CC', 'Contrôle Continu'
-        SN = 'SN', 'Session Normale'
-        RA = 'RA', 'Rattrapage'
-    
-    type_note = models.CharField(
-        max_length=2,
-        choices=TypeNote.choices
-    )
-    
-    # Relations séparées pour chaque type d'évaluation
-    controle_continu = models.ForeignKey(
-        'academic.ControleContinu',
+class Grade(TimeStampedModel):
+    """Modèle Grade d'un étudiant pour une évaluation"""
+    evaluation = models.ForeignKey(
+        'academic.Evaluation',
         on_delete=models.CASCADE,
-        related_name='notes',
-        null=True,
-        blank=True
+        related_name='grades'
     )
-    session_normale = models.ForeignKey(
-        'academic.SessionNormale',
-        on_delete=models.CASCADE,
-        related_name='notes',
-        null=True,
-        blank=True
-    )
-    rattrapage = models.ForeignKey(
-        'academic.Rattrapage',
-        on_delete=models.CASCADE,
-        related_name='notes',
-        null=True,
-        blank=True
-    )
-    
     etudiant = models.ForeignKey(
         'users.Etudiant',
         on_delete=models.CASCADE,
-        related_name='notes'
+        related_name='grades'
     )
-    valeur = models.FloatField(
-        validators=[
-            MinValueValidator(0.0),
-            MaxValueValidator(20.0)
-        ],
-        help_text="Note sur 20"
+    grade = models.DecimalField(
+        max_digits=4, 
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(20)]
     )
-    saisie_par = models.ForeignKey(
-        'users.Enseignant',
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='notes_saisies'
-    )
-    date_saisie = models.DateTimeField(auto_now_add=True)
-    date_modification = models.DateTimeField(auto_now=True)
-    commentaire = models.TextField(blank=True, null=True)
-    est_validee = models.BooleanField(
-        default=False,
-        help_text="La note a été validée par le responsable"
-    )
-    date_validation = models.DateTimeField(null=True, blank=True)
-    validee_par = models.ForeignKey(
-        'users.User',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='notes_validees'
-    )
+    class StatutEvaluation(models.TextChoices):
+        RATTRAPAGE = 'rattrapage', 'Rattrapage'
+        VALIDE = 'valide', 'Valide'
+        NON_VALIDE = 'non_valide', 'Non Valide'
     
+    statut = models.CharField(
+        max_length=10,
+        choices=StatutEvaluation.choices,
+        default=StatutEvaluation.NON_VALIDE
+    )
     class Meta:
-        verbose_name = "Note"
-        verbose_name_plural = "Notes"
-        # Contraintes uniques selon le type de note
-        constraints = [
-            models.UniqueConstraint(
-                fields=['controle_continu', 'etudiant'],
-                condition=models.Q(controle_continu__isnull=False),
-                name='unique_note_cc'
-            ),
-            models.UniqueConstraint(
-                fields=['session_normale', 'etudiant'],
-                condition=models.Q(session_normale__isnull=False),
-                name='unique_note_sn'
-            ),
-            models.UniqueConstraint(
-                fields=['rattrapage', 'etudiant'],
-                condition=models.Q(rattrapage__isnull=False),
-                name='unique_note_ra'
-            ),
-        ]
-        ordering = ['-date_saisie']
+        verbose_name = "Grade"
+        verbose_name_plural = "Grades"
+        unique_together = ('evaluation', 'etudiant')
     
     def __str__(self):
-        matiere = self.get_matiere()
-        return f"{self.etudiant.matricule} - {matiere} - {self.valeur}/20"
-    
-    def get_matiere(self):
-        """Retourne la matière associée à la note"""
-        if self.controle_continu:
-            return self.controle_continu.matiere
-        elif self.session_normale:
-            return self.session_normale.matiere
-        elif self.rattrapage:
-            return self.rattrapage.matiere
-        return None
-    
-    def save(self, *args, **kwargs):
-        # Validation: une note doit avoir exactement un type d'évaluation
-        types = [self.controle_continu, self.session_normale, self.rattrapage]
-        if sum(1 for t in types if t is not None) != 1:
-            raise ValueError("Une note doit être associée à exactement un type d'évaluation")
-        
-        # Déterminer le type de note automatiquement
-        if self.controle_continu:
-            self.type_note = self.TypeNote.CC
-        elif self.session_normale:
-            self.type_note = self.TypeNote.SN
-        elif self.rattrapage:
-            self.type_note = self.TypeNote.RA
-        
-        super().save(*args, **kwargs)
+        return f"{self.etudiant.user.username} - {self.evaluation.get_type_evaluation()} : {self.grade}/20"
 
-class HistoriqueNote(TimeStampedModel):
-    """Modèle Historique des modifications de notes"""
-    note = models.ForeignKey(
-        Note,
-        on_delete=models.CASCADE,
-        related_name='historique'
-    )
-    ancienne_valeur = models.FloatField()
-    nouvelle_valeur = models.FloatField()
-    modifie_par = models.ForeignKey(
-        'users.User',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    raison = models.TextField()
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    
-    class Meta:
-        verbose_name = "Historique Note"
-        verbose_name_plural = "Historiques Notes"
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"Modification note {self.note.id}"
+    def calculate_final_grade(self): 
+        """Calcule la note finale"""
+        grade = self.grade
+        cc_grade = grade.filter(evaluation__type_evaluation='CC').first()
+        sn_grade = grade.filter(evaluation__type_evaluation='SN').first()
+        ra_grade = grade.filter(evaluation__type_evaluation='RA').first()
+
+        final_grade = None
+
+        if cc_grade and sn_grade:
+            final_grade = (cc_grade.grade * 0.3) + (sn_grade.grade * 0.7)
+
+            if final_grade < 10 and ra_grade:
+                final_grade = ra_grade.grade
+        
+        return round(final_grade, 2) if final_grade else None
+    def get_status(self):
+        """Détermine le statut de l'étudiant pour ce cours"""
+        final_grade = self.calculate_final_grade()
+        
+        if final_grade is None:
+            self.statut = self.StatutEvaluation.NON_VALIDE
+        elif final_grade >= 10:
+            self.statut = self.StatutEvaluation.VALIDE
+        else:
+            self.statut = self.StatutEvaluation.RATTRAPAGE
+        self.save()
+        return self.statut
 
 class DecisionFinale(TimeStampedModel):
     """Modèle Décision finale pour un étudiant dans une matière"""

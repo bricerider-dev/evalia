@@ -3,10 +3,16 @@ from core.models import TimeStampedModel
 
 class Evaluation(TimeStampedModel):
     """Modèle abstrait Evaluation"""
+    ue = models.ForeignKey(
+        'academic.UniteEnseignement',
+        on_delete=models.CASCADE,
+        related_name='evaluations'
+    )
     class TypeEvaluation(models.TextChoices):
         CONTROLE_CONTINU = 'CC', 'Contrôle Continu'
         SESSION_NORMALE = 'SN', 'Session Normale'
         RATTRAPAGE = 'RA', 'Rattrapage'   
+        
     type_evaluation = models.CharField(
         max_length=2,
         choices=TypeEvaluation.choices
@@ -17,112 +23,30 @@ class Evaluation(TimeStampedModel):
     heure_debut = models.TimeField()
     heure_fin = models.TimeField(default="12:00")  # Corrigé : remplacé duree par heure_fin
     salle = models.CharField(max_length=50, blank=True, null=True)
-    coefficient = models.FloatField(default=1.0, help_text="Coefficient de l'évaluation")  # Ajouté
-   
-    class StatutEvaluation(models.TextChoices):
+ 
+
+    class StatutTime(models.TextChoices):
         PLANIFIEE = 'planifiee', 'Planifiée'
         EN_COURS = 'en_cours', 'En cours'
         TERMINEE = 'terminee', 'Terminée'
         ANNULEE = 'annulee', 'Annulée'
     
-    statut = models.CharField(
+    statut_time = models.CharField(
         max_length=10,
-        choices=StatutEvaluation.choices,
-        default=StatutEvaluation.PLANIFIEE
+        choices=StatutTime.choices,
+        default=StatutTime.PLANIFIEE
     )
-    
-    class Meta:
-        abstract = True
+
+
+    def get_status(self):
+        return self.statut
+
+    def get_type_evaluation(self):
+        return self.type_evaluation
+        
+    class Meta:        
         ordering = ['date_evaluation', 'heure_debut']
     
     def __str__(self):
         return f"{self.type_evaluation} - {self.intitule} - {self.date_evaluation}"
 
-class ControleContinu(Evaluation):
-    """Modèle Contrôle Continu (30% de la note finale)"""
-    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
-        'academic.UniteEnseignement',
-        on_delete=models.CASCADE,
-        related_name='controles_continus'
-    )
-    nombre_activites = models.IntegerField(
-        default=3,
-        help_text="Nombre d'activités de contrôle continu"
-    )    
-    
-    class TypeCC(models.TextChoices):
-        DEVOIR = 'devoir', 'Devoir Surveillé'
-        TP = 'tp', 'Travail Pratique'
-        PROJET = 'projet', 'Projet'
-        ORAL = 'oral', 'Interrogation Orale'
-        QCM = 'qcm', 'QCM'
-    
-    type_cc = models.CharField(
-        max_length=10,
-        choices=TypeCC.choices,
-        default=TypeCC.DEVOIR
-    )
-    
-    class Meta:
-        verbose_name = "Contrôle Continu"
-        verbose_name_plural = "Contrôles Continus"
-    
-    def save(self, *args, **kwargs):
-        self.type_evaluation = Evaluation.TypeEvaluation.CONTROLE_CONTINU
-        self.coefficient = 0.3  # 30% de la note finale
-        super().save(*args, **kwargs)
-
-class SessionNormale(Evaluation):
-    """Modèle Session Normale (70% de la note finale)"""
-    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
-        'academic.UniteEnseignement',
-        on_delete=models.CASCADE,
-        related_name='sessions_normales'
-    )
-    duree_revision = models.IntegerField(
-        default=7,
-        help_text="Durée de révision en jours avant l'examen"
-    )
-    
-    class TypeExamen(models.TextChoices):
-        ECRIT = 'ecrit', 'Examen Écrit'
-        ORAL = 'oral', 'Examen Oral'
-        PRATIQUE = 'pratique', 'Examen Pratique'
-        COMBINE = 'combine', 'Examen Combiné'
-    
-    type_examen = models.CharField(
-        max_length=10,
-        choices=TypeExamen.choices,
-        default=TypeExamen.ECRIT
-    )
-    
-    class Meta:
-        verbose_name = "Session Normale"
-        verbose_name_plural = "Sessions Normales"
-    
-    def save(self, *args, **kwargs):
-        self.type_evaluation = Evaluation.TypeEvaluation.SESSION_NORMALE
-        self.coefficient = 0.7  # 70% de la note finale
-        super().save(*args, **kwargs)
-
-class Rattrapage(Evaluation):
-    """Modèle Rattrapage (seulement si note < 10)"""
-    ue = models.ForeignKey(  # Corrigé : ue remplacé par matiere
-        'academic.UniteEnseignement',
-        on_delete=models.CASCADE,
-        related_name='rattrapages'
-    )
-    session_normale = models.ForeignKey(
-        'SessionNormale',
-        on_delete=models.CASCADE,
-        related_name='rattrapages'
-    )
-    
-    class Meta:
-        verbose_name = "Rattrapage"
-        verbose_name_plural = "Rattrapages"
-        unique_together = ['session_normale', 'ue']  # Corrigé : ue remplacé par matiere
-    
-    def save(self, *args, **kwargs):
-        self.type_evaluation = Evaluation.TypeEvaluation.RATTRAPAGE
-        super().save(*args, **kwargs)

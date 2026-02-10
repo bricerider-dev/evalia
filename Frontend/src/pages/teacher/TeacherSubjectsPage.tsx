@@ -24,8 +24,7 @@ export default function TeacherSubjectsPage() {
                     getFilieres(),
                     getEtudiants()
                 ]);
-
-                const teacherSubjects = allSubjects.filter((s: any) => s.responsibleTeacherId === user?.id);
+                const teacherSubjects = allSubjects.filter((s: any) => s.enseignant === user?.id);
                 setSubjects(teacherSubjects);
                 setFilieres(allFilieres);
                 setStudents(allStudents);

@@ -1,41 +1,49 @@
 from rest_framework import serializers
-from .models import Note, HistoriqueNote, DecisionFinale
-
+from .models import Grade
+from academic.models import UniteEnseignement
+from academic.serializer import UniteSerialization
 
 class GradeSerializer(serializers.ModelSerializer):
-    """Serializer unifié pour Note/Grade avec correspondance frontend"""
-    studentId = serializers.PrimaryKeyRelatedField(source='etudiant', queryset=Note._meta.get_field('etudiant').remote_field.model.objects.all())
-    score = serializers.FloatField(source='valeur')
-    enteredBy = serializers.PrimaryKeyRelatedField(source='saisie_par', queryset=Note._meta.get_field('saisie_par').remote_field.model.objects.all(), required=False)
-    
-    # Prise en charge des différents types d'évaluations
-    controle_continu = serializers.PrimaryKeyRelatedField(queryset=Note._meta.get_field('controle_continu').remote_field.model.objects.all(), required=False, allow_null=True)
-    session_normale = serializers.PrimaryKeyRelatedField(queryset=Note._meta.get_field('session_normale').remote_field.model.objects.all(), required=False, allow_null=True)
-    rattrapage = serializers.PrimaryKeyRelatedField(queryset=Note._meta.get_field('rattrapage').remote_field.model.objects.all(), required=False, allow_null=True)
-
-    enteredAt = serializers.DateTimeField(source='date_saisie', read_only=True)
-    updatedAt = serializers.DateTimeField(source='date_modification', read_only=True)
-    isValidated = serializers.BooleanField(source='est_validee', default=False)
-    validationDate = serializers.DateTimeField(source='date_validation', read_only=True)
-    evaluationType = serializers.CharField(source='type_note', read_only=True)
-    
+   
     class Meta:
-        model = Note
-        fields = [
-            'id', 'studentId', 'score', 'enteredBy', 'enteredAt', 'updatedAt', 
-            'isValidated', 'validationDate', 'commentaire', 'evaluationType',
-            'controle_continu', 'session_normale', 'rattrapage'
-        ]
-        read_only_fields = ['id', 'enteredAt', 'updatedAt', 'validationDate', 'evaluationType']
-
-
-class HistoriqueNoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HistoriqueNote
+        model = Grade
         fields = '__all__'
+        read_only_fields = ['id', 'createdAt', 'updatedAt', 'final_grade', 'statut']
+    
+    def create(self, validated_data):
+        grade = Grade.objects.create(**validated_data)
+        grade.final_grade = grade.calculate_final_grade()
+        grade.statut = grade.get_status()
+        grade.save()
+        return grade
+    
+    def update(self, instance, validated_data):
+        instance.note = validated_data.get('note', instance.note)
+        instance.final_grade = instance.calculate_final_grade()
+        instance.statut = instance.get_status()
+        instance.save()
+        return instance
+    def get_final_grade(self, obj):
+        return obj.calculate_final_grade()
+    
+    def get_statut(self, obj):
+        return obj.get_status()
 
+class StudentGradeReportSerializer(serializers.ModelSerializer):
+    studentId = serializers.PrimaryKeyRelatedField(source='etudiant', queryset=Grade._meta.get_field('etudiant').remote_field.model.objects.all())
+    ue = serializers.SerializerMethodField()
+    overall_average = serializers.FloatField()
 
-class DecisionFinaleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DecisionFinale
-        fields = '__all__'
+    def get_ue(self, obj):
+        ue_data = []
+        for ue_info in obj['ue']:
+            ue_data.append({
+                'ue': UniteSerialization(ue_info['ue']).data,                
+                'grade': GradeSerializer(ue_info['grade'], many=True).data,
+                'final_grade': ue_info['final_grade'],
+                'status': ue_info['status']
+            })
+        return ue_data
+
+    
+
