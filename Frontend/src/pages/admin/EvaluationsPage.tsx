@@ -72,6 +72,10 @@ export default function EvaluationsPage() {
       toast.error('Erreur lors du chargement des données');
     }
   };
+  const formatDate = (dateStr: Date) => {
+    // format as YYYY-MM-DD
+    return format(new Date(dateStr), 'yyyy-MM-dd');
+  }
 
   useEffect(() => {
     loadData();
@@ -104,7 +108,7 @@ export default function EvaluationsPage() {
       subjectId: formData.subjectId,
       title: formData.title || `${formData.evaluationType} - ${subjects.find(s => s.id === formData.subjectId)?.name}`,
       description: formData.description,
-      evaluationDate: formData.evaluationDate,
+      evaluationDate: formatDate(formData.evaluationDate),
       startTime: formData.startTime,
       endTime: formData.endTime,
       room: formData.room,
@@ -213,7 +217,7 @@ export default function EvaluationsPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 dark:bg-card/90 backdrop-blur-xl">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">Programmer une Évaluation</DialogTitle>
@@ -228,10 +232,10 @@ export default function EvaluationsPage() {
                       value={String(formData.subjectId)}
                       onValueChange={(value) => setFormData({ ...formData, subjectId: parseInt(value) })}
                     >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                      <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
                         <SelectValue placeholder="Sélectionner une matière" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-card dark:border-white/10">
                         {subjects.map((subject) => (
                           <SelectItem key={subject.id} value={String(subject.id)}>
                             {subject.code} - {subject.name}
@@ -241,12 +245,13 @@ export default function EvaluationsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="evaluationType" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Type d'évaluation *</Label>
+                    <Label htmlFor="evaluationType" className="text-sm  font-bold uppercase tracking-wide text-muted-foreground">Type d'évaluation *</Label>
                     <Select
+                      
                       value={formData.evaluationType}
                       onValueChange={(value) => setFormData({ ...formData, evaluationType: value as EvaluationType })}
                     >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                      <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -264,7 +269,7 @@ export default function EvaluationsPage() {
                         type="date"
                         value={formData.evaluationDate.toISOString().split('T')[0]}
                         onChange={(e) => setFormData({ ...formData, evaluationDate: new Date(e.target.value) })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
@@ -274,19 +279,19 @@ export default function EvaluationsPage() {
                         type="time"
                         value={formData.startTime}
                         onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="endTime" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Durée (min)</Label>
+                      <Label htmlFor="endTime" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Heure de fin</Label>
                       <Input
                         id="endTime"
                         type="time"
                         value={formData.endTime}
                         onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
@@ -295,7 +300,7 @@ export default function EvaluationsPage() {
                         id="room"
                         value={formData.room}
                         onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
@@ -317,10 +322,10 @@ export default function EvaluationsPage() {
           <Card className="border-0 shadow-institutional bg-white/60 dark:bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 ring-1 ring-black/5">
             <CardContent className="py-5">
               <Select value={filterSubject} onValueChange={setFilterSubject}>
-                <SelectTrigger className="w-full md:w-[320px] h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
+                <SelectTrigger className="w-full md:w-[320px] dark:bg-muted/50 h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
                   <SelectValue placeholder="Filtrer par matière" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+                <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-muted/50 backdrop-blur-xl">
                   <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Toutes les matières</SelectItem>
                   {subjects.map((subject) => (
                     <SelectItem key={subject.id} value={subject.id} className="py-3 text-base rounded-lg cursor-pointer">
@@ -386,7 +391,7 @@ export default function EvaluationsPage() {
                               <TableCell className="py-5 px-8 font-medium">
                                 {subjects.find(s => s.id === evaluation.subjectId)?.name || '...'}
                               </TableCell>
-                              <TableCell className="py-5 px-6">{getTypeBadge(evaluation.type)}</TableCell>
+                              <TableCell className="py-5 px-6">{getTypeBadge(evaluation.evaluationType)}</TableCell>
                               <TableCell className="py-5 px-6 font-medium text-slate-600">
                                 {format(new Date(evaluation.evaluationDate), 'dd MMM yyyy', { locale: fr })} à {evaluation.startTime}
                               </TableCell>

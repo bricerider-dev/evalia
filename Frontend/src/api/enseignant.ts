@@ -5,6 +5,15 @@ export const getEnseignants = async () => {
     const response = await api.get("users/enseignants/");
     return response.data;
 };
+export const getMySubjects = async (id: number | string) => {
+    const response = await api.get(`users/enseignants/${id}/get_ue/`);
+    return response.data;
+};
+
+export const getEnseignant = async (id: string) => {
+    const response = await api.get(`users/enseignants/${id}/`);
+    return response.data;
+}
 
 export const createEnseignant = async (enseignant: Teacher) => {
     const response = await api.post("users/enseignants/", enseignant);
