@@ -43,6 +43,7 @@ export default function StudentsPage() {
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFiliere, setFilterFiliere] = useState<string>('all');
+  const [filterLevel, setFilterLevel] = useState<string>('all');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -51,7 +52,10 @@ export default function StudentsPage() {
     studentId: '',
     filiereId: '',
     matricule: '',
+    phone: '',
     enrollmentYear: new Date().getFullYear(),
+    level: 'L1',
+    cycle: 'ING',
   });
 
   const loadData = async () => {
@@ -91,7 +95,10 @@ export default function StudentsPage() {
       studentId: '',
       filiereId: '',
       matricule: '',
+      phone: '',
       enrollmentYear: new Date().getFullYear(),
+      level: 'L1',
+      cycle: 'ING',
     });
     setEditingStudent(null);
   };
@@ -107,7 +114,10 @@ export default function StudentsPage() {
         studentId: student.id,
         filiereId: student.filiere,
         matricule: student.studentId,
+        phone: student.user.phone || '',
         enrollmentYear: student.enrollmentYear || new Date().getFullYear(),
+        level: student.level || 'L1',
+        cycle: student.cycle || 'ING',
       });
     } else {
       resetForm();
@@ -130,10 +140,12 @@ export default function StudentsPage() {
         lastName: formData.lastName,
         email: formData.email,
         username: formData.matricule,
-        phone: '',
+        phone: formData.phone,
         is_active: true
       },
       filiere: formData.filiereId,
+      level: formData.level,
+      cycle: formData.cycle,
       status: 'active',
     };
 
@@ -152,9 +164,12 @@ export default function StudentsPage() {
       setIsDialogOpen(false);
       resetForm();
       loadData();
-    } catch (error) {
-      console.error(error);
-      toast.error('Une erreur est survenue');
+    } catch (error: any) {
+      console.error('Full error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      const errorMessage = error.response?.data?.detail || error.response?.data?.user || error.response?.data || 'Une erreur est survenue';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
     }
   };
 
@@ -177,12 +192,13 @@ export default function StudentsPage() {
       student.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFiliere = filterFiliere === 'all' || student.filiere === filterFiliere;
-    return matchesSearch && matchesFiliere;
+    const matchesFiliere = filterFiliere === 'all' || String(student.filiere) === String(filterFiliere);
+    const matchesLevel = filterLevel === 'all' || student.level === filterLevel;
+    return matchesSearch && matchesFiliere && matchesLevel;
   });
 
-  const getFiliereName = (filiereId: string) => {
-    return filieres.find((f) => f.id === filiereId)?.code || 'N/A';
+  const getFiliereName = (filiereId: any) => {
+    return filieres.find((f) => String(f.id) === String(filiereId))?.code || 'N/A';
   };
 
   const containerVariants = {
@@ -250,7 +266,7 @@ export default function StudentsPage() {
                       : 'Inscrivez un nouvel étudiant'}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-5 py-6">
+                <div className="space-y-5 py-6 max-h-[60vh] overflow-y-auto px-1">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Prénom *</Label>
@@ -282,6 +298,16 @@ export default function StudentsPage() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Téléphone</Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="ex: 699999999"
+                      className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Email *</Label>
                     <Input
                       id="email"
@@ -306,6 +332,41 @@ export default function StudentsPage() {
                             {filiere.name} ({filiere.code})
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="level" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Niveau *</Label>
+                    <Select
+                      value={formData.level}
+                      onValueChange={(value) => setFormData({ ...formData, level: value })}
+                    >
+                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                        <SelectValue placeholder="Sélectionner un niveau" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cycle" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Cycle</Label>
+                    <Select
+                      value={formData.cycle}
+                      onValueChange={(value) => setFormData({ ...formData, cycle: value })}
+                    >
+                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                        <SelectValue placeholder="Sélectionner un cycle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ING">Ingénieur</SelectItem>
+                        <SelectItem value="M">Master</SelectItem>
+                        <SelectItem value="D">Doctorat</SelectItem>
+                        <SelectItem value="SCGI">Science de l'ingénieur</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -367,6 +428,19 @@ export default function StudentsPage() {
                     {filieres.map((filiere) => (
                       <SelectItem key={filiere.id} value={String(filiere.id)} className="py-3 text-base rounded-lg cursor-pointer">
                         {filiere.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterLevel} onValueChange={setFilterLevel}>
+                  <SelectTrigger className="w-full md:w-[150px] h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
+                    <SelectValue placeholder="Niveau" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+                    <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Tout niveau</SelectItem>
+                    {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
+                      <SelectItem key={level} value={level} className="py-3 text-base rounded-lg cursor-pointer">
+                        {level}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -442,6 +516,11 @@ export default function StudentsPage() {
                               <Badge variant="secondary" className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 px-3 py-1 rounded-full font-bold text-[10px]">
                                 {getFiliereName(student.filiere)}
                               </Badge>
+                              {student.level && (
+                                <Badge variant="outline" className="ml-2 border-primary/20 text-primary font-bold text-[10px]">
+                                  {student.level}
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell className="py-5 px-6 font-bold text-slate-500 text-sm">
                               {new Date(student.createdAt).getFullYear()}

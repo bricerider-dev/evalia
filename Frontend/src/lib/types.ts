@@ -36,6 +36,8 @@ export interface Student {
   lieu_de_naissance?: string;
   address?: string;
   enrollmentYear?: number;
+  level: string;
+  cycle?: 'ING' | 'M' | 'D' | 'SCGI';
 }
 
 export interface Teacher extends User {

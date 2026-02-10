@@ -65,6 +65,12 @@ class EtudiantSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'createdAt']
 
+    def __init__(self, *args, **kwargs):
+        super(EtudiantSerializer, self).__init__(*args, **kwargs)
+        # Propager l'instance utilisateur au serializer imbriqué pour la validation d'unicité
+        if self.instance and hasattr(self.instance, 'user'):
+            self.fields['user'].instance = self.instance.user
+
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         password = user_data.pop('password', None)
@@ -77,6 +83,29 @@ class EtudiantSerializer(serializers.ModelSerializer):
             
         etudiant = Etudiant.objects.create(user=user, **validated_data)
         return etudiant
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        
+        # Mettre à jour les données de l'étudiant
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Mettre à jour les données de l'utilisateur si fournies
+        if user_data:
+            user = instance.user
+            # Utiliser le UserSerializer pour valider et mettre à jour
+            user_serializer = UserSerializer(user, data=user_data, partial=True)
+            if user_serializer.is_valid(raise_exception=True):
+                # Ne mettre à jour le mot de passe que s'il est fourni
+                password = user_data.pop('password', None)
+                user_serializer.save()
+                if password:
+                    user.set_password(password)
+                    user.save()
+        
+        return instance
 
 class EnseignantSerializer(serializers.ModelSerializer):
     """Serializer pour Enseignant avec correspondance frontend"""
