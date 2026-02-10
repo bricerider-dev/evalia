@@ -109,8 +109,9 @@ class UserLoginSerializer(serializers.Serializer):
     matricule = serializers.CharField(source='username')
     password = serializers.CharField()    
     def validate(self, data):
-        user = authenticate(**data)
+        user = authenticate(**data)        
         if user and user.is_active:
+
             return user
         raise serializers.ValidationError("Invalid credentials")
 
