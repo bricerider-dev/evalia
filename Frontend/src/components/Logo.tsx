@@ -1,4 +1,4 @@
-import { GraduationCap } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -33,13 +33,14 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
       <div className="relative">
         {/* Icon container with shimmer */}
         <div className={cn(
-          "relative flex items-center justify-center bg-primary shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-white/20 overflow-hidden transition-all duration-500 group-hover/logo:shadow-[0_0_30px_rgba(37,99,235,0.6)] group-hover/logo:scale-110",
+          "relative flex items-center justify-center overflow-hidden bg-white rounded-lg",
           containerSizes[size]
         )}>
-          <GraduationCap className={cn("text-white transition-all duration-500 group-hover/logo:rotate-12 group-hover/logo:scale-110", sizeClasses[size])} />
-
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/logo:translate-x-full transition-transform duration-700"></div>
+          <img
+            src="/enspd-logo.jpg"
+            alt="ENSPD Logo"
+            className={cn("object-contain", sizeClasses[size])}
+          />
         </div>
       </div>
       {showText && (

@@ -24,8 +24,9 @@ import { getSubjects } from '@/api/subject';
 import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
 import { getEtudiants } from '@/api/etudiant';
 import { getGrades, createGrade, updateGrade } from '@/api/grade';
-import { ClipboardList, Save, CheckCircle } from 'lucide-react';
+import { ClipboardList, Save, CheckCircle, GraduationCap, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GradesEntryPage() {
   const { user } = useAuth();
@@ -184,7 +185,6 @@ export default function GradesEntryPage() {
   };
 
   const selectedEval = evaluations.find((e) => e.id === selectedEvaluation);
-  const selectedSubj = subjects.find((s) => s.id === selectedSubject);
 
   const getTypeBadge = (type: string) => {
     const styles: Record<string, string> = {
@@ -192,172 +192,278 @@ export default function GradesEntryPage() {
       SN: 'bg-green-500/10 text-green-600 border-green-500/20',
       RA: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
     };
-    return <Badge className={styles[type] || ''}>{type}</Badge>;
+    return <Badge className={`${styles[type] || ''} font-black`}>{type}</Badge>;
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring" as const, stiffness: 100 }
+    }
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 animate-fade-in-up">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="space-y-6"
+      >
         {/* Header Banner */}
-        <div className="relative overflow-hidden rounded-3xl gradient-deep-blue shadow-2xl group mb-8">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] -ml-24 -mb-24 animate-pulse delay-1000"></div>
+        <motion.div variants={itemVariants} className="relative overflow-hidden rounded-[2.5rem] gradient-deep-blue shadow-2xl group mb-8 border border-white/10">
+          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-white/10 rounded-full blur-[100px] -mr-48 -mt-48 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-[25rem] h-[25rem] bg-black/20 rounded-full blur-[80px] -ml-32 -mb-32 animate-pulse delay-1000"></div>
 
-          <div className="relative z-10 p-8 flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm animate-fade-in">
+          <div className="relative z-10 p-10 flex items-center justify-between">
+            <div className="space-y-4 max-w-2xl">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+              >
                 <ClipboardList className="h-4 w-4 text-white" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Gestion des Notes</span>
-              </div>
-              <h2 className="text-3xl font-black text-white tracking-tight animate-fade-up">Saisie des Notes</h2>
-              <p className="text-white/80 font-medium max-w-lg animate-fade-up delay-100">
-                Sélectionnez une matière et une évaluation pour saisir ou modifier les notes des étudiants.
-              </p>
+                <span className="text-xs font-black text-white uppercase tracking-wider">Gestion Académique</span>
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight"
+              >
+                Saisie des Notes
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-lg text-blue-100 font-medium leading-relaxed"
+              >
+                Gérez les évaluations et enregistrez les performances académiques de vos étudiants.
+              </motion.p>
             </div>
-            <div className="hidden md:block animate-float">
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
-                <Save className="h-8 w-8 text-white" />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ delay: 0.6, type: "spring" }}
+              className="hidden lg:block relative"
+            >
+              <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full transform translate-y-4"></div>
+              <div className="relative p-6 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700">
+                <GraduationCap className="h-20 w-20 text-white drop-shadow-xl" />
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
-        <Card className="border-0 shadow-lg animate-fade-in-up delay-200">
-          <CardHeader className="py-4 px-6 bg-muted/30">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-1 h-4 rounded-full bg-primary"></div>
-              Critères de Sélection
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Matière</label>
-                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Sélectionner une matière" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjects.map((subject) => (
-                      <SelectItem key={subject.id} value={subject.id}>
-                        {subject.code} - {subject.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Évaluation</label>
-                <Select
-                  value={selectedEvaluation}
-                  onValueChange={setSelectedEvaluation}
-                  disabled={!selectedSubject}
-                >
-                  <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Sélectionner une évaluation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {evaluations.map((evaluation) => (
-                      <SelectItem key={evaluation.id} value={evaluation.id}>
-                        {evaluation.type} - {evaluation.date_evaluation}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {selectedEvaluation && students.length > 0 && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <ClipboardList className="h-5 w-5" />
-                  {selectedEval && getTypeBadge(selectedEval.type)}
-                </CardTitle>
-                <CardDescription className="text-xs mt-0.5">
-                  {students.length} étudiant(s) • Note sur 20
-                </CardDescription>
-              </div>
-              <Button onClick={handleSaveGrades} disabled={isSaving} size="sm">
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving ? 'Envoi...' : 'Enregistrer'}
-              </Button>
+        <motion.div variants={itemVariants}>
+          <Card className="border-0 shadow-institutional bg-white/60 dark:bg-card/60 backdrop-blur-xl rounded-[2rem] border border-white/5 ring-1 ring-black/5 overflow-hidden">
+            <CardHeader className="bg-muted/30 border-b border-white/5 py-6 px-8">
+              <CardTitle className="text-lg font-black text-primary flex items-center gap-2">
+                <span className="w-1.5 h-6 rounded-full gradient-institutional mr-2"></span>
+                Critères de Sélection
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary">Matricule</TableHead>
-                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary">Nom Complet</TableHead>
-                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary w-[120px]">Note</TableHead>
-                    <TableHead className="py-2.5 px-6 font-black uppercase text-[10px] tracking-wider text-primary w-[100px]">Statut</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student, index) => (
-                    <TableRow key={student.id} className={`animate-fade-in-right stagger-${index % 10 + 1}`}>
-                      <TableCell className="py-3 px-6 font-mono text-sm font-medium text-primary">{student.user.username}</TableCell>
-                      <TableCell className="py-3 px-6 font-bold text-sm">
-                        {student.user.firstName} {student.user.lastName}
-                      </TableCell>
-                      <TableCell className="py-3 px-6">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.25"
-                          value={grades[student.id] ?? ''}
-                          onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                          placeholder="—"
-                          className={`w-20 h-9 text-sm font-bold text-center ${grades[student.id] !== null && (grades[student.id] as number) >= 10
-                              ? 'text-green-600 bg-green-50 border-green-200 focus-visible:ring-green-500'
-                              : grades[student.id] !== null
-                                ? 'text-red-600 bg-red-50 border-red-200 focus-visible:ring-red-500'
-                                : ''
-                            }`}
-                        />
-                      </TableCell>
-                      <TableCell className="py-3 px-6">
-                        {grades[student.id] !== null ? (
-                          <div className="flex items-center gap-1.5 text-green-600 animate-fade-in">
-                            <CheckCircle className="h-4 w-4" />
-                            <span className="text-[10px] font-bold uppercase">Saisi</span>
+            <CardContent className="p-8">
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="space-y-3 group">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Matière</label>
+                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
+                      <SelectValue placeholder="Sélectionner une matière" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-none shadow-2xl">
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={String(subject.id)} className="py-3 text-base cursor-pointer">
+                          <span className="font-bold mr-2">{subject.code}</span>
+                          {subject.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-3 group">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Évaluation</label>
+                  <Select
+                    value={selectedEvaluation}
+                    onValueChange={setSelectedEvaluation}
+                    disabled={!selectedSubject}
+                  >
+                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm disabled:opacity-50">
+                      <SelectValue placeholder="Sélectionner une évaluation" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-none shadow-2xl">
+                      {evaluations.map((evaluation) => (
+                        <SelectItem key={evaluation.id} value={evaluation.id} className="py-3 text-base cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            {getTypeBadge(evaluation.type)}
+                            <span className="text-muted-foreground ml-2">{evaluation.date_evaluation}</span>
                           </div>
-                        ) : (
-                          <span className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-wider">En attente</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        )}
+        </motion.div>
 
-        {selectedEvaluation && students.length === 0 && (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Aucun étudiant inscrit pour cette sélection.
-            </CardContent>
-          </Card>
-        )}
+        <AnimatePresence mode="wait">
+          {selectedEvaluation && students.length > 0 && (
+            <motion.div
+              key="table"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="border-0 shadow-2xl rounded-[2rem] overflow-hidden bg-white/60 dark:bg-card/60 backdrop-blur-xl border-white/20 ring-1 ring-black/5">
+                <CardHeader className="flex flex-row items-center justify-between py-6 px-8 bg-muted/30 border-b border-white/5">
+                  <div>
+                    <CardTitle className="flex items-center gap-3 text-xl font-black text-primary">
+                      <span className="p-2 bg-primary/10 rounded-xl">
+                        <ClipboardList className="h-5 w-5" />
+                      </span>
+                      {selectedEval && getTypeBadge(selectedEval.type)}
+                    </CardTitle>
+                    <CardDescription className="text-sm font-bold text-muted-foreground mt-2 pl-1 flex items-center gap-2">
+                      <span>{students.length} étudiant(s)</span>
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground/30"></span>
+                      <span>Note sur 20</span>
+                    </CardDescription>
+                  </div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={handleSaveGrades}
+                      disabled={isSaving}
+                      className="bg-primary text-white rounded-xl shadow-lg hover:shadow-primary/25 h-12 px-6 font-bold"
+                    >
+                      <Save className="mr-2 h-4 w-4" />
+                      {isSaving ? 'Envoi...' : 'Enregistrer Tout'}
+                    </Button>
+                  </motion.div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader className="bg-muted/10">
+                        <TableRow className="border-b border-white/5 hover:bg-transparent">
+                          <TableHead className="py-4 px-8 font-black uppercase text-[10px] tracking-widest text-primary">Matricule</TableHead>
+                          <TableHead className="py-4 px-6 font-black uppercase text-[10px] tracking-widest text-primary">Nom Complet</TableHead>
+                          <TableHead className="py-4 px-6 font-black uppercase text-[10px] tracking-widest text-primary w-[140px]">Note / 20</TableHead>
+                          <TableHead className="py-4 px-6 font-black uppercase text-[10px] tracking-widest text-primary w-[120px]">Statut</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {students.map((student, index) => (
+                          <motion.tr
+                            key={student.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="group hover:bg-primary/5 transition-colors border-b border-slate-100 last:border-0"
+                          >
+                            <TableCell className="py-4 px-8">
+                              <span className="font-mono font-bold text-sm bg-white border border-slate-200 px-2 py-1 rounded-md text-slate-600">
+                                {student.user.username}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <div className="font-bold text-foreground/80">{student.user.firstName} {student.user.lastName}</div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <div className="relative">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  step="0.25"
+                                  value={grades[student.id] ?? ''}
+                                  onChange={(e) => handleGradeChange(student.id, e.target.value)}
+                                  placeholder="-"
+                                  className={`w-24 h-10 text-base font-black text-center shadow-sm transition-all border-2 focus:ring-4 focus:ring-primary/10 ${grades[student.id] !== null && (grades[student.id] as number) >= 10
+                                    ? 'text-green-600 bg-green-50 border-green-200 focus:border-green-500'
+                                    : grades[student.id] !== null
+                                      ? 'text-red-600 bg-red-50 border-red-200 focus:border-red-500'
+                                      : 'bg-white border-slate-200'
+                                    }`}
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              {grades[student.id] !== null ? (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1.5 rounded-full w-fit"
+                                >
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                  <span className="text-[10px] font-black uppercase tracking-wider">Saisi</span>
+                                </motion.div>
+                              ) : (
+                                <span className="text-muted-foreground/30 text-[10px] font-black uppercase tracking-widest pl-2">—</span>
+                              )}
+                            </TableCell>
+                          </motion.tr>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {selectedEvaluation && students.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Card className="border-dashed border-2 border-slate-200">
+                <CardContent className="py-16 text-center text-muted-foreground">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-slate-300" />
+                  </div>
+                  <p className="font-bold">Aucun étudiant inscrit pour cette sélection.</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!selectedEvaluation && (
-          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-up delay-300">
-            <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mb-6 animate-pulse">
-              <ClipboardList className="h-10 w-10 text-muted-foreground/40" />
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col items-center justify-center py-20 text-center"
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-transparent rounded-full flex items-center justify-center mb-6 ring-1 ring-primary/20 shadow-xl">
+              <ChevronRight className="h-10 w-10 text-primary opacity-50 ml-1" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">Prêt à saisir les notes ?</h3>
-            <p className="text-muted-foreground max-w-sm">
+            <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight">Prêt à saisir les notes ?</h3>
+            <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
               Utilisez les filtres ci-dessus pour sélectionner une matière et une évaluation.
             </p>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </DashboardLayout>
   );
 }
