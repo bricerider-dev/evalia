@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { getSubjects } from '@/api/subject';
+import { getMySubjects } from '@/api/enseignant';
 import { getEvaluations } from '@/api/evaluation';
 import { getEtudiants } from '@/api/etudiant';
 import { getGrades, createGrade, updateGrade } from '@/api/grade';
@@ -30,6 +31,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GradesEntryPage() {
   const { user } = useAuth();
+  const user_id = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null;
   const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [evaluations, setEvaluations] = useState<any[]>([]);
@@ -38,14 +40,22 @@ export default function GradesEntryPage() {
   const [grades, setGrades] = useState<Record<string, number | null>>({});
   const [existingGrades, setExistingGrades] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const resolveGradeStudentId = (g: any) => {
+    const id = g?.studentId ?? g?.etudiant ?? g?.etudiant_id ?? g?.student ?? g?.etudiant?.id ?? g?.studentId?.toString();
+    return id !== undefined && id !== null ? String(id) : '';
+  };
+
+  const resolveGradeScore = (g: any) => g?.score ?? g?.grade ?? null;
 
   useEffect(() => {
     const loadSubjects = async () => {
       try {
-        const allSubjects = await getSubjects();
+
+        const allSubjects = await getMySubjects(localStorage.getItem('auth_user'));
         // Filter by teacher if user is teacher
         const teacherSubjects = user?.role === 'teacher'
-          ? allSubjects.filter((s: any) => s.responsibleTeacherId === user.id)
+          ? allSubjects.filter((s: any) => s.enseignant_id === user_id)
           : allSubjects;
         setSubjects(teacherSubjects);
       } catch (error) {
@@ -63,7 +73,7 @@ export default function GradesEntryPage() {
             getEvaluations()
           ]);
 
-          const subjectEvals = evals.filter(e => e.subjectId === selectedSubject);
+          const subjectEvals = evals.filter(e => e.subjectId == selectedSubject);
           setEvaluations(subjectEvals);
           setSelectedEvaluation('');
           setStudents([]);
@@ -93,22 +103,24 @@ export default function GradesEntryPage() {
           });
           setStudents(filiereStudents);
 
-          const currentEvalEvals = allGrades.filter((g: any) => {
-            const evalObj = evaluations.find(e => e.id === selectedEvaluation);
-            if (!evalObj) return false;
-            if (evalObj.type === 'CC') return g.controle_continu === selectedEvaluation;
-            if (evalObj.type === 'SN') return g.session_normale === selectedEvaluation;
-            if (evalObj.type === 'RA') return g.rattrapage === selectedEvaluation;
-            return false;
-          });
-          setExistingGrades(currentEvalEvals);
+          // Initialize grades from existing grades for this evaluation
+          const gradeMap: Record<string, number | null> = {};
 
-          const gradesMap: Record<string, number | null> = {};
-          filiereStudents.forEach((student: any) => {
-            const existingGrade = currentEvalEvals.find((g: any) => String(g.studentId) === String(student.id));
-            gradesMap[student.id] = existingGrade?.score ?? null;
+          const resolveGradeStudentId = (g: any) => {
+            // Try multiple possible shapes returned by the API
+            const id = g.studentId ?? g.etudiant ?? g.etudiant_id ?? g.student ?? g.etudiant?.id ?? g.studentId?.toString();
+            return id !== undefined && id !== null ? String(id) : '';
+          };
+
+          const resolveGradeScore = (g: any) => g.score ?? g.grade ?? null;
+
+          allGrades.forEach((grade: any) => {
+            const sid = resolveGradeStudentId(grade);
+            if (sid) gradeMap[sid] = resolveGradeScore(grade);
           });
-          setGrades(gradesMap);
+
+          setGrades(gradeMap);
+          setExistingGrades(allGrades);
 
         } catch (error) {
           toast.error('Erreur lors du chargement des notes');
@@ -116,7 +128,7 @@ export default function GradesEntryPage() {
       }
     };
     loadStudentsAndGrades();
-  }, [selectedEvaluation]);
+  }, [selectedEvaluation, selectedSubject, subjects]);
 
   const handleGradeChange = (studentId: string, value: string) => {
     const numValue = value === '' ? null : parseFloat(value);
@@ -125,7 +137,12 @@ export default function GradesEntryPage() {
     }
     setGrades((prev) => ({ ...prev, [studentId]: numValue }));
   };
-
+  const getStatus= (score: number | null) => {
+    if (score === null) return { text: 'Non saisi', value:"non_valide", color: 'text-muted-foreground/30' };
+    if (score < 10) return { text: 'Non Valide', value: "non_valide", color: 'text-red-600' };
+    if (score >= 10) return { text: 'valide', value: "valide", color: 'text-green-600' };
+    return { text: 'Non Valide', value: "non_valide", color: 'text-red-600' };
+  }
   const handleSaveGrades = async () => {
     if (!selectedEvaluation || !user) return;
     setIsSaving(true);
@@ -133,21 +150,18 @@ export default function GradesEntryPage() {
     try {
       const evalObj = evaluations.find(e => e.id === selectedEvaluation);
       if (!evalObj) return;
-
+      console.log('Saving grades for evaluation:');
       const promises = Object.entries(grades).map(async ([studentId, score]) => {
         if (score !== null) {
-          const existingGrade = existingGrades.find(g => g.studentId === studentId);
+          const existingGrade = existingGrades.find((g: any) => resolveGradeStudentId(g) === String(studentId));
 
           const payload: any = {
-            studentId,
-            score,
-            enteredBy: user.id,
-            isValidated: false,
+            etudiant: String(studentId),
+            grade: score,
+            status: getStatus(score).value,
+            evaluation: selectedEvaluation
           };
-
-          if (evalObj.type === 'CC') payload.controle_continu = selectedEvaluation;
-          else if (evalObj.type === 'SN') payload.session_normale = selectedEvaluation;
-          else if (evalObj.type === 'RA') payload.rattrapage = selectedEvaluation;
+          console.log('Payload for student', payload, 'Existing grade:', existingGrade);
 
           if (existingGrade) {
             await updateGrade(existingGrade.id, payload);
@@ -163,9 +177,9 @@ export default function GradesEntryPage() {
       // Refresh
       const allGrades = await getGrades();
       const currentEvalEvals = allGrades.filter((g: any) => {
-        if (evalObj.type === 'CC') return g.controle_continu === selectedEvaluation;
-        if (evalObj.type === 'SN') return g.session_normale === selectedEvaluation;
-        if (evalObj.type === 'RA') return g.rattrapage === selectedEvaluation;
+        if (evalObj.evaluationType === 'CC') return g.controle_continu === selectedEvaluation;
+        if (evalObj.evaluationType === 'SN') return g.session_normale === selectedEvaluation;
+        if (evalObj.evaluationType === 'RA') return g.rattrapage === selectedEvaluation;
         return false;
       });
       setExistingGrades(currentEvalEvals);
@@ -276,14 +290,14 @@ export default function GradesEntryPage() {
                 <div className="space-y-3 group">
                   <label className="text-xs font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Matière</label>
                   <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
+                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white dark:bg-card/60 border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
                       <SelectValue placeholder="Sélectionner une matière" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
                       {subjects.map((subject) => (
                         <SelectItem key={subject.id} value={String(subject.id)} className="py-3 text-base cursor-pointer">
                           <span className="font-bold mr-2">{subject.code}</span>
-                          {subject.name}
+                          {subject.nom}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -296,14 +310,14 @@ export default function GradesEntryPage() {
                     onValueChange={setSelectedEvaluation}
                     disabled={!selectedSubject}
                   >
-                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm disabled:opacity-50">
+                    <SelectTrigger className="h-14 text-base rounded-2xl bg-white dark:bg-card/60 border-2 border-slate-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm disabled:opacity-50">
                       <SelectValue placeholder="Sélectionner une évaluation" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
                       {evaluations.map((evaluation) => (
                         <SelectItem key={evaluation.id} value={evaluation.id} className="py-3 text-base cursor-pointer">
                           <div className="flex items-center gap-2">
-                            {getTypeBadge(evaluation.type)}
+                            {getTypeBadge(evaluation.evaluationType)}
                             <span className="text-muted-foreground ml-2">{evaluation.date_evaluation}</span>
                           </div>
                         </SelectItem>
@@ -332,7 +346,7 @@ export default function GradesEntryPage() {
                       <span className="p-2 bg-primary/10 rounded-xl">
                         <ClipboardList className="h-5 w-5" />
                       </span>
-                      {selectedEval && getTypeBadge(selectedEval.type)}
+                      {selectedEval && getTypeBadge(selectedEval.evaluationType)}
                     </CardTitle>
                     <CardDescription className="text-sm font-bold text-muted-foreground mt-2 pl-1 flex items-center gap-2">
                       <span>{students.length} étudiant(s)</span>
@@ -403,10 +417,10 @@ export default function GradesEntryPage() {
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}
-                                  className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1.5 rounded-full w-fit"
+                                  className={`flex items-center gap-2 ${getStatus(grades[student.id] as number).color} bg-green-50 px-3 py-1.5 rounded-full w-fit`}
                                 >
                                   <CheckCircle className="h-3.5 w-3.5" />
-                                  <span className="text-[10px] font-black uppercase tracking-wider">Saisi</span>
+                                  <span className="text-[10px] font-black uppercase tracking-wider">{getStatus(grades[student.id] as number).text}</span>
                                 </motion.div>
                               ) : (
                                 <span className="text-muted-foreground/30 text-[10px] font-black uppercase tracking-widest pl-2">—</span>

@@ -12,7 +12,7 @@ from reportlab.lib.units import inch
 from  io import BytesIO
 import datetime
 from .models import Grade
-from .serializer import GradeSerializer
+from .serializer import GradeSerializer, StudentGradeReportSerializer
 from users.models import Etudiant
 
 class GradeViewSet(viewsets.ModelViewSet):
@@ -257,3 +257,32 @@ class GeneratePVView(generics.GenericAPIView):
         pdf = buffer.getvalue()
         buffer.close()
         return pdf
+
+
+class StudentGradeReportView(generics.GenericAPIView):
+    def get(self, request, student_id):
+        try:
+            student = Etudiant.objects.get(id=student_id)
+        except Etudiant.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Récupérer toutes les notes de l'étudiant
+        grades = Grade.objects.filter(etudiant=student).select_related('evaluation__ue')
+        
+        # Organiser les données par cours
+        ue_data = []
+        for grade in grades:
+            ue_data.append({
+                'ue': grade.evaluation.ue,
+                'grade': grade,
+                'final_grade': grade.calculate_final_grade(),
+                'status': grade.get_status()
+            })
+        
+        # Créer le rapport
+        report = StudentGradeReportSerializer({
+            'studentId': student.id,
+            'ue': ue_data
+        }).data
+        
+        return Response(report)

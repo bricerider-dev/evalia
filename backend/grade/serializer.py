@@ -8,21 +8,8 @@ class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         fields = '__all__'
-        read_only_fields = ['id', 'createdAt', 'updatedAt', 'final_grade', 'statut']
+        read_only_fields = ['id', 'createdAt', 'updatedAt', 'final_grade']
     
-    def create(self, validated_data):
-        grade = Grade.objects.create(**validated_data)
-        grade.final_grade = grade.calculate_final_grade()
-        grade.statut = grade.get_status()
-        grade.save()
-        return grade
-    
-    def update(self, instance, validated_data):
-        instance.note = validated_data.get('note', instance.note)
-        instance.final_grade = instance.calculate_final_grade()
-        instance.statut = instance.get_status()
-        instance.save()
-        return instance
     def get_final_grade(self, obj):
         return obj.calculate_final_grade()
     
