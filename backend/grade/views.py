@@ -19,8 +19,10 @@ from users.models import Etudiant
 from department.models import Filiere
 from django.db.models import Q
 from django.template.loader import render_to_string
-from django.conf import settings
-from xhtml2pdf import pisa
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
 
 class GradeViewSet(viewsets.ModelViewSet):
     """ViewSet pour gérer les notes des étudiants"""

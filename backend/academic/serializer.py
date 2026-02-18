@@ -9,8 +9,12 @@ class UniteSerialization(serializers.ModelSerializer):
     """Serializer pour Unité d'Enseignement"""
     name = serializers.CharField(source='nom')
     level = serializers.IntegerField(source='niveau')
-    # expose the semestre number (1 or 2) instead of the related object
-    semester = serializers.IntegerField(source='semestre.numero')    
+    semester = serializers.SerializerMethodField()
+
+    def get_semester(self, obj):
+        if obj.semestre:
+            return obj.semestre.numero
+        return None
     filiere = serializers.PrimaryKeyRelatedField(
         queryset=UniteEnseignement._meta.get_field('filiere').remote_field.model.objects.all(),
         required=False,
