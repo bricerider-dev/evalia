@@ -89,14 +89,18 @@ class EnseignantViewSet(viewsets.ModelViewSet):
 class UserLoginView(generics.CreateAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
+    
     def post(self, request, *args, **kwargs):
-        """Retourne l'id de l'utilisateur connecté et le son profile User"""
+        """Retourne l'id de l'utilisateur connecté et son profil User"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
-        user_data = UserSerializer(user).data
-        user_data['id'] = user.id
         
+        # Utiliser le UserSerializer qui gère maintenant les IDs du profil
+        user_serializer = UserSerializer(user)
+        user_data = user_serializer.data
+        user_data['student_id'] = user_serializer.get_student_id(user)
+        user_data['teacher_id'] = user_serializer.get_teacher_id(user)
         return Response(user_data)
 
 class UserLogoutView(generics.CreateAPIView):

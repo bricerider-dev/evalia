@@ -23,6 +23,16 @@ class Evaluation(TimeStampedModel):
     heure_debut = models.TimeField()
     heure_fin = models.TimeField(default="12:00")  # Corrigé : remplacé duree par heure_fin
     salle = models.CharField(max_length=50, blank=True, null=True)
+    semestre = models.ForeignKey(
+        'academic.Semestre',
+        on_delete=models.CASCADE,
+        related_name='evaluations',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        unique_together = ('ue', 'type_evaluation', 'semestre') 
  
 
     class StatutTime(models.TextChoices):

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Download, BarChart2, PieChart, Users, BookOpen, TrendingUp } from 'lucide-react';
+import { FileText, Download, BarChart2, PieChart, Users, BookOpen, TrendingUp, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getFilieres } from '@/api/filiere';
@@ -10,6 +10,7 @@ import { getGrades } from '@/api/grade';
 import { getSubjects } from '@/api/subject';
 import { calculateWeightedAverage, getSubjectResultForStudent } from '@/lib/gradeCalculator';
 import { getEvaluations } from '@/api/evaluation';
+import { GeneratePVDialog } from '@/components/grade/GeneratePVDialog';
 import { motion } from 'framer-motion';
 
 export default function ReportsPage() {
@@ -19,39 +20,38 @@ export default function ReportsPage() {
         passRate: 0,
         filiereStats: [] as any[]
     });
+    const [selectedPV, setSelectedPV] = useState<'CC' | 'SN' | 'RA' | 'Final' | null>(null);
+    const [openDialog, setOpenDialog] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [filieres, etudiants, grades, subjects, allEvals] = await Promise.all([
+                const [filieres, etudiants, grades, allEvals] = await Promise.all([
                     getFilieres(),
                     getEtudiants(),
                     getGrades(),
-                    getSubjects(),
                     getEvaluations(),
-                    
                 ]);
                 
 
-                // Calculate Filiere Stats
+                // Calculate Filiere Stats - simplified calculation without subjects
                 const fStats = filieres.map((f: any) => {
                     const fStudents = etudiants.filter((s: any) => s.filiere === f.id);
-                    const fSubjects = subjects.filter((s: any) => s.filiereId === f.id || true); // Simplified
 
                     if (fStudents.length === 0) return { label: f.name, progress: 0, average: "0.00" };
 
-                    // Calculate average for these students
+                    // Calculate average for these students from grades
                     let totalAvg = 0;
                     let validStudents = 0;
 
                     fStudents.forEach((stud: any) => {
-                        const results = fSubjects.map((sub: any) =>
-                            getSubjectResultForStudent(stud.id, sub.id, sub.name, sub.coefficient, allEvals, grades)
-                        );
-                        const avg = calculateWeightedAverage(results);
-                        if (avg !== null) {
-                            totalAvg += avg;
-                            validStudents++;
+                        const studentGrades = grades.filter((g: any) => g.etudiant === stud.id);
+                        if (studentGrades.length > 0) {
+                            const avg = studentGrades.reduce((sum: number, g: any) => sum + (g.grade || 0), 0) / studentGrades.length;
+                            if (avg !== null) {
+                                totalAvg += avg;
+                                validStudents++;
+                            }
                         }
                     });
 
@@ -202,7 +202,58 @@ export default function ReportsPage() {
                         </CardContent>
                     </Card>
                 </motion.div>
+
+                {/* Procès-Verbaux Section */}
+                <motion.div variants={itemVariants}>
+                    <Card className="border-0 shadow-institutional rounded-[2rem] bg-white/60 dark:bg-card/60 backdrop-blur-xl">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="flex items-center gap-3 text-lg">
+                                <FileDown className="h-5 w-5 text-blue-600" />
+                                Procès-Verbaux des Évaluations
+                            </CardTitle>
+                            <CardDescription>
+                                Générez et téléchargez les procès-verbaux des évaluations
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <motion.div variants={containerVariants} className="grid gap-4 md:grid-cols-2">
+                                {[
+                                    { type: 'CC' as const, label: 'Contrôle Continu', icon: '📋' },
+                                    { type: 'SN' as const, label: 'Session Normale', icon: '📊' },
+                                    { type: 'RA' as const, label: 'Rattrapage', icon: '🔄' },
+                                    { type: 'Final' as const, label: 'Notes Finales', icon: '✅' }
+                                ].map((pv) => (
+                                    <motion.div key={pv.type} variants={itemVariants}>
+                                        <Button
+                                            onClick={() => {
+                                                setSelectedPV(pv.type);
+                                                setOpenDialog(true);
+                                            }}
+                                            className="w-full justify-start h-auto py-4 px-4 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-primary/5 hover:to-primary/10 text-foreground border border-slate-200 hover:border-primary/50 transition-all"
+                                        >
+                                            <div className="text-2xl mr-3">{pv.icon}</div>
+                                            <div className="text-left flex-1">
+                                                <div className="font-semibold">{pv.label}</div>
+                                                <div className="text-xs text-muted-foreground">PV {pv.type}</div>
+                                            </div>
+                                            <Download className="h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
             </motion.div>
+
+            {/* PV Dialog */}
+            {selectedPV && (
+                <GeneratePVDialog
+                    open={openDialog}
+                    onOpenChange={setOpenDialog}
+                    evaluationType={selectedPV}
+                />
+            )}
         </DashboardLayout>
     );
 }

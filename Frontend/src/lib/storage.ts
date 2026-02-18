@@ -283,12 +283,20 @@ export function updateGrade(id: string, updates: Partial<Grade>): void {
 
 export function upsertGrade(grade: Grade): void {
   const grades = getGrades();
+  // Utiliser les vrais noms de champs du backend: etudiant et evaluation
+  const studentId = String(grade.etudiant ?? (grade as any).studentId);
+  const evaluationId = String(grade.evaluation ?? (grade as any).evaluationId);
+  
   const existingIndex = grades.findIndex(
-    (g) => g.studentId === grade.studentId && g.evaluationId === grade.evaluationId
+    (g) => {
+      const gStudentId = String((g as any).etudiant ?? (g as any).studentId);
+      const gEvaluationId = String((g as any).evaluation ?? (g as any).evaluationId);
+      return gStudentId === studentId && gEvaluationId === evaluationId;
+    }
   );
 
   if (existingIndex !== -1) {
-    grades[existingIndex] = { ...grade, updatedAt: new Date().toISOString() };
+    grades[existingIndex] = { ...grade, updated_at: new Date().toISOString() };
   } else {
     grades.push(grade);
   }

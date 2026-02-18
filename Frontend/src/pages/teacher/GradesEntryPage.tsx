@@ -20,18 +20,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getSubjects } from '@/api/subject';
 import { getMySubjects } from '@/api/enseignant';
 import { getEvaluations } from '@/api/evaluation';
 import { getEtudiants } from '@/api/etudiant';
-import { getGrades, createGrade, updateGrade } from '@/api/grade';
+import { getGrades, createGrade, patchGrade } from '@/api/grade';
 import { ClipboardList, Save, CheckCircle, GraduationCap, ChevronRight, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GradesEntryPage() {
   const { user } = useAuth();
-  const user_id = localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user') as string) : null;
   const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [evaluations, setEvaluations] = useState<any[]>([]);
@@ -42,22 +40,19 @@ export default function GradesEntryPage() {
   const [isSaving, setIsSaving] = useState(false);
   
   const resolveGradeStudentId = (g: any) => {
-    const id = g?.studentId ?? g?.etudiant ?? g?.etudiant_id ?? g?.student ?? g?.etudiant?.id ?? g?.studentId?.toString();
+    // Essayer plusieurs formats possibles retournés par l'API
+    const id = g.etudiant ?? g.etudiant_id ?? g.student?.id ?? g.student;
     return id !== undefined && id !== null ? String(id) : '';
   };
 
-  const resolveGradeScore = (g: any) => g?.score ?? g?.grade ?? null;
+  const resolveGradeScore = (g: any) => g.grade ?? g.score ?? null;
 
   useEffect(() => {
     const loadSubjects = async () => {
       try {
 
-        const allSubjects = await getMySubjects(localStorage.getItem('auth_user'));
-        // Filter by teacher if user is teacher
-        const teacherSubjects = user?.role === 'teacher'
-          ? allSubjects.filter((s: any) => s.enseignant_id === user_id)
-          : allSubjects;
-        setSubjects(teacherSubjects);
+        const allSubjects = await getMySubjects(user.teacher_id);        
+        setSubjects(allSubjects);
       } catch (error) {
         toast.error('Erreur lors du chargement des matières');
       }
@@ -73,7 +68,10 @@ export default function GradesEntryPage() {
             getEvaluations()
           ]);
 
-          const subjectEvals = evals.filter(e => e.subjectId == selectedSubject);
+          // Backend retourne "ue" pour l'ID de la matière
+          const subjectEvals = evals.filter(e => 
+            String(e.subjectId ?? e.ue) === String(selectedSubject)
+          );
           setEvaluations(subjectEvals);
           setSelectedEvaluation('');
           setStudents([]);
@@ -90,29 +88,25 @@ export default function GradesEntryPage() {
     const loadStudentsAndGrades = async () => {
       if (selectedEvaluation && selectedSubject) {
         try {
+          const subject = subjects.find(s => String(s.id) === String(selectedSubject));
+          if (!subject) return;
+
+          // Charger données en parallèle avec optimisations
           const [allStudents, allGrades] = await Promise.all([
             getEtudiants(),
-            getGrades()
+            // Optimisation: charger les notes seulement pour cette évaluation
+            getGrades({ evaluation_id: selectedEvaluation })
           ]);
 
-          const subject = subjects.find(s => String(s.id) === String(selectedSubject));
+          // Filtrer les étudiants par filière de la matière
           const filiereStudents = allStudents.filter((s: any) => {
-            // If subject has a filiere property, use it. Otherwise, use what's available or default to true for now.
             const subjectFiliere = subject?.filiere;
             return subjectFiliere ? s.filiere === subjectFiliere : true;
           });
           setStudents(filiereStudents);
 
-          // Initialize grades from existing grades for this evaluation
+          // Initialiser le map des notes depuis les notes existantes
           const gradeMap: Record<string, number | null> = {};
-
-          const resolveGradeStudentId = (g: any) => {
-            // Try multiple possible shapes returned by the API
-            const id = g.studentId ?? g.etudiant ?? g.etudiant_id ?? g.student ?? g.etudiant?.id ?? g.studentId?.toString();
-            return id !== undefined && id !== null ? String(id) : '';
-          };
-
-          const resolveGradeScore = (g: any) => g.score ?? g.grade ?? null;
 
           allGrades.forEach((grade: any) => {
             const sid = resolveGradeStudentId(grade);
@@ -123,7 +117,8 @@ export default function GradesEntryPage() {
           setExistingGrades(allGrades);
 
         } catch (error) {
-          toast.error('Erreur lors du chargement des notes');
+          console.error('Error loading students and grades:', error);
+          toast.error('Erreur lors du chargement des étudiants et notes');
         }
       }
     };
@@ -148,25 +143,32 @@ export default function GradesEntryPage() {
     setIsSaving(true);
 
     try {
-      const evalObj = evaluations.find(e => e.id === selectedEvaluation);
-      if (!evalObj) return;
-      console.log('Saving grades for evaluation:');
+      const evalObj = evaluations.find(e => String(e.id) === String(selectedEvaluation));
+      if (!evalObj) {
+        toast.error('Évaluation non trouvée');
+        return;
+      }
+      
       const promises = Object.entries(grades).map(async ([studentId, score]) => {
         if (score !== null) {
-          const existingGrade = existingGrades.find((g: any) => resolveGradeStudentId(g) === String(studentId));
-
-          const payload: any = {
-            etudiant: String(studentId),
-            grade: score,
-            status: getStatus(score).value,
-            evaluation: selectedEvaluation
-          };
-          console.log('Payload for student', payload, 'Existing grade:', existingGrade);
+          const existingGrade = existingGrades.find((g: any) => 
+            String(resolveGradeStudentId(g)) === String(studentId)
+          );
 
           if (existingGrade) {
-            await updateGrade(existingGrade.id, payload);
+            // UPDATE: Utiliser PATCH pour modification partielle
+            const updatePayload = { grade: score };
+            console.log('Patching grade', existingGrade.id, 'with payload:', updatePayload);
+            await patchGrade(String(existingGrade.id), updatePayload);
           } else {
-            await createGrade(payload);
+            // CREATE: Envoyer tous les champs requis
+            const createPayload = {
+              etudiant: parseInt(studentId),
+              evaluation: parseInt(selectedEvaluation),
+              grade: score
+            };
+            console.log('Creating grade with payload:', createPayload);
+            await createGrade(createPayload);
           }
         }
       });
@@ -174,15 +176,12 @@ export default function GradesEntryPage() {
       await Promise.all(promises);
       toast.success('Notes enregistrées avec succès');
 
-      // Refresh
+      // Refresh: charger les notes actualisées
       const allGrades = await getGrades();
-      const currentEvalEvals = allGrades.filter((g: any) => {
-        if (evalObj.evaluationType === 'CC') return g.controle_continu === selectedEvaluation;
-        if (evalObj.evaluationType === 'SN') return g.session_normale === selectedEvaluation;
-        if (evalObj.evaluationType === 'RA') return g.rattrapage === selectedEvaluation;
-        return false;
-      });
-      setExistingGrades(currentEvalEvals);
+      const currentEvalGrades = allGrades.filter((g: any) => 
+        String(g.evaluation) === String(selectedEvaluation)
+      );
+      setExistingGrades(currentEvalGrades);
     } catch (error) {
       console.error('Error saving grades:', error);
       toast.error('Erreur lors de l\'enregistrement');
@@ -417,10 +416,14 @@ export default function GradesEntryPage() {
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}
-                                  className={`flex items-center gap-2 ${getStatus(grades[student.id] as number).color} bg-green-50 px-3 py-1.5 rounded-full w-fit`}
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full w-fit font-bold text-[10px] uppercase tracking-wider ${
+                                    (grades[student.id] as number) >= 10
+                                      ? 'bg-green-50 text-green-600'
+                                      : 'bg-red-50 text-red-600'
+                                  }`}
                                 >
                                   <CheckCircle className="h-3.5 w-3.5" />
-                                  <span className="text-[10px] font-black uppercase tracking-wider">{getStatus(grades[student.id] as number).text}</span>
+                                  <span>{getStatus(grades[student.id] as number).text}</span>
                                 </motion.div>
                               ) : (
                                 <span className="text-muted-foreground/30 text-[10px] font-black uppercase tracking-widest pl-2">—</span>

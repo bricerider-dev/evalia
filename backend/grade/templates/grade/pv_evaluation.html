@@ -1,0 +1,33 @@
+{% extends "grade/pv_base.html" %}
+{% block title %}Procès-Verbal - {{ evaluation_type }}{% endblock %}
+{% block header_title %}Procès-Verbal - {{ evaluation_type }} {% endblock %}
+{% block content %}
+    <div class="pv-info">
+        <h4>UE : <span class="highlight">{{ ue_name }}</span></h3>
+        <h4>Type d'évaluation : <span class="highlight">{{ evaluation_type }}</span></h4>
+        <h4>classe : <span>{{classe}}</span></h4>
+        <h4>Enseignant : <span class="highlight">{{ teacher }}</span></h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Note</th>
+                <th>Observation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in grades %}
+            <tr>
+                <td>{{ row.matricule }}</td>
+                <td>{{ row.nom }}</td>
+                <td>{{ row.prenom }}</td>
+                <td>{{ row.note }}</td>
+                <td>{{ row.observation }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

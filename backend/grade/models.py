@@ -37,33 +37,66 @@ class Grade(TimeStampedModel):
     def __str__(self):
         return f"{self.etudiant.user.username} - {self.evaluation.get_type_evaluation()} : {self.grade}/20"
 
-    def calculate_final_grade(self): 
-        """Calcule la note finale"""
-        grade = self.grade
-        cc_grade = grade.filter(evaluation__type_evaluation='CC').first()
-        sn_grade = grade.filter(evaluation__type_evaluation='SN').first()
-        ra_grade = grade.filter(evaluation__type_evaluation='RA').first()
-
-        final_grade = None
-
-        if cc_grade and sn_grade:
-            final_grade = (cc_grade.grade * 0.3) + (sn_grade.grade * 0.7)
-
-            if final_grade < 10 and ra_grade:
-                final_grade = ra_grade.grade
+    def calculate_final_grade(self):
+        """
+        Calcule la note finale pour l'UE de cette évaluation.
+        Formule: Final = (CC × 0.3) + (SN × 0.7)
+        Si Final < 10 et RA existe: Final = max(SN, RA) (rattrapage)
+        """
+        ue = self.evaluation.ue
         
-        return round(final_grade, 2) if final_grade else None
+        # Récupérer les notes de cet étudiant pour cette UE
+        cc_grade = Grade.objects.filter(
+            etudiant=self.etudiant,
+            evaluation__ue=ue,
+            evaluation__type_evaluation='CC'
+        ).first()
+        
+        sn_grade = Grade.objects.filter(
+            etudiant=self.etudiant,
+            evaluation__ue=ue,
+            evaluation__type_evaluation='SN'
+        ).first()
+        
+        ra_grade = Grade.objects.filter(
+            etudiant=self.etudiant,
+            evaluation__ue=ue,
+            evaluation__type_evaluation='RA'
+        ).first()
+
+        # Si pas de CC ou SN, impossible de calculer
+        if not cc_grade or not sn_grade:
+            return None
+
+        cc_score = float(cc_grade.grade)
+        sn_score = float(sn_grade.grade)
+        
+        # Formule normale: CC×30% + SN×70%
+        final_grade = (cc_score * 0.3) + (sn_score * 0.7)
+        
+        # Si rattrapage existe et la note est < 10
+        if ra_grade and final_grade < 10:
+            ra_score = float(ra_grade.grade)
+            # Rattrapage remplace SN: CC×30% + RA×70%
+            final_grade = (cc_score * 0.3) + (ra_score * 0.7)
+        
+        return round(final_grade, 2)
+    
     def get_status(self):
-        """Détermine le statut de l'étudiant pour ce cours"""
+        """Détermine le statut basé sur la note finale"""
         final_grade = self.calculate_final_grade()
         
         if final_grade is None:
-            self.statut = self.StatutEvaluation.NON_VALIDE
+            return self.StatutEvaluation.NON_VALIDE
         elif final_grade >= 10:
-            self.statut = self.StatutEvaluation.VALIDE
+            return self.StatutEvaluation.VALIDE
         else:
-            self.statut = self.StatutEvaluation.RATTRAPAGE
-        self.save()
+            return self.StatutEvaluation.RATTRAPAGE
+    
+    def update_status(self):
+        """Met à jour et sauvegarde le statut"""
+        self.statut = self.get_status()
+        self.save(update_fields=['statut', 'updated_at'])
         return self.statut
 
 class DecisionFinale(TimeStampedModel):

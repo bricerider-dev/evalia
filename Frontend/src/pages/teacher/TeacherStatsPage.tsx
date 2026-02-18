@@ -37,7 +37,7 @@ export default function TeacherStatsPage() {
                     let count = 0;
 
                     subjectStudents.forEach(student => {
-                        const result = getSubjectResultForStudent(student.id, subject.id, subject.name, subject.coefficient, allEvals, allGrades);
+                        const result = getSubjectResultForStudent(student.id, subject.id, subject.name, subject.credit || 1, allEvals, allGrades);
                         if (result.finalScore !== null) {
                             totalAvg += result.finalScore;
                             if (result.finalScore >= 10) passCount++;

@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
 export default function TeacherSubjectsPage() {
-    let user = localStorage.getItem('auth_user');
+    let user = JSON.parse(localStorage.getItem('user') || '{}');
     const [subjects, setSubjects] = useState<any[]>([]);
     const [filieres, setFilieres] = useState<any[]>([]);
     const [students, setStudents] = useState<any[]>([]);
@@ -20,12 +20,11 @@ export default function TeacherSubjectsPage() {
         const loadData = async () => {
             try {
                 const [allSubjects, allFilieres, allStudents] = await Promise.all([
-                    getMySubjects(user),
+                    getMySubjects(user.teacher_id),
                     getFilieres(),
                     getEtudiants()
-                ]);
-                const teacherSubjects = allSubjects.filter((s: any) => s.enseignant_id == user);
-                setSubjects(teacherSubjects);
+                ]);                
+                setSubjects(allSubjects);
                 setFilieres(allFilieres);
                 setStudents(allStudents);
             } catch (error) {
@@ -36,7 +35,7 @@ export default function TeacherSubjectsPage() {
         };
 
         if (user) loadData();
-    }, [user]);
+    }, []);
 
     const getFiliereName = (id: number) => {
         const filiere = filieres.find(f => f.id === id);

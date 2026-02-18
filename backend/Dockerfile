@@ -3,22 +3,21 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN python3 -m venv venv
-RUN .venv/bin/activate
+
+#installer les dependances
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Appliquer les migrations
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m appuser && \
-    mkdir -p /app/media /app/staticfiles && \
-    chown -R appuser:appuser /app && \
-    chmod -R 755 /app/staticfiles /app/media
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3  \
+    CMD [ "executable" ]
 
-USER appuser
+COPY . .
+#RUN python3 manage.py collectstatic
+RUN python3 manage.py makemigrations
+RUN python3 manage.py migrate
 
-CMD ["gunicon", "wsgi:application", "--bind", "0.0.0.0:8000"]
+EXPOSE 8000
+
+CMD [ "python3", "manage.py", "runserver", "0.0.0.0:8000" ]

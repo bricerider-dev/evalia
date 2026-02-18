@@ -389,7 +389,7 @@ export default function EvaluationsPage() {
                               className="group hover:bg-primary/5 transition-colors border-b border-white/5 last:border-0"
                             >
                               <TableCell className="py-5 px-8 font-medium">
-                                {subjects.find(s => s.id === evaluation.subjectId)?.name || '...'}
+                                {subjects.find(s => s.id === (evaluation.subjectId ?? evaluation.ue))?.name || '...'}
                               </TableCell>
                               <TableCell className="py-5 px-6">{getTypeBadge(evaluation.evaluationType)}</TableCell>
                               <TableCell className="py-5 px-6 font-medium text-slate-600">

@@ -20,14 +20,14 @@ export function StudentDashboard() {
     const loadData = async () => {
       if (user && 'filiere' in user) {
         try {
-          const student = user as Student;
+          const student = user;
           const [allFilieres, allSubjects, allGrades] = await Promise.all([
             getFilieres(),
             getSubjects(),
-            getGrades()
+            getGrades({ student_id: String(student.student_id) })
           ]);
 
-          const filiere = allFilieres.find((f: any) => f.id === student.filiere);
+          const filiere = allFilieres.find((f: any) => f.id === student?.filiere);
           setFiliereName(filiere?.name || '');
 
           // Filter subjects for student's filiere
@@ -40,12 +40,12 @@ export function StudentDashboard() {
             return {
               subjectId: sub.id,
               subjectName: sub.name,
-              ccScore: grades.find((g: any) => g.evaluationId?.includes('CC'))?.score || null,
-              snScore: grades.find((g: any) => g.evaluationId?.includes('SN'))?.score || null,
-              raScore: grades.find((g: any) => g.evaluationId?.includes('RA'))?.score || null,
-              finalScore: null, // To be calculated
+              ccScore: null,  // Will be calculated from getSubjectResultForStudent
+              snScore: null,
+              raScore: null,
+              finalScore: null,
               decision: 'Non Validé',
-              coefficient: sub.coefficient
+              coefficient: sub.credit || 1  // Use credit field, not coefficient
             };
           });
 
@@ -57,7 +57,7 @@ export function StudentDashboard() {
       }
     };
     loadData();
-  }, [user]);
+  }, []);
 
   const validatedCount = results.filter((r) => r.decision === 'Validé').length;
   const rattrapageCount = results.filter((r) => r.decision === 'Rattrapage').length;
@@ -199,7 +199,6 @@ export function StudentDashboard() {
               <Progress
                 value={results.length > 0 ? (validatedCount / results.length) * 100 : 0}
                 className="mt-3 h-2 bg-slate-100 rounded-full"
-                indicatorClassName="gradient-institutional"
               />
             </div>
           </div>
