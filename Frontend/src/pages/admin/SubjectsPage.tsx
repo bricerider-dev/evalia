@@ -33,7 +33,7 @@ import { getSubjects, createSubject, updateSubject, deleteSubject, getUnits } fr
 import { getFilieres } from '@/api/filiere';
 import { getEnseignants } from '@/api/enseignant';
 import { Subject, Filiere, Teacher } from '@/lib/types';
-import { Plus, Pencil, Trash2, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, BookOpen, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,6 +45,9 @@ export default function SubjectsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<any>(null);
   const [filterFiliere, setFilterFiliere] = useState<string>('all');
+  const [filterLevel, setFilterLevel] = useState<string>('all');
+  const [filterSemester, setFilterSemester] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -61,12 +64,12 @@ export default function SubjectsPage() {
   const loadData = async () => {
     try {
       const subjectsData = await getSubjects();
-      // const filieresData = await getFilieres();
+      const filieresData = await getFilieres();
       // const teachersData = await getEnseignants();
       // const unitsData = await getUnits();
 
       setSubjects(subjectsData);
-      // setFilieres(filieresData);
+      setFilieres(filieresData);
       // setTeachers(teachersData);
       // setUnits(unitsData);
     } catch (error) {
@@ -177,9 +180,26 @@ export default function SubjectsPage() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 }
+      transition: { type: "spring" as const, stiffness: 100 }
     }
   };
+
+  const filteredSubjects = subjects.filter(subject => {
+    const matchesSearch =
+      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // In Subjects model, filiere is often linked via units or directly if your API returns it
+    // For now, let's filter if filiere field exists or skip if 'all'
+    const matchesFiliere = filterFiliere === 'all' ||
+      (subject as any).filiere?.id === parseInt(filterFiliere) ||
+      (subject as any).filiere_id === parseInt(filterFiliere);
+
+    const matchesLevel = filterLevel === 'all' || String(subject.level) === filterLevel.replace('L', '').replace('M', '');
+    const matchesSemester = filterSemester === 'all' || String(subject.semester) === filterSemester.replace('S', '');
+
+    return matchesSearch && matchesFiliere && matchesLevel && matchesSemester;
+  });
 
   return (
     <DashboardLayout>
@@ -214,13 +234,13 @@ export default function SubjectsPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">
                     {editingSubject ? 'Modifier la Matière' : 'Nouvelle Matière'}
                   </DialogTitle>
-                  <DialogDescription className="text-base">
+                  <DialogDescription className="text-base dark:text-slate-400">
                     {editingSubject
                       ? 'Modifiez les informations de la matière'
                       : 'Créez une nouvelle matière'}
@@ -228,38 +248,38 @@ export default function SubjectsPage() {
                 </DialogHeader>
                 <div className="space-y-5 py-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Nom de la matière *</Label>
+                    <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Nom de la matière *</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="ex: Programmation Java"
-                      className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                      className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="code" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Code *</Label>
+                    <Label htmlFor="code" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Code *</Label>
                     <Input
                       id="code"
                       value={formData.code}
                       onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                       placeholder="ex: INFO101"
-                      className="h-12 text-lg font-mono bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                      className="h-12 text-lg font-mono bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Description</Label>
+                    <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Description</Label>
                     <Input
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                      className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="level" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Niveau</Label>
+                      <Label htmlFor="level" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Niveau</Label>
                       <Input
                         id="level"
                         type="number"
@@ -267,11 +287,11 @@ export default function SubjectsPage() {
                         max="5"
                         value={formData.level}
                         onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) || 1 })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="semester" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Semestre</Label>
+                      <Label htmlFor="semester" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Semestre</Label>
                       <Input
                         id="semester"
                         type="number"
@@ -279,14 +299,14 @@ export default function SubjectsPage() {
                         max="2"
                         value={formData.semester}
                         onChange={(e) => setFormData({ ...formData, semester: parseInt(e.target.value) || 1 })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="credit" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Crédits</Label>
+                      <Label htmlFor="credit" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Crédits</Label>
                       <Input
                         id="credit"
                         type="number"
@@ -294,13 +314,13 @@ export default function SubjectsPage() {
                         max="30"
                         value={formData.credit}
                         onChange={(e) => setFormData({ ...formData, credit: parseInt(e.target.value) || 1 })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
                       />
                     </div>
                   </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
-                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground">
+                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground dark:hover:bg-slate-800 transition-colors">
                     Annuler
                   </Button>
                   <Button type="submit" className="h-12 rounded-xl gradient-institutional text-white font-bold shadow-lg hover:shadow-primary/25">
@@ -310,6 +330,67 @@ export default function SubjectsPage() {
               </form>
             </DialogContent>
           </Dialog>
+        </motion.div>
+
+        {/* Filters */}
+        <motion.div variants={itemVariants}>
+          <Card className="border-0 shadow-institutional bg-white/60 dark:bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 ring-1 ring-black/5">
+            <CardContent className="py-5">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    placeholder="Rechercher une matière ou un code..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner"
+                  />
+                </div>
+
+                <Select value={filterFiliere} onValueChange={setFilterFiliere}>
+                  <SelectTrigger className="w-full md:w-[200px] h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner text-muted-foreground hover:text-foreground">
+                    <SelectValue placeholder="Filière" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                    <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Toutes les filières</SelectItem>
+                    {filieres.map((filiere) => (
+                      <SelectItem key={filiere.id} value={String(filiere.id)} className="py-3 text-base rounded-lg cursor-pointer">
+                        {filiere.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterLevel} onValueChange={setFilterLevel}>
+                  <SelectTrigger className="w-full md:w-[130px] h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner text-muted-foreground hover:text-foreground">
+                    <SelectValue placeholder="Niveau" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                    <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Tout Niveau</SelectItem>
+                    {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
+                      <SelectItem key={level} value={level} className="py-3 text-base rounded-lg cursor-pointer">
+                        {level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterSemester} onValueChange={setFilterSemester}>
+                  <SelectTrigger className="w-full md:w-[130px] h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner text-muted-foreground hover:text-foreground">
+                    <SelectValue placeholder="Semestre" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                    <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Tout Semestre</SelectItem>
+                    {['S1', 'S2'].map((sem) => (
+                      <SelectItem key={sem} value={sem} className="py-3 text-base rounded-lg cursor-pointer">
+                        {sem}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         <motion.div variants={itemVariants}>
@@ -324,7 +405,7 @@ export default function SubjectsPage() {
                     Liste des Matières
                   </CardTitle>
                   <CardDescription className="text-base font-bold text-muted-foreground mt-2 pl-1">
-                    {subjects.length} matière(s) définie(s)
+                    {filteredSubjects.length} matière(s) trouvée(s)
                   </CardDescription>
                 </div>
               </div>
@@ -344,6 +425,7 @@ export default function SubjectsPage() {
                       <TableRow className="hover:bg-transparent border-none">
                         <TableHead className="py-5 px-8 font-bold text-primary uppercase tracking-widest text-xs">Code</TableHead>
                         <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs">Matière</TableHead>
+                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs text-center">Filière</TableHead>
                         <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs text-center">Niveau</TableHead>
                         <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs text-center">Crédits</TableHead>
                         <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs text-center">Semestre</TableHead>
@@ -352,7 +434,7 @@ export default function SubjectsPage() {
                     </TableHeader>
                     <TableBody>
                       <AnimatePresence>
-                        {subjects.map((subject, index) => (
+                        {filteredSubjects.map((subject, index) => (
                           <motion.tr
                             key={subject.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -375,6 +457,11 @@ export default function SubjectsPage() {
                                   {subject.description}
                                 </div>
                               )}
+                            </TableCell>
+                            <TableCell className="py-5 px-6 text-center">
+                              <span className="font-bold text-muted-foreground/80 text-sm">
+                                {(subject as any).filiere?.name || (subject as any).filiere_name || '-'}
+                              </span>
                             </TableCell>
                             <TableCell className="py-5 px-6 text-center">
                               <span className="font-bold text-muted-foreground/80 text-sm">L{subject.level}</span>

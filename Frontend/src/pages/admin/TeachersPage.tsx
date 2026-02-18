@@ -27,11 +27,7 @@ import { getEnseignants, createEnseignant, updateEnseignant, deleteEnseignant } 
 import { Teacher } from '@/lib/types';
 import { Plus, Pencil, Trash2, User, BookOpen, Search } from 'lucide-react';
 import { toast } from 'sonner';
-<<<<<<< HEAD
 import { motion, AnimatePresence } from 'framer-motion';
-=======
-import { fi, id } from 'date-fns/locale';
->>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -51,6 +47,9 @@ export default function TeachersPage() {
     is_active: true,
     status: 'actif',
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredTeachers, setFilteredTeachers] = useState<any[]>([]);
+
 
   const loadTeachers = async () => {
     try {
@@ -68,6 +67,7 @@ export default function TeachersPage() {
         status: t.status,
       }));
       setTeachers(mappedTeachers);
+      setFilteredTeachers(mappedTeachers); // Initialize filtered teachers
     } catch (error) {
       console.error('Error loading teachers:', error);
       toast.error('Erreur lors du chargement des enseignants');
@@ -77,6 +77,17 @@ export default function TeachersPage() {
   useEffect(() => {
     loadTeachers();
   }, []);
+
+  useEffect(() => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const results = teachers.filter(
+      (teacher) =>
+        teacher.firstName.toLowerCase().includes(lowerCaseSearchTerm) ||
+        teacher.lastName.toLowerCase().includes(lowerCaseSearchTerm) ||
+        teacher.matricule.toLowerCase().includes(lowerCaseSearchTerm)
+    );
+    setFilteredTeachers(results);
+  }, [searchTerm, teachers]);
 
   const resetForm = () => {
     setFormData({
@@ -88,10 +99,10 @@ export default function TeachersPage() {
       phone: '+237 6',
       grade: 'PA',
       is_active: true,
-      id: '',      
+      id: '',
       status: 'actif',
       role: 'teacher',
-      matricule: ''      
+      matricule: ''
     });
     setEditingTeacher(null);
   };
@@ -151,7 +162,7 @@ export default function TeachersPage() {
         await updateEnseignant(editingTeacher.id, payload);
         toast.success('Enseignant mis à jour avec succès');
       } else {
-        
+
         await createEnseignant(payload);
         toast.success('Enseignant ajouté avec succès');
       }
@@ -263,67 +274,40 @@ export default function TeachersPage() {
                       />
                     </div>
                   </div>
-<<<<<<< HEAD
-                  <div className="space-y-2">
-                    <Label htmlFor="teacherId" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Matricule *</Label>
-                    <Input
-                      id="teacherId"
-                      value={formData.teacherId}
-                      onChange={(e) => setFormData({ ...formData, teacherId: e.target.value.toUpperCase() })}
-                      placeholder="ex: T001"
-                      className="h-12 text-lg font-mono bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="department" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Département</Label>
-                    <Input
-                      id="department"
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      placeholder="ex: Informatique"
-                      className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
-=======
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="matricule">Matricule *</Label>
+                      <Label htmlFor="matricule" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Matricule *</Label>
                       <Input
                         id="matricule"
                         value={formData.matricule}
                         onChange={(e) => setFormData({ ...formData, matricule: e.target.value.toUpperCase() })}
                         placeholder="ex: T001"
+                        className="h-12 text-lg font-mono bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Email *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="grade">Grade</Label>
+                      <Label htmlFor="grade" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Grade</Label>
                       <Select
-                        onValueChange={(value) => setFormData({ ...formData, grade: value as any })}
+                        value={formData.grade}
+                        onValueChange={(value) => setFormData({ ...formData, grade: value })}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl shadow-inner">
                           <SelectValue placeholder="Sélectionnez le grade" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="rounded-xl border-none shadow-22xl bg-white/95 backdrop-blur-xl">
                           <SelectItem value="PA">PA (Professeur Assistant)</SelectItem>
                           <SelectItem value="PH">PH (Professeur)</SelectItem>
                           <SelectItem value="DR">DR (Docteur)</SelectItem>
@@ -335,15 +319,15 @@ export default function TeachersPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Téléphone</Label>
+                      <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Téléphone</Label>
                       <Input
                         id="phone"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+237 ..."
+                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl shadow-inner"
                       />
                     </div>
-
->>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
                   </div>
                   {!editingTeacher && (
                     <div className="space-y-2">
@@ -368,40 +352,32 @@ export default function TeachersPage() {
               </form>
             </DialogContent>
           </Dialog>
-<<<<<<< HEAD
         </motion.div>
-=======
-        </div>
-        {/**  filtres by name */}
-        <Card>
-          <CardContent className='py-5'>            
-              <div className="relative flex items-center gap-4">
-                <Search className="absolute left-4 top-5 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  placeholder="Rechercher par nom ou matricule..."
-                  className="pl-12 py-5 text-base rounded-xl border-2 border-white/10 dark:border-white/5 focus:border-primary/20 bg-muted/30 shadow-inner"
-                  onChange={(e) => {
-                    const query = e.target.value.toLowerCase();
-                    setTeachers((prev) =>
-                      prev.filter(
-                        (t) =>
-                          t.firstName.toLowerCase().includes(query) ||
-                          t.lastName.toLowerCase().includes(query) ||
-                          t.matricule.toLowerCase().includes(query)
-                      )
-                    );
-                  }}
-                />
+
+        <motion.div variants={itemVariants}>
+          <Card className="border-0 shadow-institutional bg-white/60 dark:bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 ring-1 ring-black/5">
+            <CardContent className="py-5">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1 relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    placeholder="Rechercher par nom ou matricule..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner"
+                  />
+                </div>
                 <Button
                   variant="outline"
-                  onClick={() => loadTeachers()}
+                  onClick={() => { setSearchTerm(''); loadTeachers(); }}
+                  className="h-14 px-6 rounded-xl border-2 border-primary/10 hover:bg-primary/5 text-primary font-bold shadow-sm transition-all"
                 >
                   Réinitialiser
                 </Button>
-              </div>            
-          </CardContent>
-        </Card>
->>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-2xl rounded-[2rem] overflow-hidden bg-white/60 dark:bg-card/60 backdrop-blur-xl border-white/20 ring-1 ring-black/5">
@@ -419,31 +395,30 @@ export default function TeachersPage() {
                   </CardDescription>
                 </div>
               </div>
-<<<<<<< HEAD
             </CardHeader>
             <CardContent className="p-0">
-              {teachers.length === 0 ? (
+              {filteredTeachers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                   <div className="p-4 bg-muted/50 rounded-full mb-4">
                     <User className="h-12 w-12 opacity-50" />
                   </div>
-                  <p className="text-lg font-medium">Aucun enseignant enregistré.</p>
+                  <p className="text-lg font-medium">Aucun enseignant trouvé.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-muted/30">
                       <TableRow className="hover:bg-transparent border-none">
-                        <TableHead className="py-5 px-8 font-bold text-primary uppercase tracking-widest text-xs">Matricule</TableHead>
-                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs">Nom Complet</TableHead>
-                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs">Email</TableHead>
-                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-xs">Département</TableHead>
-                        <TableHead className="py-5 px-8 text-right font-bold text-primary uppercase tracking-widest text-xs">Actions</TableHead>
+                        <TableHead className="py-5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
+                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
+                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
+                        <TableHead className="py-5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Téléphone</TableHead>
+                        <TableHead className="py-5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       <AnimatePresence>
-                        {teachers.map((teacher, index) => (
+                        {filteredTeachers.map((teacher, index) => (
                           <motion.tr
                             key={teacher.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -451,57 +426,10 @@ export default function TeachersPage() {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ delay: index * 0.05 }}
                             className="group hover:bg-primary/5 transition-colors border-b border-white/5 last:border-0"
-=======
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {teachers.length === 0 ? (
-              <div className="text-center py-20">
-                <User className="h-20 w-20 mx-auto text-slate-200 mb-4" />
-                <p className="text-2xl font-bold text-slate-400">Aucun enseignant enregistré.</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent border-0">
-                    <TableHead className="py-3.5 px-10 font-bold text-primary uppercase tracking-widest text-[10px]">Matricule</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Nom Complet</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Email</TableHead>
-                    <TableHead className="py-3.5 px-6 font-bold text-primary uppercase tracking-widest text-[10px]">Telephone</TableHead>
-                    <TableHead className="py-3.5 px-10 text-right font-bold text-primary uppercase tracking-widest text-[10px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teachers.map((teacher) => (
-                    <TableRow key={teacher.id} className="hover:bg-primary/5 transition-colors border-b border-white/5 group">
-                      <TableCell className="py-4 px-10 font-mono font-black text-primary text-sm">
-                        {teacher.matricule}
-                      </TableCell>
-                      <TableCell className="py-4 px-6">
-                        <div className="font-bold text-base group-hover:text-primary transition-colors text-foreground">
-                          {teacher.grade}. {teacher.firstName} {teacher.lastName}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-3 px-6 text-muted-foreground font-medium text-sm">
-                        {teacher.email}
-                      </TableCell>
-                      <TableCell className="py-3 px-6">
-                        <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1 rounded-full font-bold text-[10px]">
-                          {teacher.phone || 'N/A'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-4 px-10 text-right">
-                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleOpenDialog(teacher)}
-                            className="h-10 w-10 rounded-xl hover:bg-card hover:shadow-lg text-primary transition-all"
->>>>>>> 6889971bfddb7defa4f6f6fd47ac976ff5c4908f
                           >
                             <TableCell className="py-5 px-8">
                               <span className="px-3 py-1 rounded-lg bg-white dark:bg-muted font-mono font-black text-primary text-sm shadow-sm ring-1 ring-black/5">
-                                {teacher.teacherId}
+                                {teacher.matricule}
                               </span>
                             </TableCell>
                             <TableCell className="py-5 px-6">
@@ -514,7 +442,7 @@ export default function TeachersPage() {
                             </TableCell>
                             <TableCell className="py-5 px-6">
                               <Badge variant="secondary" className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 px-3 py-1 rounded-full font-bold text-[10px]">
-                                {teacher.department || 'N/A'}
+                                {teacher.phone || 'N/A'}
                               </Badge>
                             </TableCell>
                             <TableCell className="py-5 px-8 text-right">

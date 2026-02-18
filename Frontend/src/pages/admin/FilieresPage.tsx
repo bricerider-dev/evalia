@@ -125,7 +125,7 @@ export default function FilieresPage() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 }
+      transition: { type: "spring" as const, stiffness: 100 }
     }
   };
 
@@ -162,13 +162,13 @@ export default function FilieresPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[500px] border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">
                     {editingFiliere ? 'Modifier la Filière' : 'Nouvelle Filière'}
                   </DialogTitle>
-                  <DialogDescription className="text-base">
+                  <DialogDescription className="text-base dark:text-slate-400">
                     {editingFiliere
                       ? 'Modifiez les informations de la filière'
                       : 'Créez un nouveau programme d\'études'}
@@ -176,38 +176,38 @@ export default function FilieresPage() {
                 </DialogHeader>
                 <div className="space-y-5 py-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Nom de la filière *</Label>
+                    <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Nom de la filière *</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="ex: Informatique"
-                      className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                      className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="code" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Code *</Label>
+                    <Label htmlFor="code" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Code *</Label>
                     <Input
                       id="code"
                       value={formData.code}
                       onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                       placeholder="ex: INFO"
-                      className="h-12 text-lg font-mono bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                      className="h-12 text-lg font-mono bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Description</Label>
+                    <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Description du programme..."
-                      className="min-h-[100px] text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl resize-none"
+                      className="min-h-[100px] text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl resize-none shadow-inner"
                     />
                   </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
-                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground">
+                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground dark:hover:bg-slate-800 transition-colors">
                     Annuler
                   </Button>
                   <Button type="submit" className="h-12 rounded-xl gradient-institutional text-white font-bold shadow-lg hover:shadow-primary/25">

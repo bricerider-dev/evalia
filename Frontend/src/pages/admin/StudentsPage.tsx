@@ -254,115 +254,135 @@ export default function StudentsPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="max-w-md border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">
                     {editingStudent ? 'Modifier l\'Étudiant' : 'Nouvel Étudiant'}
                   </DialogTitle>
-                  <DialogDescription className="text-base">
+                  <DialogDescription className="text-base dark:text-slate-400">
                     {editingStudent
                       ? 'Modifiez les informations de l\'étudiant'
-                      : 'Inscrivez un nouvel étudiant'}
+                      : 'Inscrivez un nouvel étudiant d\'excellence'}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-5 py-6 max-h-[60vh] overflow-y-auto px-1">
+                <div className="space-y-5 py-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Prénom *</Label>
+                      <Label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Prénom *</Label>
                       <Input
                         id="firstName"
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Nom *</Label>
+                      <Label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Nom *</Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="matricule" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Matricule *</Label>
-                    <Input
-                      id="matricule"
-                      value={formData.matricule}
-                      onChange={(e) => setFormData({ ...formData, matricule: e.target.value })}
-                      placeholder="ex: S2024001"
-                      className="h-12 text-lg font-mono bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="matricule" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Matricule *</Label>
+                      <Input
+                        id="matricule"
+                        value={formData.matricule}
+                        onChange={(e) => setFormData({ ...formData, matricule: e.target.value.toUpperCase() })}
+                        placeholder="ex: S2024001"
+                        className="h-12 text-lg font-mono bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="ex: 699999999"
-                      className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+237 ..."
+                        className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="enrollmentYear" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Année d'inscription</Label>
+                      <Input
+                        id="enrollmentYear"
+                        type="number"
+                        value={formData.enrollmentYear}
+                        onChange={(e) => setFormData({ ...formData, enrollmentYear: parseInt(e.target.value) })}
+                        className="h-12 text-lg bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="filiereId" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Filière *</Label>
+                      <Select
+                        value={formData.filiereId}
+                        onValueChange={(value) => setFormData({ ...formData, filiereId: value })}
+                      >
+                        <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner">
+                          <SelectValue placeholder="Sélectionner une filière" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                          {filieres.map((filiere) => (
+                            <SelectItem key={filiere.id} value={String(filiere.id)}>
+                              {filiere.name} ({filiere.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="level" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Niveau *</Label>
+                      <Select
+                        value={formData.level}
+                        onValueChange={(value) => setFormData({ ...formData, level: value })}
+                      >
+                        <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner">
+                          <SelectValue placeholder="Sélectionner un niveau" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
+                          {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
+                            <SelectItem key={level} value={level}>
+                              {level}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="filiereId" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Filière *</Label>
-                    <Select
-                      value={formData.filiereId}
-                      onValueChange={(value) => setFormData({ ...formData, filiereId: value })}
-                    >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
-                        <SelectValue placeholder="Sélectionner une filière" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filieres.map((filiere) => (
-                          <SelectItem key={filiere.id} value={String(filiere.id)}>
-                            {filiere.name} ({filiere.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="level" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Niveau *</Label>
-                    <Select
-                      value={formData.level}
-                      onValueChange={(value) => setFormData({ ...formData, level: value })}
-                    >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
-                        <SelectValue placeholder="Sélectionner un niveau" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cycle" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Cycle</Label>
+                    <Label htmlFor="cycle" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Cycle</Label>
                     <Select
                       value={formData.cycle}
                       onValueChange={(value) => setFormData({ ...formData, cycle: value })}
                     >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                      <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl shadow-inner">
                         <SelectValue placeholder="Sélectionner un cycle" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
                         <SelectItem value="ING">Ingénieur</SelectItem>
                         <SelectItem value="M">Master</SelectItem>
                         <SelectItem value="D">Doctorat</SelectItem>
@@ -370,30 +390,21 @@ export default function StudentsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="enrollmentYear" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Année d'inscription</Label>
-                    <Input
-                      id="enrollmentYear"
-                      type="number"
-                      value={formData.enrollmentYear}
-                      onChange={(e) => setFormData({ ...formData, enrollmentYear: parseInt(e.target.value) })}
-                      className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                    />
-                  </div>
+
                   {!editingStudent && (
                     <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Mot de passe initial</Label>
+                      <Label htmlFor="password" className="text-sm font-bold uppercase tracking-wide text-muted-foreground dark:text-slate-500">Mot de passe initial</Label>
                       <Input
                         id="password"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-slate-800/50 border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl"
                       />
                     </div>
                   )}
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
-                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground">
+                  <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-12 rounded-xl text-muted-foreground hover:text-foreground dark:hover:bg-slate-800 transition-colors">
                     Annuler
                   </Button>
                   <Button type="submit" className="h-12 rounded-xl gradient-institutional text-white font-bold shadow-lg hover:shadow-primary/25">
@@ -416,14 +427,14 @@ export default function StudentsPage() {
                     placeholder="Rechercher..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner"
+                    className="pl-12 h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner"
                   />
                 </div>
                 <Select value={filterFiliere} onValueChange={setFilterFiliere}>
-                  <SelectTrigger className="w-full md:w-[280px] h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
+                  <SelectTrigger className="w-full md:w-[280px] h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner">
                     <SelectValue placeholder="Filières" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
                     <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Toutes les filières</SelectItem>
                     {filieres.map((filiere) => (
                       <SelectItem key={filiere.id} value={String(filiere.id)} className="py-3 text-base rounded-lg cursor-pointer">
@@ -433,10 +444,10 @@ export default function StudentsPage() {
                   </SelectContent>
                 </Select>
                 <Select value={filterLevel} onValueChange={setFilterLevel}>
-                  <SelectTrigger className="w-full md:w-[150px] h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
+                  <SelectTrigger className="w-full md:w-[150px] h-14 text-base rounded-xl border-transparent bg-muted/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary/20 transition-all shadow-inner">
                     <SelectValue placeholder="Niveau" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+                  <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
                     <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Tout niveau</SelectItem>
                     {['L1', 'L2', 'L3', 'M1', 'M2'].map((level) => (
                       <SelectItem key={level} value={level} className="py-3 text-base rounded-lg cursor-pointer">
