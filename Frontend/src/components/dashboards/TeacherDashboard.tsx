@@ -212,7 +212,7 @@ export function TeacherDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-bold text-[10px] border-slate-200 bg-white shadow-sm">Coef. {subject.coefficient}</Badge>
+                          <Badge variant="outline" className="font-bold text-[10px] border-slate-200 bg-white shadow-sm">Crédit {subject.credit}</Badge>
                           <Badge className="font-bold text-[10px] bg-primary/10 text-primary hover:bg-primary/20">S{subject.semester}</Badge>
                         </div>
                       </motion.div>

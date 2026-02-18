@@ -241,7 +241,7 @@ export default function TeachersPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[600px] dark:bg-card/80 border-none shadow-2xl bg-white/95 backdrop-blur-xl">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">
@@ -254,23 +254,14 @@ export default function TeachersPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-5 py-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Prénom *</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
-                      />
-                    </div>
+                  <div className="grid grid-cols-2 gap-4">                    
                     <div className="space-y-2">
                       <Label htmlFor="lastName" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Nom *</Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="h-12 text-lg bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-lg bg-muted/50 dark:bg-muted/30 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
@@ -336,7 +327,7 @@ export default function TeachersPage() {
                         id="password"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/30 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   )}
@@ -459,7 +450,7 @@ export default function TeachersPage() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDelete(teacher.id)}
-                                  className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors"
+                                  className="h-10 w-10 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>

@@ -13,18 +13,36 @@ class UserSerializer(serializers.ModelSerializer):
     lastName = serializers.CharField(source='last_name')
     is_active = serializers.BooleanField(default=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    teacher_id = serializers.SerializerMethodField(read_only=True)
+    student_id = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'firstName', 'lastName',
-            'role', 'phone', 'password', 'is_active', 'createdAt'
+            'role', 'phone', 'password', 'is_active', 'createdAt', 'teacher_id', 'student_id'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'validators': []},
             'email': {'validators': []},
         }
+    
+    def get_teacher_id(self, obj):
+        """Récupère l'ID du professeur associé s'il existe"""
+        try:
+            teacher = Enseignant.objects.get(user=obj)
+            return teacher.id
+        except Enseignant.DoesNotExist:
+            return None
+    
+    def get_student_id(self, obj):
+        """Récupère l'ID de l'étudiant associé s'il existe"""
+        try:
+            student = Etudiant.objects.get(user=obj)
+            return student.id
+        except Etudiant.DoesNotExist:
+            return None
     
     def validate(self, data):
         # Validation de l'email
@@ -55,6 +73,25 @@ class UserSerializer(serializers.ModelSerializer):
                 })
         
         return data
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+        
+    
 
 class EtudiantSerializer(serializers.ModelSerializer):
     """Serializer pour Étudiant avec correspondance frontend"""

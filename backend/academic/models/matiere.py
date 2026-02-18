@@ -6,9 +6,7 @@ class UniteEnseignement(TimeStampedModel):
     code = models.CharField(max_length=10, unique=True)
     nom = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    semestre = models.IntegerField(
-        choices=[(1, 'Semestre 1'), (2, 'Semestre 2')]
-    )
+    # Removed IntegerField for semestre; only ForeignKey remains
     enseignant = models.ForeignKey(
         'users.Enseignant',
         on_delete=models.CASCADE,
@@ -30,6 +28,13 @@ class UniteEnseignement(TimeStampedModel):
         blank=True
     )
     
+    semestre = models.ForeignKey(
+        'academic.Semestre',
+        on_delete=models.CASCADE,
+        related_name='unites_enseignement',
+        null=True,
+        blank=True
+    )
     class Meta:
         verbose_name = "Unité d'Enseignement"
         verbose_name_plural = "Unités d'Enseignement"

@@ -1,0 +1,129 @@
+{% extends "grade/pv_base.html" %}
+{% block title %}PROCES VERBAL SEMESTRIEL DES NOTES{% endblock %}
+{% block extra_style %}
+    <style>
+        .bilingual-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95em;
+            margin-bottom: 0.5em;
+        }
+        .bilingual-header .left, .bilingual-header .right {
+            width: 32%;
+        }
+        .bilingual-header .center {
+            width: 36%;
+            text-align: center;
+        }
+        .pv-title {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 0.5em 0 0.2em 0;
+        }
+        .pv-meta {
+            display: flex;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 0.3em 1em;
+            margin-bottom: 0.5em;
+            font-size: 0.98em;
+        }
+        .pv-table th, .pv-table td {
+            font-size: 0.4em;
+            border: 2px solid #dbeafe;
+        }
+        .pv-stats {
+            margin-top: 0.7em;
+            font-size: 1em;
+            display: flex;
+            justify-content: flex-start;
+            gap: 2em;
+        }
+        .pv-signature {
+            margin-top: 2em;
+            text-align: right;
+            font-size: 1em;
+        }
+        .pv-signature .sign {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .pv-signature .cachet {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 0.5em;
+        }
+        .pv-meta{
+            display: flex;
+            justify-content: space-evenly;
+            background: #d0e2f3;
+            padding: 0.3em 1em;
+            margin-bottom: 0.5em;
+            font-size: 0.98em;
+        }
+    </style>
+{% endblock %}
+{% block header_title %}
+    <div class="main-title">
+        <h2>PROCÈS VERBAL SEMESTRIEL DES NOTES</h2>
+    </div>
+    <div>
+
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="pv-meta">
+        <div><b>FILIERE :</b> {{filiere}}</div>
+        <div><b>CLASSE :</b> {{classe}}</div>
+        <div><b>SEMESTRE :</b> {{semestre}}</div>
+    </div>
+    <table class="pv-table">
+        <thead>
+            <!-- Ligne 1 : titres principaux -->
+            <tr>
+                <th rowspan="2">Matricule</th>
+                <th rowspan="2">Noms et Prénoms</th>
+
+                {% for ue in ues %}
+                    <th colspan="3">{{ ue.nom }}</th>
+                {% endfor %}
+
+                <th rowspan="2">Note Finale</th>
+                <th rowspan="2">Observation</th>
+            </tr>
+
+            <!-- Ligne 2 : sous-colonnes -->
+            <tr>
+                {% for ue in ues %}
+                    <th>CC</th>
+                    <th>SN</th>
+                    <th>Final</th>
+                {% endfor %}
+            </tr>
+        </thead>            <!-- Ligne 1 : titres principaux -->    
+        <tbody>
+            {% for row in grades %}
+            <tr>
+                <td>{{ row.matricule }}</td>
+                <td>{{ row.nom }} {{ row.prenom }}</td>
+                <td>{{ row.note_cc}}</td>
+                <td>{{row.note_sn}}</td>                
+                <td>{{ row.note_finale }}</td>
+                <td>{{ row.observation }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pv-stats">
+        <div><b>Effectif :</b> {{ total_students }}</div>
+        <div><b>Taux de réussite :</b> {{ taux_reussite }} %</div>
+        <div><b>Moyenne générale :</b> {{ moyenne_generale }} / 20</div>
+    </div>
+    <div class="pv-signature">
+        <div>Fait à Douala, le {{ date }}</div>
+        <div class="sign">Le Chef de Département</div>
+        <div class="cachet">(Signature et Cachet)</div>
+    </div>
+{% endblock %}

@@ -63,6 +63,7 @@ export function getJuryDecision(
 
 /**
  * Get subject result for a student
+ * Récupère les notes CC, SN, RA pour une matière d'un étudiant
  */
 export function getSubjectResultForStudent(
   studentId: string,
@@ -72,27 +73,37 @@ export function getSubjectResultForStudent(
   allEvaluations: any[],
   allGrades: any[]
 ): SubjectResult {
-  const evaluations = allEvaluations.filter((e) => e.subjectId === subjectId);
-  const grades = allGrades.filter(
-    (g) => g.studentId === studentId && (
-      g.controle_continu === evaluations.find(e => e.type === 'CC')?.id ||
-      g.session_normale === evaluations.find(e => e.type === 'SN')?.id ||
-      g.rattrapage === evaluations.find(e => e.type === 'RA')?.id
-    )
+  // Trouver les évaluations pour cette matière (UE)
+  // Note: Backend retourne "ue" mais le frontend utilise "subjectId"
+  // On cherche en vérifiant les deux cas
+  const evaluations = allEvaluations.filter((e) => 
+    String(e.subjectId) === String(subjectId) || String(e.ue) === String(subjectId)
   );
+  
+  // Trouver les évaluations par type
+  const ccEval = evaluations.find((e) => e.evaluationType === 'CC' || e.type_evaluation === 'CC');
+  const snEval = evaluations.find((e) => e.evaluationType === 'SN' || e.type_evaluation === 'SN');
+  const raEval = evaluations.find((e) => e.evaluationType === 'RA' || e.type_evaluation === 'RA');
 
-  // Find grades by evaluation type
-  const ccEval = evaluations.find((e) => e.type === 'CC');
-  const snEval = evaluations.find((e) => e.type === 'SN');
-  const raEval = evaluations.find((e) => e.type === 'RA');
+  // Trouver les notes correspondantes pour cet étudiant
+  // Backend envoie étudiant comme FK (nombre), on compare en tant que strings
+  const ccGrade = ccEval ? allGrades.find((g) => 
+    String(g.etudiant) === String(studentId) && String(g.evaluation) === String(ccEval.id)
+  ) : null;
+  
+  const snGrade = snEval ? allGrades.find((g) => 
+    String(g.etudiant) === String(studentId) && String(g.evaluation) === String(snEval.id)
+  ) : null;
+  
+  const raGrade = raEval ? allGrades.find((g) => 
+    String(g.etudiant) === String(studentId) && String(g.evaluation) === String(raEval.id)
+  ) : null;
 
-  const ccGrade = ccEval ? grades.find((g) => g.controle_continu === ccEval.id) : null;
-  const snGrade = snEval ? grades.find((g) => g.session_normale === snEval.id) : null;
-  const raGrade = raEval ? grades.find((g) => g.rattrapage === raEval.id) : null;
-
-  const ccScore = ccGrade?.score ?? null;
-  const snScore = snGrade?.score ?? null;
-  const raScore = raGrade?.score ?? null;
+  // Backend retourne "grade", pas "score"
+  // Important: Convertir en nombres car le backend retourne des Decimal (strings en JSON)
+  const ccScore = ccGrade?.grade ? parseFloat(String(ccGrade.grade)) : null;
+  const snScore = snGrade?.grade ? parseFloat(String(snGrade.grade)) : null;
+  const raScore = raGrade?.grade ? parseFloat(String(raGrade.grade)) : null;
 
   const finalScore = calculateFinalGrade(ccScore, snScore, raScore);
   const hasRattrapage = raEval !== undefined;

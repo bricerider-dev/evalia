@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Procès-Verbal{% endblock %}</title>
+    <style>
+        /* Force PDF page to A4 landscape for xhtml2pdf */
+        @page { size: A4 landscape; margin: 15mm; }
+
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            background: #ffffff;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Use table layout for header to improve xhtml2pdf compatibility */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        .header-table td {
+            vertical-align: middle;
+            text-align: center;
+            padding: 4px 8px;
+        }
+        .logo {
+            height: 60px;
+            display: inline-block;
+        }
+        .institution {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        .content {
+            margin: 12px 18px;
+            background: #fff;
+            padding: 12px;
+        }
+        .footer {
+            text-align: right;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin: 12px 18px 0 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            border: 1px solid #dbeafe;
+            padding: 6px 4px;
+            text-align: center;
+        }
+        th {
+            background: #7d9fea;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background: #f1f5f9;
+        }
+        .highlight {
+            color: #2563eb;
+            font-weight: bold;
+        }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td style="width:34%; text-align:left;">
+                <div>
+                    <div style="font-weight:bold;">REPUBLIQUE DU CAMEROUN</div>
+                    <div>Paix - Travail - Patrie</div>
+                    <div style="font-weight:bold; margin-top:6px;">UNIVERSITE DE DOUALA</div>
+                    <div>Ecole Nationale Supérieure Polytechnique de Douala</div>
+                </div>
+            </td>
+            <td style="width:32%; text-align:center;">
+                {% if logo_url %}
+                <img src="{{ logo_url }}" class="logo" alt="Logo ENSPD" />
+                {% else %}
+                <div class="logo" style="font-weight:bold; font-size:0.95em; border:1px solid #dbeafe; padding:6px 8px; display:inline-block;">LOGO</div>
+                {% endif %}
+            </td>
+            <td style="width:34%; text-align:right;">
+                <div>
+                    <div style="font-weight:bold;">REPUBLIC OF CAMEROON</div>
+                    <div>Peace - Work - Fatherland</div>
+                    <div style="font-weight:bold; margin-top:6px;">UNIVERSITY OF DOUALA</div>
+                    <div>National Higher School Polytechnic of Douala</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div class="content">    
+        {% block header_title %}{% endblock %}
+        {% block content %}{% endblock %}
+    </div>
+    <div class="footer">
+        {% block footer %}Généré le {{ date }}{% endblock %}
+    </div>
+</body>
+</html>

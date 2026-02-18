@@ -3,62 +3,96 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { getSubjects } from '@/api/subject';
 import { getFilieres } from '@/api/filiere';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA } from '@/api/evaluation';
+import { getEvaluations } from '@/api/evaluation';
 import { getGrades } from '@/api/grade';
+import { getEtudiant } from '@/api/etudiant';
+import { getStudentGradeReport } from '@/api/grade';
 import { getSubjectResultForStudent, calculateWeightedAverage, getMention } from '@/lib/gradeCalculator';
 import { Student, SubjectResult } from '@/lib/types';
-import { FileText, Award, GraduationCap } from 'lucide-react';
+import { StudentGradeReport } from '@/components/grade/StudentGradeReport';
+import { FileText, Award, GraduationCap, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function StudentGradesPage() {
-  const { user } = useAuth();
+  let { user } = useAuth();
+  const [student, setStudent] = useState<any>(null);  // State pour l'étudiant complet
   const [results, setResults] = useState<SubjectResult[]>([]);
   const [average, setAverage] = useState<number | null>(null);
   const [filiereName, setFiliereName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [useDetailedReport, setUseDetailedReport] = useState(false);
 
+  // Étape 1: Récupérer les données d'étudiant complet quand user change
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (user?.student_id) {
+        try {
+          const fullStudentData = await getEtudiant(String(user.student_id));
+          console.log("Fetched full student data:", fullStudentData);
+          setStudent(fullStudentData);  // Mettre à jour le state
+        } catch (error) {
+          console.error("Error fetching student data:", error);
+          toast.error("Erreur lors du chargement des données étudiant");
+        }
+      }
+    };
+    fetchStudentData();
+  }, [user]);  // S'exécute quand user change
+
+  // Étape 2: Charger les notes quand student change
   useEffect(() => {
     const loadData = async () => {
-      if (user && 'filiere' in user) {
+      if (student && 'filiere' in student) {
         try {
-          const student = user as any;
-          const [allFilieres, allSubjects, cc, sn, ra, allGrades] = await Promise.all([
+          console.log("=== Loading Grades ===");
+          console.log("Student:", student);
+          
+          // Charger données en parallèle
+          const [allFilieres, allSubjects, allEvals, allGrades] = await Promise.all([
             getFilieres(),
             getSubjects(),
-            getEvaluationsCC(),
-            getEvaluationsSN(),
-            getEvaluationsRA(),
-            getGrades()
+            getEvaluations(),
+            // Optimisation: charger seulement les notes de l'étudiant courant
+            getGrades({ student_id: String(student.id) })
           ]);
+          
+          console.log("All subjects:", allSubjects);
+          console.log("All evaluations:", allEvals);
+          console.log("All grades:", allGrades);
 
+          // Définir le nom de la filière
           const filiere = allFilieres.find((f: any) => f.id === student.filiere);
           setFiliereName(filiere?.name || '');
 
-          const allEvals = [
-            ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-            ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-            ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-          ];
+          // Filtrer les matières pour la filière de l'étudiant
+          const studentSubjects = allSubjects.filter((s: any) => {
+            return s.filiere === student.filiere;
+          });
+          
+          console.log("Student subjects:", studentSubjects);
 
-          // Filter subjects for student's filiere (simplified logic)
-          const studentSubjects = allSubjects.filter((s: any) => s.filiereId === student.filiere || true);
-
+          // Calculer les résultats par matière
           const subjectResults = studentSubjects.map((subject: any) =>
             getSubjectResultForStudent(
-              student.id,
-              subject.id,
+              String(student.id),  // Convertir en string pour comparaison
+              String(subject.id),   // Convertir en string pour comparaison
               subject.name,
-              subject.coefficient,
+              subject.credit || 1,  // Utiliser credit au lieu de coefficient
               allEvals,
               allGrades
             )
           );
+          
+          console.log("Subject results:", subjectResults);
           setResults(subjectResults);
 
+          // Calculer la moyenne pondérée
           const weightedAvg = calculateWeightedAverage(subjectResults);
+          console.log("Weighted average:", weightedAvg);
           setAverage(weightedAvg);
         } catch (error) {
           console.error("Error loading student grades:", error);
@@ -69,7 +103,7 @@ export default function StudentGradesPage() {
       }
     };
     loadData();
-  }, [user]);
+  }, [student]);
 
   const getDecisionBadge = (decision: string) => {
     switch (decision) {
@@ -85,7 +119,7 @@ export default function StudentGradesPage() {
   };
 
   const getScoreColor = (score: number | null) => {
-    if (score === null) return '';
+    if (score === null || typeof score !== 'number') return '';
     if (score >= 14) return 'text-green-600 font-bold';
     if (score >= 10) return 'text-primary font-bold';
     return 'text-red-500 font-bold';
@@ -195,6 +229,11 @@ export default function StudentGradesPage() {
                     Les résultats n'ont pas encore été publiés.
                   </p>
                 </div>
+              ) : loading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground/50">
+                  <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                  <p className="text-sm font-medium">Chargement de vos notes...</p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -236,22 +275,22 @@ export default function StudentGradesPage() {
                             </td>
                             <td className="py-4 px-4 text-center text-sm font-mono">
                               <span className={getScoreColor(result.ccScore)}>
-                                {result.ccScore !== null ? result.ccScore.toFixed(1) : '—'}
+                                {result.ccScore !== null && typeof result.ccScore === 'number' ? result.ccScore.toFixed(2) : '—'}
                               </span>
                             </td>
                             <td className="py-4 px-4 text-center text-sm font-mono">
                               <span className={getScoreColor(result.snScore)}>
-                                {result.snScore !== null ? result.snScore.toFixed(1) : '—'}
+                                {result.snScore !== null && typeof result.snScore === 'number' ? result.snScore.toFixed(1) : '—'}
                               </span>
                             </td>
                             <td className="py-4 px-4 text-center text-sm font-mono">
                               <span className={getScoreColor(result.raScore)}>
-                                {result.raScore !== null ? result.raScore.toFixed(1) : '—'}
+                                {result.raScore !== null && typeof result.raScore === 'number' ? result.raScore.toFixed(1) : '—'}
                               </span>
                             </td>
                             <td className="py-4 px-4 text-center">
                               <span className={`text-base font-black ${getScoreColor(result.finalScore)}`}>
-                                {result.finalScore !== null ? result.finalScore.toFixed(2) : '—'}
+                                {result.finalScore !== null && typeof result.finalScore === 'number' ? result.finalScore.toFixed(2) : '—'}
                               </span>
                             </td>
                             <td className="py-4 px-4 text-center">

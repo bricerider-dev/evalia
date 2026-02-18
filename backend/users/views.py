@@ -1,5 +1,5 @@
 from .models import User, Etudiant, Enseignant
-from academic.models import Evaluation
+from academic.models import Evaluation, UniteEnseignement
 from department.models import Departement
 from .serializer import UserSerializer, EtudiantSerializer, EnseignantSerializer, UserLoginSerializer, UserLogoutSerializer
 from rest_framework import viewsets, status
@@ -73,6 +73,12 @@ class EnseignantViewSet(viewsets.ModelViewSet):
     serializer_class = EnseignantSerializer
     permission_classes = [AllowAny]
 
+    @action(detail=True, methods=['get'])
+    def get_ue(self, request, pk=None):
+        ues = UniteEnseignement.objects.filter(enseignant=self.get_object())
+        data = ues.values()
+        return Response(data) 
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -83,12 +89,18 @@ class EnseignantViewSet(viewsets.ModelViewSet):
 class UserLoginView(generics.CreateAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
+    
     def post(self, request, *args, **kwargs):
+        """Retourne l'id de l'utilisateur connecté et son profil User"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
-        user_data = UserSerializer(user).data
-
+        
+        # Utiliser le UserSerializer qui gère maintenant les IDs du profil
+        user_serializer = UserSerializer(user)
+        user_data = user_serializer.data
+        user_data['student_id'] = user_serializer.get_student_id(user)
+        user_data['teacher_id'] = user_serializer.get_teacher_id(user)
         return Response(user_data)
 
 class UserLogoutView(generics.CreateAPIView):

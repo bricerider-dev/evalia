@@ -29,14 +29,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getEvaluationsCC, getEvaluationsSN, getEvaluationsRA, createEvaluationCC, createEvaluationSN, createEvaluationRA, deleteEvaluation } from '@/api/evaluation';
+import { getEvaluations,  createEvaluation, updateEvaluation } from '@/api/evaluation';
 import { getSubjects } from '@/api/subject';
-import { EvaluationType, SessionType } from '@/lib/types';
+import { EvaluationType } from '@/lib/types';
 import { Plus, Trash2, ClipboardList, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
+import { title } from 'process';
 
 export default function EvaluationsPage() {
   const [evaluations, setEvaluations] = useState<any[]>([]);
@@ -44,36 +45,37 @@ export default function EvaluationsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filterSubject, setFilterSubject] = useState<string>('all');
   const [formData, setFormData] = useState({
-    subjectId: '',
-    type: 'CC' as EvaluationType,
-    date: '',
+    subjectId: 1,
+    title: '',
+    description: '',
+    evaluationDate: new Date(),
     startTime: '08:00',
-    duration: 120,
+    endTime: '10:00',
     room: '',
+    evaluationStatus: 'planifiee',
+    evaluationType: 'CC' as EvaluationType,
+    createdAt: new Date().toISOString(),
+
   });
 
   const loadData = async () => {
     try {
-      const [cc, sn, ra, subjectsData] = await Promise.all([
-        getEvaluationsCC(),
-        getEvaluationsSN(),
-        getEvaluationsRA(),
+      const [evaluationsData, subjectsData] = await Promise.all([
+        getEvaluations(),       
         getSubjects()
-      ]);
+      ]);      
 
-      const allEvals = [
-        ...cc.map((e: any) => ({ ...e, type: 'CC' })),
-        ...sn.map((e: any) => ({ ...e, type: 'SN' })),
-        ...ra.map((e: any) => ({ ...e, type: 'RA' }))
-      ];
-
-      setEvaluations(allEvals);
+      setEvaluations(evaluationsData);
       setSubjects(subjectsData);
     } catch (error) {
       console.error('Error loading evaluations:', error);
       toast.error('Erreur lors du chargement des données');
     }
   };
+  const formatDate = (dateStr: Date) => {
+    // format as YYYY-MM-DD
+    return format(new Date(dateStr), 'yyyy-MM-dd');
+  }
 
   useEffect(() => {
     loadData();
@@ -81,53 +83,45 @@ export default function EvaluationsPage() {
 
   const resetForm = () => {
     setFormData({
-      subjectId: '',
-      type: 'CC',
-      date: '',
-      startTime: '08:00',
-      duration: 120,
-      room: '',
+    subjectId: 1,
+    title: '',
+    description: '',
+    evaluationDate: new Date(),
+    startTime: '08:00',
+    endTime: '10:00',
+    room: '',
+    evaluationStatus: 'planifiee',
+    evaluationType: 'CC' as EvaluationType,
+    createdAt: new Date().toISOString(),
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.subjectId || !formData.date) {
+    if (!formData.subjectId || !formData.evaluationDate) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
     const payload = {
-      matiere: formData.subjectId,
-      intitule: `${formData.type} - ${subjects.find(s => s.id === formData.subjectId)?.name}`,
-      date_evaluation: formData.date,
-      heure_debut: formData.startTime,
-      duree: formData.duration,
-      salle: formData.room,
-      statut: 'planifiee',
-      coefficient: formData.type === 'CC' ? 0.3 : 0.7
+      subjectId: formData.subjectId,
+      title: formData.title || `${formData.evaluationType} - ${subjects.find(s => s.id === formData.subjectId)?.name}`,
+      description: formData.description,
+      evaluationDate: formatDate(formData.evaluationDate),
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      room: formData.room,
+      evaluationType: formData.evaluationType,
+      evaluationStatus: 'planifiee',      
     };
 
     try {
-      if (formData.type === 'CC') {
-        await createEvaluationCC({ ...payload, nombre_activites: 1, type_cc: 'devoir' });
-      } else if (formData.type === 'SN') {
-        await createEvaluationSN({ ...payload, duree_revision: 7, type_examen: 'ecrit' });
-      } else {
-        // Find a session normale for the subject to link the makeup
-        const snForSubject = evaluations.find(ev => ev.type === 'SN' && ev.subjectId === formData.subjectId);
-        if (!snForSubject && formData.type === 'RA') {
-          toast.error('Une session normale doit exister avant de créer un rattrapage');
-          return;
-        }
-        await createEvaluationRA({
-          ...payload,
-          session_normale: snForSubject.id,
-          date_limite_inscription: formData.date,
-          type_rattrapage: 'ecrit'
-        });
-      }
+      await createEvaluation({
+        ...payload
+      });
+      
+    
 
       toast.success('Évaluation programmée avec succès');
       setIsDialogOpen(false);
@@ -139,18 +133,18 @@ export default function EvaluationsPage() {
     }
   };
 
-  const handleDelete = async (type: EvaluationType, id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?')) {
-      try {
-        await deleteEvaluation(type, id);
-        toast.success('Évaluation supprimée');
-        loadData();
-      } catch (error) {
-        console.error('Error deleting evaluation:', error);
-        toast.error('Erreur lors de la suppression');
-      }
-    }
-  };
+  // const handleDelete = async (type: EvaluationType, id: string) => {
+  //   if (confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?')) {
+  //     try {
+  //       await deleteEvaluation(type, id);
+  //       toast.success('Évaluation supprimée');
+  //       loadData();
+  //     } catch (error) {
+  //       console.error('Error deleting evaluation:', error);
+  //       toast.error('Erreur lors de la suppression');
+  //     }
+  //   }
+  // };
 
   const filteredEvaluations = filterSubject === 'all'
     ? evaluations
@@ -223,7 +217,7 @@ export default function EvaluationsPage() {
                 </Button>
               </motion.div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+            <DialogContent className="sm:max-w-[600px] border-none shadow-2xl bg-white/95 dark:bg-card/90 backdrop-blur-xl">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary">Programmer une Évaluation</DialogTitle>
@@ -235,15 +229,15 @@ export default function EvaluationsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="subjectId" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Matière *</Label>
                     <Select
-                      value={formData.subjectId}
-                      onValueChange={(value) => setFormData({ ...formData, subjectId: value })}
+                      value={String(formData.subjectId)}
+                      onValueChange={(value) => setFormData({ ...formData, subjectId: parseInt(value) })}
                     >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                      <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
                         <SelectValue placeholder="Sélectionner une matière" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-card dark:border-white/10">
                         {subjects.map((subject) => (
-                          <SelectItem key={subject.id} value={subject.id}>
+                          <SelectItem key={subject.id} value={String(subject.id)}>
                             {subject.code} - {subject.name}
                           </SelectItem>
                         ))}
@@ -251,12 +245,13 @@ export default function EvaluationsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Type d'évaluation *</Label>
+                    <Label htmlFor="evaluationType" className="text-sm  font-bold uppercase tracking-wide text-muted-foreground">Type d'évaluation *</Label>
                     <Select
-                      value={formData.type}
-                      onValueChange={(value) => setFormData({ ...formData, type: value as EvaluationType })}
+                      
+                      value={formData.evaluationType}
+                      onValueChange={(value) => setFormData({ ...formData, evaluationType: value as EvaluationType })}
                     >
-                      <SelectTrigger className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
+                      <SelectTrigger className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -272,9 +267,9 @@ export default function EvaluationsPage() {
                       <Input
                         id="date"
                         type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        value={formData.evaluationDate.toISOString().split('T')[0]}
+                        onChange={(e) => setFormData({ ...formData, evaluationDate: new Date(e.target.value) })}
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
@@ -284,19 +279,19 @@ export default function EvaluationsPage() {
                         type="time"
                         value={formData.startTime}
                         onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="duration" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Durée (min)</Label>
+                      <Label htmlFor="endTime" className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Heure de fin</Label>
                       <Input
-                        id="duration"
-                        type="number"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 120 })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        id="endTime"
+                        type="time"
+                        value={formData.endTime}
+                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
@@ -305,7 +300,7 @@ export default function EvaluationsPage() {
                         id="room"
                         value={formData.room}
                         onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                        className="h-12 text-base bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
+                        className="h-12 text-base bg-muted/50 dark:bg-muted/50 border-transparent focus:border-primary/50 focus:bg-white transition-all rounded-xl"
                       />
                     </div>
                   </div>
@@ -327,10 +322,10 @@ export default function EvaluationsPage() {
           <Card className="border-0 shadow-institutional bg-white/60 dark:bg-card/60 backdrop-blur-xl rounded-2xl border border-white/5 ring-1 ring-black/5">
             <CardContent className="py-5">
               <Select value={filterSubject} onValueChange={setFilterSubject}>
-                <SelectTrigger className="w-full md:w-[320px] h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
+                <SelectTrigger className="w-full md:w-[320px] dark:bg-muted/50 h-14 text-base rounded-xl border-transparent bg-muted/50 focus:bg-white focus:border-primary/20 transition-all shadow-inner">
                   <SelectValue placeholder="Filtrer par matière" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
+                <SelectContent className="rounded-xl border-none shadow-2xl bg-white/95 dark:bg-muted/50 backdrop-blur-xl">
                   <SelectItem value="all" className="py-3 text-base rounded-lg cursor-pointer">Toutes les matières</SelectItem>
                   {subjects.map((subject) => (
                     <SelectItem key={subject.id} value={subject.id} className="py-3 text-base rounded-lg cursor-pointer">
@@ -394,9 +389,9 @@ export default function EvaluationsPage() {
                               className="group hover:bg-primary/5 transition-colors border-b border-white/5 last:border-0"
                             >
                               <TableCell className="py-5 px-8 font-medium">
-                                {subjects.find(s => s.id === evaluation.subjectId)?.name || '...'}
+                                {subjects.find(s => s.id === (evaluation.subjectId ?? evaluation.ue))?.name || '...'}
                               </TableCell>
-                              <TableCell className="py-5 px-6">{getTypeBadge(evaluation.type)}</TableCell>
+                              <TableCell className="py-5 px-6">{getTypeBadge(evaluation.evaluationType)}</TableCell>
                               <TableCell className="py-5 px-6 font-medium text-slate-600">
                                 {format(new Date(evaluation.evaluationDate), 'dd MMM yyyy', { locale: fr })} à {evaluation.startTime}
                               </TableCell>
@@ -406,7 +401,7 @@ export default function EvaluationsPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => handleDelete(evaluation.type, evaluation.id)}
+                                    onClick={() => alert('Edit functionality not implemented yet')}
                                     className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors"
                                   >
                                     <Trash2 className="h-4 w-4" />

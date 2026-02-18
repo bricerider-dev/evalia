@@ -12,6 +12,8 @@ export interface User {
   is_active: boolean;
   createdAt: string;
   password?: string;
+  teacher_id?: number;
+  student_id?: number;
 }
 
 // Academic Types
@@ -48,14 +50,16 @@ export interface Teacher  {
 }
 
 export interface Subject {
-  id: number;
+  id: number | string;
   code: string;
   name: string;
   description: string;
   level: number;
   semester: number;
   credit: number;
-  createdAt: string;
+  filiere?: number | string;  // Optional filiere ID
+  createdAt?: string;
+  enseignant?: string;  // Optional teacher ID
 }
 
 // Evaluation Types
@@ -63,23 +67,42 @@ export type EvaluationType = 'CC' | 'SN' | 'RA';
 export type SessionType = 'normal' | 'rattrapage';
 
 export interface Evaluation {
-  id: string;
-  subjectId: string;
-  type: EvaluationType;
-  session: SessionType;
-  date: string;
-  maxScore: number;
+  id?: number | string;
+  subjectId?: number | string;
+  ue?: number | string;  // Backend field name
+  title?: string;
+  intitule?: string;  // Backend field name
+  description?: string;
+  evaluationDate?: Date | string;
+  date_evaluation?: Date | string;  // Backend field name
+  startTime?: string;
+  heure_debut?: string;  // Backend field name
+  endTime?: string;
+  heure_fin?: string;  // Backend field name
+  room?: string;
+  salle?: string;  // Backend field name
+  evaluationStatus?: string;
+  statut_time?: string;  // Backend field name
+  evaluationType: EvaluationType;
+  type_evaluation?: EvaluationType;  // Backend field name
+  createdAt?: string;
+  created_at?: string;  // Backend field name
 }
 
 export interface Grade {
-  id: string;
-  studentId: string;
-  subjectId: string;
-  evaluationId: string;
-  score: number | null;
-  enteredBy: string;
-  enteredAt: string;
-  updatedAt: string;
+  id: string | number;
+  evaluation: number | string;
+  etudiant: number | string;
+  grade: number | null;
+  score?: number | null;  // Backward compatibility
+  final_grade?: number | null;  // From serializer
+  status?: string;  // Status from backend
+  evaluation_type?: string;  // Type d'évaluation (CC, SN, RA)
+  ue_code?: string;
+  student_name?: string;
+  statut?: string;  // Field name from model
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Calculated Results

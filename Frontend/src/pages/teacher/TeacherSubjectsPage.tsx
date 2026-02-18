@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, Clock, GraduationCap, ChevronRight } from 'lucide-react';
-import { getSubjects } from '@/api/subject';
-import { getFilieres } from '@/api/filiere';
+import { getMySubjects } from '@/api/enseignant';
 import { getEtudiants } from '@/api/etudiant';
+import { getFilieres } from '@/api/filiere';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
 export default function TeacherSubjectsPage() {
-    const { user } = useAuth();
+    let user = JSON.parse(localStorage.getItem('user') || '{}');
     const [subjects, setSubjects] = useState<any[]>([]);
     const [filieres, setFilieres] = useState<any[]>([]);
     const [students, setStudents] = useState<any[]>([]);
@@ -21,12 +20,11 @@ export default function TeacherSubjectsPage() {
         const loadData = async () => {
             try {
                 const [allSubjects, allFilieres, allStudents] = await Promise.all([
-                    getSubjects(),
+                    getMySubjects(user.teacher_id),
                     getFilieres(),
                     getEtudiants()
-                ]);
-                const teacherSubjects = allSubjects.filter((s: any) => s.enseignant === user?.id);
-                setSubjects(teacherSubjects);
+                ]);                
+                setSubjects(allSubjects);
                 setFilieres(allFilieres);
                 setStudents(allStudents);
             } catch (error) {
@@ -37,16 +35,18 @@ export default function TeacherSubjectsPage() {
         };
 
         if (user) loadData();
-    }, [user]);
+    }, []);
 
-    const getFiliereName = (filiereId: string) => {
-        return filieres.find(f => f.id === filiereId)?.name || 'Inconnue';
+    const getFiliereName = (id: number) => {
+        const filiere = filieres.find(f => f.id === id);
+        return filiere ? filiere.name : 'N/A';
     };
 
-    const getStudentCount = (filiereId: string) => {
-        return students.filter(s => s.filiere === filiereId).length;
+    const getStudentCount = (filiereId: number) => {
+        return students.filter((s: any) => s.filiere === filiereId).length;
     };
 
+    
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -154,27 +154,27 @@ export default function TeacherSubjectsPage() {
                                     <div className="h-2 bg-gradient-to-r from-primary to-blue-400 group-hover:h-3 transition-all duration-500" />
                                     <CardHeader className="pt-8 px-8 pb-4">
                                         <div className="flex justify-between items-start mb-4">
-                                            <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest border-slate-200 bg-slate-50">{subject.code}</Badge>
-                                            <Badge className="bg-primary/10 text-primary border-0 text-[10px] font-black uppercase tracking-wider hover:bg-primary/20">Semestre {subject.semester}</Badge>
+                                            <Badge variant="outline" className="font-mono text-[10px] dark:bg-muted/30 uppercase tracking-widest border-slate-200 bg-slate-50">{subject.code}</Badge>
+                                            <Badge className="bg-primary/10 text-primary border-0 text-[10px] font-black uppercase tracking-wider hover:bg-primary/20">Semestre {subject.semestre}</Badge>
                                         </div>
                                         <CardTitle className="text-2xl font-black leading-tight text-foreground group-hover:text-primary transition-colors duration-300">
-                                            {subject.name}
+                                            {subject.nom}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="px-8 pb-8 space-y-6 flex-1 flex flex-col justify-end">
                                         <div className="space-y-4">
-                                            <div className="flex items-center gap-3 text-sm text-slate-600 font-bold group-hover:text-slate-900 transition-colors p-3 rounded-xl bg-slate-50 group-hover:bg-primary/5">
-                                                <GraduationCap className="h-4 w-4 text-primary/70" />
-                                                <span className="truncate">{getFiliereName(subject.filiereId)}</span>
+                                            <div className="flex items-center dark:bg-muted/30 gap-3 text-sm text-slate-600 font-bold group-hover:text-slate-900 transition-colors p-3 rounded-xl bg-slate-50 group-hover:bg-primary/5">
+                                                <GraduationCap className="h-4 w-4 dark:bg-muted/30text-primary/70" />
+                                                <span className="truncate ">{getFiliereName(subject.filiere_id)}</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                                                     <Users className="h-3.5 w-3.5" />
-                                                    <span>{getStudentCount(subject.filiereId)} Étudiants</span>
+                                                    <span>{getStudentCount(subject.filiere_id)} Étudiants</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500 justify-end">
                                                     <Clock className="h-3.5 w-3.5" />
-                                                    <span>Coeff: {subject.coefficient}</span>
+                                                    <span>Coeff: {subject.credit}</span>
                                                 </div>
                                             </div>
                                         </div>

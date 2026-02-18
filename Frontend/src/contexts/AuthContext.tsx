@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/types';
 import { login } from '@/api/login';
+import { getEnseignant, getEnseignants } from '@/api/enseignant';
+import { getEtudiants } from '@/api/etudiant';
 
 interface AuthContextType {
   user: User | null;
@@ -18,8 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check for existing session in localStorage
     const storedUser = localStorage.getItem('user');
+    console.log("AuthContext: Checking localStorage for user...");
+    console.log("Stored user:", storedUser);
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      console.log("AuthContext: User found in localStorage:", parsedUser);
+      setUser(parsedUser);
+    } else {
+      console.log("AuthContext: No user in localStorage");
     }
     setIsLoading(false);
   }, []);
@@ -28,12 +36,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const authenticatedUser = await login(matricule, password);
       console.log('Authenticated User:', authenticatedUser);
-      if (authenticatedUser) {
-        setUser(authenticatedUser);
-        localStorage.setItem('user', JSON.stringify(authenticatedUser));
-        return true;
+      
+      if (!authenticatedUser) {
+        return false;
       }
-      return false;
+
+      // Store basic user info
+      setUser(authenticatedUser);
+      localStorage.setItem('user', JSON.stringify(authenticatedUser));
+
+      return true;
     } catch (error) {
       console.error('Login error:', error);
       return false;
@@ -42,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    localStorage.removeItem('user');    
   };
 
   return (
